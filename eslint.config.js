@@ -17,6 +17,22 @@ export default defineConfig([
     ],
     languageOptions: {
       globals: globals.browser,
+      ecmaVersion: 2023,
+    },
+
+    rules: {
+      ...reactHooks.configs.recommended.rules,
+      "react-refresh/only-export-components": [
+        "warn",
+        { allowConstantExport: true },
+      ],
+
+      "@typescript-eslint/no-empty-object-type": "off",
+      "@typescript-eslint/no-explicit-any": "off",
+      "no-irregular-whitespace": "off",
+      "no-empty-pattern": "off",
+      "@typescript-eslint/ban-ts-comment": 'off',
+      '@typescript-eslint/no-unused-vars': 'warn'
     },
   },
 ])
