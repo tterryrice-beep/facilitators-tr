@@ -1,5 +1,5 @@
 import type { FC } from "react";
-import { PathProvider } from "@/modules";
+import { RouterProvider } from "../Router";
 
 interface Props {
   children?: React.ReactNode;
@@ -7,7 +7,7 @@ interface Props {
 export const Providers: FC<Props> = ({ children }) => {
   return (
     <>
-      <PathProvider>{children}</PathProvider>
+      <RouterProvider>{children}</RouterProvider>
     </>
   );
 };

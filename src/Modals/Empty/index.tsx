@@ -1,5 +1,6 @@
 import React, { type FC } from "react";
-import { usePath, type ModalProps } from "@/modules";
+import type { ModalProps } from "@/modules";
+import { usePath } from "@/containers/Router";
 import css from "./style.module.scss";
 
 export const Modal: FC<ModalProps> = ({ onClose }) => {
@@ -7,7 +8,7 @@ export const Modal: FC<ModalProps> = ({ onClose }) => {
     page: { navigate },
   } = usePath();
 
-  navigate('');
+  navigate("about"); // typo working
 
   return <div>Modal</div>;
 };

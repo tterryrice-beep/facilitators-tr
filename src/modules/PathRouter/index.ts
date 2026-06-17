@@ -42,6 +42,14 @@ export type { NavLinkProps } from "./NavLink";
 
 export { setPage, setModal } from "./utils/setters";
 
+/* Factory: bind a config to fully-typed router pieces */
+export { createPathRouter } from "./createPathRouter";
+export type {
+  BoundPathRouterContainerProps,
+  BoundNavLinkProps,
+  PathRouter,
+} from "./createPathRouter";
+
 /* Useful path helpers */
 export { clearSlash } from "./utils/clearSlash";
 
