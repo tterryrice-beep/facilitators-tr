@@ -3,8 +3,8 @@ import React, { type FC } from "react";
 interface Props {}
 
 import css from "./style.module.scss";
-import { PathRouterContainer } from "~/modules";
-import { route } from "~/config";
+import { PathRouterContainer } from "@/modules";
+import { route } from "@/config";
 import { Header } from "./components";
 
 export const Layout: FC<Props> = ({}) => {

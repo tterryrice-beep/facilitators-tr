@@ -1,6 +1,6 @@
-import { Modal } from "~/Modals/Empty";
-import { setModal, setPage } from "~/modules";
-import { Page } from "~/Pages/Empty";
+import { Modal } from "@/Modals/Empty";
+import { setModal, setPage } from "@/modules";
+import { Page } from "@/Pages/Empty";
 
 export const route = {
   pages: {

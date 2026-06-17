@@ -19,8 +19,8 @@
     /* paths */
     "baseUrl": "./",
     "paths": {
-      "~~/*": ["src/components/*"],
-      "~/*": ["src/*"]
+      "@@/*": ["src/components/*"],
+      "@/*": ["src/*"]
     },
 
 

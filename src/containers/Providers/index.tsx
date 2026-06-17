@@ -1,5 +1,5 @@
 import type { FC } from "react";
-import { PathProvider } from "~/modules";
+import { PathProvider } from "@/modules";
 
 interface Props {
   children?: React.ReactNode;

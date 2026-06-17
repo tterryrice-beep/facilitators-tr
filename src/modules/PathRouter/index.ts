@@ -37,6 +37,9 @@ export type { PathRouterProps } from "./Container/RouterContainer";
 
 export { PathProvider, usePath } from "./Provider";
 
+export { NavLink } from "./NavLink";
+export type { NavLinkProps } from "./NavLink";
+
 export { setPage, setModal } from "./utils/setters";
 
 /* Useful path helpers */

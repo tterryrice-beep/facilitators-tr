@@ -23,7 +23,7 @@ export const Header: FC = () => {
 
       <nav>
         <div className="aywb aywh aywp ayxc ayxn ayxv ayzr azez">
-          <HeaderNavLinks />
+          {/* <HeaderNavLinks /> */}
           <HeaderLogo />
           <HeaderActions />
         </div>
