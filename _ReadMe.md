@@ -51,4 +51,5 @@ Instructions for running the project:
 - [Template_2](https://tailwindcss.com/plus/kits/oatmeal/preview)
 - [Template_3](https://tailwindcss.com/plus/templates/protocol/preview)
 - [Tailwind Docs](https://tailwindcss.com/docs)
+- [Preline Docs](https://github.com/htmlstreamofficial/preline)
 

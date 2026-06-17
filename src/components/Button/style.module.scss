@@ -1,62 +1,64 @@
-@keyframes waveAnimation {
-  0% {
-    transform: scale(0);
+@layer components {
+  @keyframes waveAnimation {
+    0% {
+      transform: scale(0);
+    }
+
+    65% {
+      transform: scale(var(--wave-scale));
+      opacity: 0.2;
+    }
+
+    100% {
+      opacity: 0;
+      transform: scale(var(--wave-scale));
+    }
   }
 
-  65% {
-    transform: scale(var(--wave-scale));
-    opacity: 0.2;
-  }
+  .baseButton {
+    background: transparent;
+    border: none;
+    padding: 0;
+    border-radius: 0;
 
-  100% {
-    opacity: 0;
-    transform: scale(var(--wave-scale));
-  }
-}
+    position: relative;
+    cursor: pointer;
+    color: inherit;
 
-.baseButton {
-  background: transparent;
-  border: none;
-  padding: 0;
-  border-radius: 0;
+    transition: opacity 0.3s;
+    display: block;
 
-  position: relative;
-  cursor: pointer;
-  color: inherit;
+    &:disabled {
+      opacity: 0.5;
+      cursor: default;
+    }
 
-  transition: opacity 0.3s;
-  display: block;
+    &_waveWrapper {
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      top: 0;
+      left: 0;
+      pointer-events: none;
+      border-radius: inherit;
 
-  &:disabled {
-    opacity: 0.5;
-    cursor: default;
-  }
+      overflow: hidden;
+    }
 
-  &_waveWrapper {
-    width: 100%;
-    height: 100%;
-    position: absolute;
-    top: 0;
-    left: 0;
-    pointer-events: none;
-    border-radius: inherit;
+    &_wave {
+      --wave-scale: 1;
 
-    overflow: hidden;
-  }
+      animation: waveAnimation 0.7s ease-in-out forwards;
+      position: absolute;
+      transform-origin: center;
 
-  &_wave {
-    --wave-scale: 1;
+      background-color: rgb(255, 255, 255);
+      opacity: 0.2;
+      border-radius: 50%;
+      width: 1px;
+      height: 1px;
 
-    animation: waveAnimation 0.7s ease-in-out forwards;
-    position: absolute;
-    transform-origin: center;
-
-    background-color: rgb(255, 255, 255);
-    opacity: 0.2;
-    border-radius: 50%;
-    width: 1px;
-    height: 1px;
-
-    will-change: transform, opacity;
+      will-change: transform, opacity;
+    }
   }
 }

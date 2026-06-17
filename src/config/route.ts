@@ -4,6 +4,8 @@ import { Page } from "@/Pages/Empty";
 
 export const route = {
   pages: {
+    "home": setPage({ component: Page }),
+    "about": setPage({ component: Page }),
     "*": setPage({ component: Page }),
   },
   modals: {

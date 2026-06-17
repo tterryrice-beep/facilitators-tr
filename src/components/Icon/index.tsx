@@ -1,11 +1,11 @@
 import React, { type FC, Fragment, useMemo } from "react";
 
-import type {
+import {
   allIcons,
-  IconCategory,
-  IconInstance,
-  IconElement,
-  IconName,
+  type IconCategory,
+  type IconInstance,
+  type IconElement,
+  type IconName,
 } from "@/assets/icons";
 import Alert from "@/assets/icons/alert.svg?react";
 
