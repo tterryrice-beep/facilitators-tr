@@ -1,8 +1,8 @@
 import React, { forwardRef } from "react";
 import clsx from "clsx";
 
-import css from "./style.module.scss";
 import type { BaseButtonProps } from "./type";
+import css from "./style.module.scss";
 
 export const Button = forwardRef<HTMLButtonElement, BaseButtonProps>(
   (

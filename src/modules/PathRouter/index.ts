@@ -1,48 +1,43 @@
 /**
- * Router package — public API.
+ * PathRouter — public API.
  *
- * Quick start:
+ * Everything that depends on a concrete config is produced by
+ * `createPathRouter(config)`. The package itself only exposes:
  *
- * ```tsx
- * // 1. Build a config
- * import { setPage, setModal } from "@/Router";
- * export const config = {
- *   pages: {
- *     "/":   setPage({ component: HomePage }),
- *     add:   setPage({ component: AddItemPage }),
- *     "*":   setPage({ component: NotFoundPage }),
- *   },
- *   modals: {
- *     test: setModal({ component: TestModal }),
- *   },
+ *   - `setPage` / `setModal`   — config builders;
+ *   - `createPathRouter`       — the factory;
+ *   - `clearSlash`             — path normalizer;
+ *   - generic helper types     — must be parametrised with `typeof config`;
+ *   - plugin / data types      — for `ModalWrapper` authors and modal
+ *                                components (`ModalProps`, etc.).
+ *
+ * `PathProvider`, `PathRouterContainer`, `usePath`, `NavLink`, `getPath`,
+ * `getModal` are intentionally **not** re-exported — obtain them from
+ * `createPathRouter(config)`.
+ *
+ * ```ts
+ * import { setPage, setModal, createPathRouter } from "@/modules/PathRouter";
+ *
+ * const config = {
+ *   pages:  { home: setPage({ component: Home }) },
+ *   modals: { test: setModal({ component: TestModal }) },
  * } as const;
  *
- * // 2. Mount it
- * import { PathProvider, RouterContainer } from "@/Router";
- * <PathProvider>
- *   <RouterContainer config={config} ModalWrapper={MyModalWrapper} />
- * </PathProvider>
- *
- * // 3. Read it (typed)
- * import { usePath } from "@/Router";
- * const { page, modal } = usePath<typeof config>();
- * page.navigate("add");   // ✓ typed
- * modal.open("test");     // ✓ typed
+ * export const {
+ *   PathProvider,
+ *   PathRouterContainer,
+ *   usePath,
+ *   NavLink,
+ *   getPath,
+ *   getModal,
+ * } = createPathRouter(config);
  * ```
  */
 
-/* Main user-facing pieces */
-export { PathRouterContainer } from "./Container";
-export type { PathRouterProps } from "./Container/RouterContainer";
-
-export { PathProvider, usePath } from "./Provider";
-
-export { NavLink } from "./NavLink";
-export type { NavLinkProps } from "./NavLink";
-
+/* Config builders */
 export { setPage, setModal } from "./utils/setters";
 
-/* Factory: bind a config to fully-typed router pieces */
+/* The factory — the only way to get config-bound router pieces */
 export { createPathRouter } from "./createPathRouter";
 export type {
   BoundPathRouterContainerProps,
@@ -50,24 +45,34 @@ export type {
   PathRouter,
 } from "./createPathRouter";
 
-/* Useful path helpers */
+/* Path normalizer */
 export { clearSlash } from "./utils/clearSlash";
 
-/* All public types */
+/*
+ * Public types.
+ *
+ * Note on config-dependent generics: `PathNamesOf<C>` and `ModalNamesOf<C>`
+ * REQUIRE the config generic — there is no default. Use them as
+ * `PathNamesOf<typeof config>` etc.
+ *
+ * `PathContextType` is intentionally not re-exported — get a typed context
+ * shape via the `usePath` returned by `createPathRouter(config)`.
+ */
 export type {
+  /* Config shape */
   RouterConfig,
-  PathNamesOf,
-  ModalNamesOf,
   PageData,
   ModalData,
+  /* Props passed to a modal component */
   ModalProps,
-  PagesRoute,
-  ModalRoutes,
-  ExtendedPage,
-  PathContextType,
+  /* Config-dependent helpers (require <typeof config>) */
+  PathNamesOf,
+  ModalNamesOf,
+  /* Context sub-shapes */
   ModalState,
   SearchParams,
   SearchParamsState,
+  /* `ModalWrapper` plugin contract */
   ModalWrapperComponent,
   ModalWrapperProps,
   ModalWrapperRef,

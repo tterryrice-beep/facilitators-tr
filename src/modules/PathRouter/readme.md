@@ -3,9 +3,9 @@
 A small, type-safe routing layer built on top of `react-router-dom` that adds:
 
 - A **declarative config** for pages and modals (`setPage` / `setModal`).
-- A **single React context** (`PathProvider` / `usePath`) exposing the current page, the current modal and the search params, all with imperative helpers (`navigate`, `open`, `close`, `set`, `change`, `delete`, `clear`).
+- A **factory** (`createPathRouter`) that binds your config to fully-typed router pieces — no manual generics on every call site.
+- A **single React context** exposing the current page, the current modal and the search params, with imperative helpers (`navigate`, `open`, `close`, `set`, `change`, `delete`, `clear`).
 - **URL-driven modals**: a modal is represented as a segment after `/modal/` inside the path, so it survives reloads, deep links and back/forward navigation.
-- **Full TypeScript inference** of page paths and modal names from your config (`PathNamesOf<typeof config>`, `ModalNamesOf<typeof config>`).
 - An optional **`ModalWrapper`** plugin (e.g. an animated popup) that can intercept the close action via a forwarded ref.
 
 ---
@@ -14,7 +14,8 @@ A small, type-safe routing layer built on top of `react-router-dom` that adds:
 
 ```text
 PathRouter/
-├── index.ts                 # Public API re-exports
+├── index.ts                 # Public API (factory + builders + types)
+├── createPathRouter.tsx     # The factory itself
 ├── types.ts                 # All public types
 ├── Container/
 │   ├── RouterContainer.tsx  # Renders <Routes> for pages + <ModalsContainer>
@@ -23,7 +24,10 @@ PathRouter/
 ├── Provider/
 │   ├── PathProvider.tsx     # BrowserRouter + PathContext provider
 │   ├── context.ts           # React context object
-│   ├── usePath.ts           # Typed hook to read the context
+│   ├── usePath.ts           # Internal hook (factory wraps it for users)
+│   └── index.ts
+├── NavLink/
+│   ├── NavLink.tsx          # Internal NavLink (factory wraps it for users)
 │   └── index.ts
 └── utils/
     ├── setters.ts           # setPage / setModal helpers
@@ -31,6 +35,64 @@ PathRouter/
     ├── clearSlash.ts        # Path normalization
     ├── parseSearch.ts       # Search-params merge helper
     └── index.ts
+```
+
+---
+
+## Quick start
+
+```ts
+// src/config/route.ts
+import { setPage, setModal } from "@/modules/PathRouter";
+import { HomePage, AddPage, NotFoundPage } from "@/Pages";
+import { TestModal } from "@/Modals/Test";
+
+export const route = {
+  pages: {
+    home:  setPage({ component: HomePage }),
+    add:   setPage({ component: AddPage }),
+    "*":   setPage({ component: NotFoundPage }),
+  },
+  modals: {
+    test: setModal({ component: TestModal }),
+  },
+} as const;
+```
+
+```ts
+// src/containers/Router/PathProvider.tsx
+import { route } from "@/config";
+import { createPathRouter } from "@/modules/PathRouter";
+
+export const {
+  PathProvider,
+  PathRouterContainer,
+  usePath,
+  NavLink,
+  getPath,
+  getModal,
+} = createPathRouter(route);
+```
+
+```tsx
+// somewhere near the root
+import { PathProvider, PathRouterContainer } from "@/containers/Router";
+
+<PathProvider>
+  <PathRouterContainer fallback={<Spinner />} />
+</PathProvider>;
+```
+
+```tsx
+// any component
+import { usePath, NavLink } from "@/containers/Router";
+
+const Foo = () => {
+  const { page, modal } = usePath();   // no <typeof config> generic needed!
+  page.navigate("add");                 // ✓ autocompleted
+  modal.open("test");                   // ✓ autocompleted
+  return <NavLink to="home" modal="test">Open</NavLink>;
+};
 ```
 
 ---
@@ -44,13 +106,13 @@ The config is a plain object with two sections — `pages` and `modals`:
 ```ts
 import { setPage, setModal } from "@/modules/PathRouter";
 
-export const config = {
+export const route = {
   pages: {
     "/":   setPage({ component: HomePage }),
     add:   setPage({ component: AddItemPage }),
     users: {
-      "/":     setPage({ component: UsersListPage }),
-      ":id":   setPage({ component: UserPage }),
+      "/":   setPage({ component: UsersListPage }),
+      ":id": setPage({ component: UserPage }),
     },
     "*":   setPage({ component: NotFoundPage }),
   },
@@ -65,25 +127,49 @@ export const config = {
 - Pages can be **nested** as plain objects — `createRoute` walks the tree and produces a flat `[{ pathName, data }]` list (see `utils/createRoute.ts`).
 - A page with `redirect` (or no `component`) becomes a `<Navigate to={redirect || "/"} replace />`.
 - `setModal({ component })` is just an identity helper that preserves literal types for inference.
+- `as const` is **required** — without it TS widens string keys to `string` and you lose autocompletion.
 
-### 2. Mounting
+### 2. The `createPathRouter` factory
+
+`createPathRouter(route)` captures your config once and returns everything pre-bound:
+
+```ts
+const {
+  PathProvider,            // BrowserRouter + context
+  PathRouterContainer,     // renders pages + modals (config injected)
+  usePath,                 // typed hook  — no <typeof config> needed
+  NavLink,                 // typed link  — no <typeof config> needed
+  getPath,                 // identity helper: <P extends PathNamesOf<C>>(p: P) => p
+  getModal,                // identity helper: <M extends ModalNamesOf<C>>(m: M) => m
+  config,                  // the original config, re-exported
+} = createPathRouter(route);
+```
+
+Why re-exports rather than direct imports?
+
+- TypeScript cannot infer generics from a literal `typeof route` _unless_ you pass it explicitly each time. The factory passes it once for you.
+- Every consumer of the returned API gets autocompletion of routes / modal names with **zero ceremony**.
+- The package itself stays generic and reusable; the binding lives in your app code.
+
+> The factory return values are not re-exported from `@/modules/PathRouter`. The only way to obtain `PathProvider`, `PathRouterContainer`, `usePath`, `NavLink`, `getPath`, `getModal` is via `createPathRouter(config)`.
+
+### 3. Mounting
 
 ```tsx
-import { PathProvider, PathRouterContainer } from "@/modules/PathRouter";
+import { PathProvider, PathRouterContainer } from "@/containers/Router";
 
 <PathProvider>
   <PathRouterContainer
-    config={config}
     ModalWrapper={MyModalWrapper}   // optional
     fallback={<Spinner />}          // optional Suspense fallback
   />
-</PathProvider>
+</PathProvider>;
 ```
 
 - `PathProvider` mounts a `BrowserRouter` and an inner provider that derives the page path, the modal state and the search params from `useLocation()` (`Provider/PathProvider.tsx`).
-- `PathRouterContainer` renders the pages inside `<Suspense>` and, if a modal is open, mounts `ModalsContainer` next to the page tree.
+- `PathRouterContainer` renders the pages inside `<Suspense>` and, if a modal is open, mounts `ModalsContainer` next to the page tree. `config` is already injected by the factory — you only pass `ModalWrapper` / `fallback`.
 
-### 3. URL shape
+### 4. URL shape
 
 A URL is split on the literal **`/modal/`** separator:
 
@@ -110,22 +196,22 @@ So:
 
 This means modals are **bookmarkable and shareable** out of the box and the browser back button closes the modal naturally.
 
-### 4. The `usePath` hook
+### 5. The `usePath` hook (from the factory)
 
 ```ts
-import { usePath } from "@/modules/PathRouter";
+import { usePath } from "@/containers/Router";
 
-const { page, modal, searchParams } = usePath<typeof config>();
+const { page, modal, searchParams } = usePath();   // already typed!
 
 page.path;                 // current page pathname (no /modal/... suffix)
-page.navigate("add");      // typed against config.pages
+page.navigate("add");      // ✓ typed against config.pages
 page.isHavePrevHistory;    // true if history.key !== "default"
 
 modal.isOpen;
-modal.name;                // current modal key (typed)
+modal.name;                // current modal key
 modal.breadCrumbs;         // string[] after the modal name
 modal.path;                // "<name>/<crumb1>/<crumb2>"
-modal.open("confirm", ["step-2"]); // typed against config.modals
+modal.open("confirm", ["step-2"]); // ✓ typed against config.modals
 modal.close();
 
 searchParams.params;       // Record<string, string[]>
@@ -135,9 +221,56 @@ searchParams.delete("tab");
 searchParams.clear();
 ```
 
-Passing `typeof config` as the generic gives compile-time autocomplete for both `page.navigate(...)` and `modal.open(...)` thanks to `PathNamesOf` / `ModalNamesOf` in `types.ts`.
+### 6. `getPath` / `getModal` — typed identity helpers
 
-### 5. Page rendering (`RouterContainer.tsx`)
+When you need a typed path or modal-name literal somewhere outside JSX (e.g. inside a side-effect, a redux thunk, a `redirect` field of another page), use the identity helpers returned by the factory:
+
+```ts
+import { getPath, getModal } from "@/containers/Router";
+
+const target = getPath("home");      // type: "home"
+const which  = getModal("test");     // type: "test"
+
+// Compile-time error: argument is not assignable to PathNamesOf<typeof route>
+const bad = getPath("does-not-exist");
+```
+
+These replace the previous `export type PathNames = NestedKeyOf<typeof routes, "data">` pattern that is impossible to express from inside an isolated package.
+
+If you really need the type itself (e.g. as a function parameter), it is still available via `typeof getPath`:
+
+```ts
+type PathNames = Parameters<typeof getPath>[0];
+type ModalNames = Parameters<typeof getModal>[0];
+```
+
+…or use the package-level generics with an explicit config:
+
+```ts
+import type { PathNamesOf, ModalNamesOf } from "@/modules/PathRouter";
+import type { route } from "@/config";
+
+type PathNames  = PathNamesOf<typeof route>;
+type ModalNames = ModalNamesOf<typeof route>;
+```
+
+### 7. `NavLink` (from the factory)
+
+```tsx
+import { NavLink } from "@/containers/Router";
+
+<NavLink to="home">Home</NavLink>
+<NavLink modal="test">Open test modal</NavLink>
+<NavLink to="users" modal="confirm" modalBreadCrumbs={["step-2"]}>
+  Users + confirm at step 2
+</NavLink>
+```
+
+- Renders a real `<a href>` (right-click / “open in new tab” / SSR work as expected).
+- Intercepts the primary-button click and routes through `page.navigate(...)`.
+- Adds `aria-current="page"` and `data-active` when active; you can override the active class via `activeClassName`.
+
+### 8. Page rendering (`RouterContainer.tsx`)
 
 - Calls `createRoute(config)` once (memoised) to flatten the page tree.
 - Renders a single `<Routes>` switch with one `<Route>` per leaf.
@@ -145,7 +278,7 @@ Passing `typeof config` as the generic gives compile-time autocomplete for both 
 - The whole switch is wrapped in `<Suspense fallback={fallback}>` so lazy components work transparently.
 - Modals are rendered as a **sibling** of `<Routes>`, only when `modal.isOpen` — they overlay the current page rather than replacing it.
 
-### 6. Modal rendering (`ModalsContainer.tsx`)
+### 9. Modal rendering (`ModalsContainer.tsx`)
 
 - Builds a virtual location `"<pagePath>/<modalName>"` (normalized via `clearSlash`) and feeds it to a dedicated `<Routes location={routesLocation}>`. This is what makes the modal aware of the current page path.
 - Each modal route is registered at `"<pagePath>/<modalName>"`, so modals can be **page-scoped** if needed.
@@ -171,7 +304,18 @@ type ModalWrapperComponent = ForwardRefExoticComponent<
 >;
 ```
 
-### 7. Path normalization (`clearSlash`)
+Modal components themselves receive `ModalProps` (`{ onClose: () => void }`):
+
+```tsx
+import type { FC } from "react";
+import type { ModalProps } from "@/modules/PathRouter";
+
+export const TestModal: FC<ModalProps> = ({ onClose }) => (
+  <button onClick={onClose}>Close</button>
+);
+```
+
+### 10. Path normalization (`clearSlash`)
 
 All internal `navigate(...)` calls go through `clearSlash`:
 
@@ -181,7 +325,7 @@ All internal `navigate(...)` calls go through `clearSlash`:
 
 This keeps the URL canonical regardless of how the caller composed it.
 
-### 8. Search params
+### 11. Search params
 
 `PathProvider` derives `searchParams` from `location.search` and exposes four helpers:
 
@@ -196,42 +340,40 @@ All mutations preserve `location.hash`.
 
 ---
 
-## Public API (re-exported from `index.ts`)
+## Public API of `@/modules/PathRouter`
 
-Components / hooks:
+The package exposes only what cannot depend on a concrete config:
 
-- `PathProvider` — top-level provider (mounts `BrowserRouter`).
-- `PathRouterContainer` — renders pages + modals from a config.
-- `usePath<C>()` — typed access to the router context.
-
-Helpers:
+### Builders / factory / utilities
 
 - `setPage`, `setModal` — config builders.
+- `createPathRouter(config)` — returns `{ PathProvider, PathRouterContainer, usePath, NavLink, getPath, getModal, config }`.
 - `clearSlash` — path normalizer.
 
-Types:
+### Types — config-independent
 
-- `RouterConfig`, `PagesRoute`, `ModalRoutes`, `ExtendedPage`
-- `PageData`, `ModalData`, `ModalProps`
-- `PathNamesOf<C>`, `ModalNamesOf<C>`
-- `PathContextType`, `ModalState`
-- `SearchParams`, `SearchParamsState`
+- `RouterConfig`, `PageData`, `ModalData`
+- `ModalProps` — props passed to a modal component.
+- `ModalState`, `SearchParams`, `SearchParamsState`
 - `ModalWrapperComponent`, `ModalWrapperProps`, `ModalWrapperRef`
+- `BoundPathRouterContainerProps`, `BoundNavLinkProps<C>`, `PathRouter<C>`
+
+### Types — config-dependent (must be parametrised)
+
+- `PathNamesOf<C>` — must be used as `PathNamesOf<typeof route>`.
+- `ModalNamesOf<C>` — must be used as `ModalNamesOf<typeof route>`.
+
+> `PathProvider`, `PathRouterContainer`, `usePath`, `NavLink`, `getPath`, `getModal` are **deliberately not exported** from the package — obtain them from `createPathRouter(config)`.
+> `PathContextType` is also not re-exported; the typed shape is available via the return type of the factory's `usePath`.
 
 ---
 
 ## Minimal end-to-end example
 
 ```tsx
-import {
-  PathProvider,
-  PathRouterContainer,
-  setPage,
-  setModal,
-  usePath,
-} from "@/modules/PathRouter";
+import { setPage, setModal, createPathRouter } from "@/modules/PathRouter";
 
-const config = {
+const route = {
   pages: {
     "/":  setPage({ component: HomePage }),
     add:  setPage({ component: AddItemPage }),
@@ -242,15 +384,23 @@ const config = {
   },
 } as const;
 
+export const {
+  PathProvider,
+  PathRouterContainer,
+  usePath,
+  NavLink,
+  getPath,
+  getModal,
+} = createPathRouter(route);
+
 export const App = () => (
   <PathProvider>
-    <PathRouterContainer config={config} />
+    <PathRouterContainer />
   </PathProvider>
 );
 
-// Anywhere inside the tree:
 const SomeButton = () => {
-  const { page, modal } = usePath<typeof config>();
+  const { page, modal } = usePath();
   return (
     <button onClick={() => modal.open("confirm")}>
       Open confirm (current page stays: {page.path})
