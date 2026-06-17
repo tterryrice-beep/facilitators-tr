@@ -1,12 +1,12 @@
-import React, { FC, Fragment, useMemo } from "react";
+import React, { type FC, Fragment, useMemo } from "react";
 
-import {
+import type {
   allIcons,
   IconCategory,
   IconInstance,
   IconElement,
   IconName,
-} from "";
+} from "@/assets/icons";
 import Alert from "@/assets/icons/alert.svg?react";
 
 type SVGProps = React.SVGProps<SVGSVGElement>;

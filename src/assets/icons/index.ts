@@ -36,4 +36,5 @@ export type IconElement =
 
 export type IconInstance = ClothesIcon["Cloting"];
 
-export type IconName = ClothesNames | MainNames | SeasonsNames | WeatherNames;
+// export type IconName = MainNames | ClothesNames | SeasonsNames | WeatherNames;
+export type IconName = MainNames;
