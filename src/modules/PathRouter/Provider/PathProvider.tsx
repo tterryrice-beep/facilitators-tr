@@ -1,18 +1,18 @@
-import React, { FC, ReactNode, useCallback, useMemo } from "react";
+import React, { type FC, type ReactNode, useCallback, useMemo } from "react";
 import {
   BrowserRouter,
-  Location,
-  NavigateOptions,
-  To,
+  type Location,
+  type NavigateOptions,
+  type To,
   useLocation,
   useNavigate,
 } from "react-router-dom";
 
 import {
-  ModalState,
-  PathContextType,
-  SearchParams,
-  SearchParamsState,
+  type ModalState,
+  type PathContextType,
+  type SearchParams,
+  type SearchParamsState,
 } from "../types";
 import { clearSlash } from "../utils/clearSlash";
 import { parseSearchParams } from "../utils/parseSearch";

@@ -1,9 +1,9 @@
 import {
-  ExtendedPage,
-  ModalRoutes,
-  PageData,
-  PagesRoute,
-  RouterConfig,
+ type ExtendedPage,
+ type ModalRoutes,
+ type PageData,
+ type PagesRoute,
+ type RouterConfig,
 } from "../types";
 
 const objectIsEmpty = (obj: Record<string, any>) =>

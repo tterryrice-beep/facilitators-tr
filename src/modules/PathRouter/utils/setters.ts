@@ -1,4 +1,4 @@
-import { ModalData, PageData } from "../types";
+import type { ModalData, PageData } from "../types";
 
 /** Wrap a page descriptor so the route tree can detect leaves via `data`. */
 export const setPage = <const T extends PageData>(data: T) => ({ data });

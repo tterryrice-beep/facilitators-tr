@@ -1,18 +1,15 @@
-import {
+import type {
   ComponentType,
   ForwardRefExoticComponent,
   LazyExoticComponent,
   ReactNode,
   RefAttributes,
 } from "react";
-import { Location, NavigateOptions } from "react-router-dom";
+import type { Location, NavigateOptions } from "react-router-dom";
 
 /* ───────────────────────── Generic helpers ───────────────────────── */
 
-export type NestedKeyOf<
-  ObjectType extends object,
-  StopKey extends string,
-> = {
+export type NestedKeyOf<ObjectType extends object, StopKey extends string> = {
   [Key in keyof ObjectType & (string | number)]: ObjectType[Key] extends object
     ? Key extends StopKey
       ? never
@@ -23,9 +20,7 @@ export type NestedKeyOf<
 /* ───────────────────────── Page / Modal data ───────────────────────── */
 
 export interface PageData {
-  component?:
-    | ComponentType<any>
-    | LazyExoticComponent<ComponentType<any>>;
+  component?: ComponentType<any> | LazyExoticComponent<ComponentType<any>>;
   redirect?: string;
 }
 

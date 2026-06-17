@@ -1,5 +1,5 @@
-import { Location } from "react-router-dom";
-import { SearchParamsState } from "../types";
+import { type Location } from "react-router-dom";
+import { type SearchParamsState } from "../types";
 
 export const parseSearchParams = (
   searchParams: SearchParamsState,

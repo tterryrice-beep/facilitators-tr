@@ -1,14 +1,13 @@
-import type { FC } from 'react'
+import type { FC } from "react";
+import { PathProvider } from "~/modules";
 
 interface Props {
   children?: React.ReactNode;
-
 }
-export const Providers:FC<Props> = ({children}) => {
+export const Providers: FC<Props> = ({ children }) => {
   return (
     <>
-
-      {children}
+      <PathProvider>{children}</PathProvider>
     </>
-  )
-}
+  );
+};

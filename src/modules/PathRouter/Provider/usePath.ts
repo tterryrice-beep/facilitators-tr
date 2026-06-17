@@ -1,6 +1,6 @@
 import { useContext } from "react";
 import { PathContext } from "./context";
-import { PathContextType, RouterConfig } from "../types";
+import type { PathContextType, RouterConfig } from "../types";
 
 /**
  * Access the router context.

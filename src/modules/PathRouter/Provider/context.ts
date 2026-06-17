@@ -1,5 +1,5 @@
 import { createContext } from "react";
-import { PathContextType } from "../types";
+import { type PathContextType } from "../types";
 
 const defaultValues: PathContextType = {
   page: {

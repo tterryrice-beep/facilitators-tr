@@ -1,0 +1,62 @@
+@keyframes waveAnimation {
+  0% {
+    transform: scale(0);
+  }
+
+  65% {
+    transform: scale(var(--wave-scale));
+    opacity: 0.2;
+  }
+
+  100% {
+    opacity: 0;
+    transform: scale(var(--wave-scale));
+  }
+}
+
+.baseButton {
+  background: transparent;
+  border: none;
+  padding: 0;
+  border-radius: 0;
+
+  position: relative;
+  cursor: pointer;
+  color: inherit;
+
+  transition: opacity 0.3s;
+  display: block;
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: default;
+  }
+
+  &_waveWrapper {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+    border-radius: inherit;
+
+    overflow: hidden;
+  }
+
+  &_wave {
+    --wave-scale: 1;
+
+    animation: waveAnimation 0.7s ease-in-out forwards;
+    position: absolute;
+    transform-origin: center;
+
+    background-color: rgb(255, 255, 255);
+    opacity: 0.2;
+    border-radius: 50%;
+    width: 1px;
+    height: 1px;
+
+    will-change: transform, opacity;
+  }
+}
