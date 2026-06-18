@@ -1,8 +1,7 @@
 import React, { type FC } from "react";
-import { Overlay } from "@@/overlays/Overlay";
+import { Overlay, OverlayPosition } from "@@/overlays";
 
 import css from "./style.module.scss";
-import { OverlayPosition } from "@@/overlays/Overlay/type";
 
 export const Page: FC = ({}) => {
   return (

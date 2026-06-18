@@ -13,4 +13,10 @@ export interface OverlayProps {
   anchor?: HTMLElement | null | OverlayPosition | string; // string => querySelectorText
   isOpen?: boolean;
   onClose?: () => void;
+
+  classes?: {
+    wrapper?: string;
+    blind?: string;
+    content?: string;
+  };
 }
