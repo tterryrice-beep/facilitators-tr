@@ -6,18 +6,25 @@ import css from "./style.module.scss";
 
 export const Page: FC = ({}) => {
   const [modal, setModal] = useState(false);
-  const { getText, language, loading } = useTranslate();
-
-  console.log({
-    language,
-    loading,
-  });
+  const { getText, changeLanguage } = useTranslate();
 
   return (
     <section className={css.page}>
       <div>Page Content</div>
       <div>{getText("test")}</div>
       <button onClick={() => setModal(true)}>OPEN MODAL</button>
+      <div className="flex gap-2">
+        <button
+          className="bg-blue-500 text-white px-4 py-2 rounded"
+          onClick={() => changeLanguage("en")}>
+          EN
+        </button>
+        <button
+          className="bg-blue-500 text-white px-4 py-2 rounded"
+          onClick={() => changeLanguage("uk")}>
+          UK
+        </button>
+      </div>
 
       <Overlay
         isOpen={modal}

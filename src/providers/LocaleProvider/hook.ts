@@ -1,9 +1,10 @@
-import { useContext, useEffect, useMemo, useState } from "react";
+import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { LocaleContext } from "./Context";
 
 const useLocale = () => useContext(LocaleContext);
 
 export const useTranslate = () => {
+  "use no memo";
   const { manager } = useLocale();
 
   const [isLoading, setIsLoading] = useState(false);
@@ -22,7 +23,21 @@ export const useTranslate = () => {
     };
   }, [manager]);
 
-  const getText = useMemo(() => manager.getText, [isLoading, currentLanguage]);
+  /**
+   * Re-wrap `manager.getText` on every language change so that React Compiler
+   * (and any consumer relying on referential equality) invalidates cached
+   * calls. The underlying manager state is mutable and invisible to the
+   * compiler, so we must surface the dependency explicitly.
+   */
+  const getText = useCallback<typeof manager.getText>(
+    (id, values) => {
+      const lang = currentLanguage;
+      const loadStatus = isLoading;
+      const result = manager.getText(id, values);
+      return result;
+    },
+    [manager, currentLanguage, isLoading],
+  );
 
   return {
     getText,
