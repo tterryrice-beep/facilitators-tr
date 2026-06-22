@@ -1,4 +1,5 @@
 import en from "./en.json";
+import uk from "./uk.json";
 
 const languages = {
   en: {
@@ -16,7 +17,7 @@ const languages = {
 export type LanguageKey = keyof typeof languages;
 
 export const localeConfig = {
-  defaultLanguage: en,
+  defaultLanguage: uk,
   languages: {
     data: languages,
     list: Object.keys(languages) as LanguageKey[],

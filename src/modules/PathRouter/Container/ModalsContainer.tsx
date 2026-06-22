@@ -1,14 +1,13 @@
-import React, {
-  Fragment,
-  Suspense,
-  useEffect,
-  useRef,
-} from "react";
+import React, { Fragment, Suspense, useEffect, useRef } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 
 import { usePath } from "../Provider/usePath";
 import { clearSlash } from "../utils/clearSlash";
-import type { ModalData, ModalWrapperComponent, ModalWrapperRef } from "../types";
+import type {
+  ModalData,
+  ModalWrapperComponent,
+  ModalWrapperRef,
+} from "../types";
 
 interface Props {
   paths: { pathName: string; data: ModalData }[];

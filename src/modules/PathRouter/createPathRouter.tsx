@@ -21,8 +21,9 @@ export interface BoundPathRouterContainerProps {
   fallback?: ReactNode;
 }
 
-export interface BoundNavLinkProps<C extends RouterConfig<any, any>>
-  extends NavLinkProps<C> {}
+export interface BoundNavLinkProps<
+  C extends RouterConfig<any, any>,
+> extends NavLinkProps<C> {}
 
 /**
  * Build a router instance bound to a concrete config.

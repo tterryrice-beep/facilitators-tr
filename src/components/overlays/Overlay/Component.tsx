@@ -111,6 +111,15 @@ export const Overlay: React.FC<OverlayProps> = ({
   const contentRef = useRef<HTMLDivElement | null>(null);
   /** Latest resolved anchor element (for string / HTMLElement variants). */
   const anchorElRef = useRef<HTMLElement | null>(null);
+  /** Set when an in-component action requested closing; consumed on transition end. */
+  const pendingCloseRef = useRef<boolean>(false);
+
+  /** Begin the fade-out animation; `onClose` will fire after it completes. */
+  const requestClose = useCallback(() => {
+    pendingCloseRef.current = true;
+    setInteractable(false);
+    setVisible(false);
+  }, []);
 
   const isAnchorless = anchor == null;
   const isPositionAnchor = isOverlayPosition(anchor);
@@ -192,6 +201,10 @@ export const Overlay: React.FC<OverlayProps> = ({
       setMounted(false);
       setPlaced(false);
       setContentPos(undefined);
+      if (pendingCloseRef.current) {
+        pendingCloseRef.current = false;
+        onClose?.();
+      }
     }
   };
 
@@ -209,7 +222,7 @@ export const Overlay: React.FC<OverlayProps> = ({
       {!withoutBlind && (
         <div
           role="overlay-blind"
-          onClick={onClose}
+          onClick={requestClose}
           className={clsx(
             "absolute inset-0 z-1 bg-black/50 transition-opacity duration-200 ease-in-out",
             visible ? "opacity-100" : "opacity-0",

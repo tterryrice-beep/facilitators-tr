@@ -1,10 +1,10 @@
 import React, { type FC, useState } from "react";
 
 import { Overlay, OverlayPosition } from "@@/overlays";
-import { Button } from "@@/Button";
 
 import { useTranslate } from "@/providers/LocaleProvider/hook";
 import css from "./style.module.scss";
+import { PrimaryButton } from "@@/PrimaryButton";
 
 const Page: FC = ({}) => {
   const [modal, setModal] = useState(false);
@@ -16,16 +16,8 @@ const Page: FC = ({}) => {
       <div>{getText("test")}</div>
       <button onClick={() => setModal(true)}>OPEN MODAL</button>
       <div className="flex gap-2">
-        <button
-          className="bg-blue-500 text-white px-4 py-2 rounded"
-          onClick={() => changeLanguage("en")}>
-          EN
-        </button>
-        <Button
-          className="bg-blue-500 text-white px-4 py-2 rounded"
-          onClick={() => changeLanguage("uk")}>
-          UK
-        </Button>
+        <PrimaryButton onClick={() => changeLanguage("en")}>EN</PrimaryButton>
+        <PrimaryButton onClick={() => changeLanguage("uk")}>UK</PrimaryButton>
       </div>
 
       <Overlay

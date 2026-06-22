@@ -1,6 +1,5 @@
 import type {
   ComponentType,
-  ForwardRefExoticComponent,
   LazyExoticComponent,
   ReactNode,
   RefAttributes,
@@ -126,6 +125,15 @@ export interface ModalWrapperProps {
   children?: ReactNode;
 }
 
-export type ModalWrapperComponent = ForwardRefExoticComponent<
+/**
+ * Wrapper plugin component.
+ *
+ * Accepts both a `forwardRef`-wrapped component (the container will call
+ * `ref.current.handleCloseWithAnimation()` when available) and a plain
+ * function component that simply ignores the ref. `RefAttributes` keeps
+ * `ref` as an optional prop, so any `ComponentType<ModalWrapperProps>`
+ * structurally satisfies this signature in React 19.
+ */
+export type ModalWrapperComponent = ComponentType<
   ModalWrapperProps & RefAttributes<ModalWrapperRef>
 >;
