@@ -1,10 +1,12 @@
 import React, { type FC, useState } from "react";
+
 import { Overlay, OverlayPosition } from "@@/overlays";
+import { Button } from "@@/Button";
 
 import { useTranslate } from "@/providers/LocaleProvider/hook";
 import css from "./style.module.scss";
 
-export const Page: FC = ({}) => {
+const Page: FC = ({}) => {
   const [modal, setModal] = useState(false);
   const { getText, changeLanguage } = useTranslate();
 
@@ -19,11 +21,11 @@ export const Page: FC = ({}) => {
           onClick={() => changeLanguage("en")}>
           EN
         </button>
-        <button
+        <Button
           className="bg-blue-500 text-white px-4 py-2 rounded"
           onClick={() => changeLanguage("uk")}>
           UK
-        </button>
+        </Button>
       </div>
 
       <Overlay
@@ -35,3 +37,5 @@ export const Page: FC = ({}) => {
     </section>
   );
 };
+
+export default Page;
