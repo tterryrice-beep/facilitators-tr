@@ -3,7 +3,9 @@ export type InterpolateResult<Values extends Record<string, unknown>> =
     ? string
     : Array<string | Values[keyof Values]>;
 
-export const interpolate = <Values extends Record<string, unknown>>(
+export const interpolate = <
+  Values extends Record<string, unknown> = Record<string, string>,
+>(
   template: string,
   values?: Values,
 ): InterpolateResult<Values> => {

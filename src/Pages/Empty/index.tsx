@@ -1,18 +1,22 @@
 import React, { type FC, useState } from "react";
 import { Overlay, OverlayPosition } from "@@/overlays";
 
-import css from "./style.module.scss";
 import { useTranslate } from "@/providers/LocaleProvider/hook";
+import css from "./style.module.scss";
 
 export const Page: FC = ({}) => {
   const [modal, setModal] = useState(false);
-  const { getText } = useTranslate();
+  const { getText, language, loading } = useTranslate();
 
-  const text = getText("test")
+  console.log({
+    language,
+    loading,
+  });
+
   return (
     <section className={css.page}>
       <div>Page Content</div>
-      <div>{}</div>
+      <div>{getText("test")}</div>
       <button onClick={() => setModal(true)}>OPEN MODAL</button>
 
       <Overlay

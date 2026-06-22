@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useMemo, useState } from "react";
 import { LocaleContext } from "./Context";
 
 const useLocale = () => useContext(LocaleContext);
@@ -15,16 +15,19 @@ export const useTranslate = () => {
     const rmSelected = manager.listen("selectedLanguage", (lang) =>
       setCurentLanguage(lang),
     );
-    const rmLoading = manager.listen("translationLoaded", setIsLoading);
+    const rmLoading = manager.listen("isLoadingActive", setIsLoading);
     return () => {
       rmSelected();
       rmLoading();
     };
-  }, []);
+  }, [manager]);
+
+  const getText = useMemo(() => manager.getText, [isLoading, currentLanguage]);
 
   return {
-    getText: manager.getText,
+    getText,
     language: currentLanguage,
     loading: isLoading,
+    changeLanguage: manager.changeLanguage,
   } as const;
 };

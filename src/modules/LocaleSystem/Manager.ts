@@ -1,11 +1,12 @@
 import type { ObjectAddress } from "@/types";
 
 import { StateDispatcher } from "../StateDispatcher";
-import type {
-  LocaleState,
-  LocaleEvents,
-  TranslationProps,
-  SystemState,
+import {
+  type LocaleState,
+  type LocaleEvents,
+  type TranslationProps,
+  type SystemState,
+  TranslationLocalData,
 } from "./type";
 import { interpolate } from "./utils";
 
@@ -23,14 +24,14 @@ export class LocaleManager<
     super(
       {
         selectedLanguage: "" as LangName,
-        translationLoaded: false,
+        isLoadingActive: false,
       },
       {
         selectedLanguage: (state, value) => {
           state.selectedLanguage = value;
         },
-        translationLoaded: (state, value) => {
-          state.translationLoaded = value;
+        isLoadingActive: (state, value) => {
+          state.isLoadingActive = value;
         },
       },
     );
@@ -58,7 +59,9 @@ export class LocaleManager<
     return typeof current === "string" ? current : key;
   };
 
-  private formatMessage = <Values extends Record<string, string | unknown>>(
+  private formatMessage = <
+    Values extends Record<string, unknown> = Record<string, string>,
+  >(
     props: TranslationProps<LangConfig, Values>,
   ) => {
     const { values, id } = props;
@@ -76,13 +79,14 @@ export class LocaleManager<
     return { lang, translation };
   };
 
-  private getTranslation = (key: LangName) => {
+  private getTranslation = (lang: LangName) => {
     try {
       const { languageList, translations } = this.systemState;
 
-      const currentTranslation = translations[key];
+      const currentTranslation = translations[lang];
 
       if (currentTranslation) return currentTranslation;
+      else this.downloadLanguage(lang);
 
       return this.defaultLanguageConfig;
     } catch (error) {
@@ -98,7 +102,9 @@ export class LocaleManager<
     this.downloaders = { ...this.downloaders, ...downloaders };
 
     // get saved language from storage
-    const savedLanguage = localStorage.getItem("language");
+    const savedLanguage = localStorage.getItem(
+      TranslationLocalData.SelectedLanguage,
+    );
     if (
       savedLanguage &&
       this.systemState.languageList.includes(savedLanguage as LangName)
@@ -121,22 +127,45 @@ export class LocaleManager<
     onLoad?.();
   }
 
-  public changeLanguage = async (language: LangName) => {
-    this.setters.translationLoaded(false);
-    const isDownloaded = this.getTranslation(language);
-    if (!isDownloaded) {
-      const downloader = this.downloaders[language];
-      if (downloader) {
-        const config = await downloader();
-        this.systemState.translations[language] = config;
-      }
-    }
+  private downloadLanguage = async (language: LangName) => {
+    try {
+      if (this.getState().isLoadingActive) return;
+      this.setters.isLoadingActive(true);
+      const isDownloaded = !!this.systemState.translations[language];
 
-    this.setters.selectedLanguage(language);
-    this.setters.translationLoaded(true);
+      let result = false;
+      if (isDownloaded) result = true;
+      else {
+        const downloader = this.downloaders[language];
+        if (downloader) {
+          const config = await downloader();
+          this.systemState.translations[language] = config;
+          result = true;
+        }
+      }
+
+      this.setters.isLoadingActive(false);
+      return result;
+    } catch (error) {
+      console.error({ error });
+      this.setters.isLoadingActive(false);
+      return false;
+    }
   };
 
-  public getText = <Values extends Record<string, string | unknown>>(
+  public changeLanguage = async (language: LangName) => {
+    localStorage.setItem(TranslationLocalData.SelectedLanguage, language);
+    const success = await this.downloadLanguage(language);
+    if (success) {
+      this.setters.selectedLanguage(language);
+    } else {
+      console.error(`Failed to change language: ${language}`);
+    }
+  };
+
+  public getText = <
+    Values extends Record<string, unknown> = Record<string, string>,
+  >(
     id: ObjectAddress<LangConfig>,
     values?: Values,
   ) => {

@@ -5,12 +5,12 @@ export interface LocaleState<
   LocaleList extends Language[],
 > {
   selectedLanguage: LocaleList[number];
-  translationLoaded: boolean;
+  isLoadingActive: boolean;
 }
 
 export interface LocaleEvents<Language extends string> {
   selectedLanguage: Language;
-  translationLoaded: boolean;
+  isLoadingActive: boolean;
 }
 
 export interface SystemState<
@@ -31,3 +31,7 @@ export interface TranslationProps<
 
 export type TranslationResult<Values extends Record<string, unknown>> =
   Values extends Record<string, string> ? string : Array<Values[keyof Values]>;
+
+export enum TranslationLocalData {
+  SelectedLanguage = "language",
+}
