@@ -3,11 +3,11 @@ import React, { Fragment, type FC } from "react";
 interface Props {}
 
 import { ErrorBoundary } from "@@/ErrorBoundary";
+import { Overlay, OverlayPosition } from "@@/overlays";
 
 import { PathRouterContainer } from "../../providers/Router";
 import { Footer, Header } from "./components";
 import css from "./style.module.scss";
-import { Overlay, OverlayPosition } from "@@/overlays";
 
 export const Layout: FC<Props> = ({}) => {
   return (
