@@ -2,7 +2,7 @@ import React, { type FC } from "react";
 
 interface Props {}
 
-import { PathRouterContainer } from "../Router";
+import { PathRouterContainer } from "../../providers/Router";
 import { Footer, Header } from "./components";
 import css from "./style.module.scss";
 
