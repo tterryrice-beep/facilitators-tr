@@ -114,7 +114,10 @@ interface NodeProps {
   defaultOpen?: boolean;
 }
 
-const Chevron: FC<{ open: boolean; visible: boolean }> = ({ open, visible }) => (
+const Chevron: FC<{ open: boolean; visible: boolean }> = ({
+  open,
+  visible,
+}) => (
   <span
     style={{
       display: "inline-block",
@@ -189,15 +192,16 @@ const Node: FC<NodeProps> = ({
   }
 
   /* Об'єкт / масив / Map / Set */
-  if (isPlainObjectLike(value) && !(value instanceof Date) && !(value instanceof RegExp)) {
+  if (
+    isPlainObjectLike(value) &&
+    !(value instanceof Date) &&
+    !(value instanceof RegExp)
+  ) {
     const entries = getEntries(value);
     return (
       <div>
         <div style={rowStyle} onClick={toggle}>
-          <Chevron
-            open={!!actuallyOpen}
-            visible={expandable && !pinnedOpen}
-          />
+          <Chevron open={!!actuallyOpen} visible={expandable && !pinnedOpen} />
           <KeyLabel name={name} />
           <span style={{ color: COLOR.muted }}>{getPreview(value)}</span>
         </div>
@@ -223,8 +227,8 @@ const Node: FC<NodeProps> = ({
     value instanceof Date
       ? { text: `Date "${value.toISOString()}"`, color: COLOR.string }
       : value instanceof RegExp
-      ? { text: value.toString(), color: COLOR.string }
-      : formatPrimitive(value);
+        ? { text: value.toString(), color: COLOR.string }
+        : formatPrimitive(value);
 
   return (
     <div style={rowStyle}>
