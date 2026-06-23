@@ -114,6 +114,11 @@ export const route = {
       "/":   setPage({ component: UsersListPage }),
       ":id": setPage({ component: UserPage }),
     },
+    modules: {
+      ...setPage({ component: ModulesIndexPage }), // page at /modules
+      routing: setPage({ component: RoutingPage }), // page at /modules/routing
+      "*":     setPage({ component: RoutingPage }), // page at /modules/*
+    },
     "*":   setPage({ component: NotFoundPage }),
   },
   modals: {
@@ -123,8 +128,20 @@ export const route = {
 } as const;
 ```
 
-- `setPage({ component, redirect? })` wraps a leaf as `{ data: {...} }`. The `data` marker tells the route builder “this is a leaf, stop recursing”.
+- `setPage({ component, redirect? })` wraps the value as `{ data: {...} }`. The `data` field marks the node as a renderable page, but **does not stop** the route builder from descending — children of the same node are still discovered.
 - Pages can be **nested** as plain objects — `createRoute` walks the tree and produces a flat `[{ pathName, data }]` list (see `utils/createRoute.ts`).
+- A node may **simultaneously be a page and a container** for child routes. Spread the result of `setPage` into the node to attach a component at that path while keeping nested keys:
+
+  ```ts
+  modules: {
+    ...setPage({ component: ModulesIndexPage }), // /modules
+    routing: setPage({ component: RoutingPage }), // /modules/routing
+    "*":     setPage({ component: RoutingPage }), // /modules/*
+  }
+  ```
+
+  This is what enables breadcrumb-style hierarchies where each ancestor segment is itself a page.
+- Recursion into a node stops only when the node itself carries `component` or `redirect` at its top level (i.e. it is a bare leaf, not a `setPage(...)` result). `setPage` puts those fields under `data`, so spreading it never blocks descent.
 - A page with `redirect` (or no `component`) becomes a `<Navigate to={redirect || "/"} replace />`.
 - `setModal({ component })` is just an identity helper that preserves literal types for inference.
 - `as const` is **required** — without it TS widens string keys to `string` and you lose autocompletion.

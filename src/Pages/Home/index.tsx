@@ -1,14 +1,17 @@
 import React, { type FC, useState } from "react";
 
-import { useTranslate } from "@/providers/LocaleProvider/hook";
-import css from "./style.module.scss";
-import { createRoute } from "@/modules/PathRouter/utils";
 import { route } from "@/config";
+import { useTranslate } from "@/providers/LocaleProvider/hook";
 import { NavLink } from "@/providers/Router";
+import { createRoute } from "@/modules/PathRouter/utils";
+
+import css from "./style.module.scss";
 
 const { modals, pages } = createRoute(route);
+
 const Page: FC = ({}) => {
   const { getText, changeLanguage } = useTranslate();
+
   return (
     <section className={css.page}>
       <br />
@@ -26,7 +29,7 @@ const Page: FC = ({}) => {
                     className="w-full flex justify-between gap-12"
                     //@ts-ignore
                     to={pathName}>
-                    <p >{data.title}</p>
+                    <p>{data.title}</p>
                     <pre>{pathName}</pre>
                   </NavLink>
                 </li>
