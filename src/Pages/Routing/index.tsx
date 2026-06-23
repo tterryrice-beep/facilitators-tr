@@ -6,6 +6,7 @@ import { createRoute } from "@/modules/PathRouter/utils";
 import { route } from "@/config";
 import { Heading } from "@@/Heading";
 import { Text } from "@@/Text";
+import { ObjectView } from "@@/ObjectView";
 
 const { modals, pages } = createRoute(route);
 
@@ -18,7 +19,34 @@ const Page: FC = ({}) => {
       <section id="overview">
         <Text type="subtitle">Overview</Text>
         <br />
-        <Text>Ідея даного роутингу полягає </Text>
+        <br />
+        <Text>
+          На багатьох проектах де я працював часто були проблеми зі Зручністю
+          маршрутизації.
+          <br />В кращому разі, вона виглядала ось так:
+        </Text>
+
+        <div className="mb-6 mt-6 ">
+          <ObjectView
+            defaultExpanded
+            data={{
+              route: [
+                {
+                  path: "/about",
+                  component: "AboutRoot",
+                },
+                {
+                  path: "/about/terms",
+                  component: "Terms",
+                },
+                {
+                  path: "/about/privacy",
+                  component: "Privacy",
+                },
+              ],
+            }}
+          />
+        </div>
       </section>
     </div>
   );
