@@ -9,7 +9,9 @@ export const Heading: FC<Props> = ({ title, rightBar }) => {
   return (
     <>
       <div className="flex justify-between w-full mt-4 mb-4">
-        <Text type="title">{title}</Text>
+        <Text type="title" tag="h1">
+          {title}
+        </Text>
         <div>{rightBar}</div>
       </div>
 

@@ -8,6 +8,7 @@ import { JSXView } from "@@/JSXView";
 import { Text } from "@@/Text";
 
 import css from "./style.module.scss";
+import { Pre } from "@@/Pre";
 
 // const { modals, pages } = createRoute(route);
 
@@ -16,119 +17,154 @@ const Page: FC = ({}) => {
 
   return (
     <div className={css.page}>
-      <Heading title={"Routing"} rightBar={<div>github ling be here</div>} />
-
-      <section id={css.overview} className="mt-6">
-        <Text type="subtitle">Проблематика</Text>
-        <br />
-        <br />
-        <Text>
-          На багатьох проектах де я працював часто були проблеми зі Зручністю
-          маршрутизації.
-          <br />В кращому разі, вона виглядала ось так:
-        </Text>
-
-        <div className="mb-6 mt-6 ">
-          <ObjectView
-            defaultExpanded
-            data={{
-              routes: [
-                {
-                  path: "/about",
-                  element: "<AboutRoot />",
-                },
-                {
-                  path: "/about/terms",
-                  element: "<Terms />",
-                },
-                {
-                  path: "/about/privacy",
-                  element: "<Privacy />",
-                },
-              ],
-            }}
-          />
-
-          <JSXView>{`
-<Routes>
-  {routes.map((data) => <Route {...data} />)}
-</Routes>`}</JSXView>
-        </div>
-
-        <Text>
-          Але зазвичай воно реалізовано як у типових Реакт-посібниках:
-        </Text>
-
-        <JSXView>{`
-<Routes>
-  <Route path="/about" element={<AboutRoot />} />
-  <Route path="/about/terms" element={<Terms />} />
-  <Route path="/about/privacy" element={<Privacy />} />
-  ...
-</Routes>`}</JSXView>
-        <br />
-        <br />
-
-        <Text>Які проблеми із цього, виникали особисто у мене:</Text>
-        <ul className="list-disc mt-4">
-          <li className="ml-8">
-            <Text>
-              Додавання нових сторінок, чи, прости Господи, переадресація.
-            </Text>
-          </li>
-
-          <li className="ml-8">
-            <Text>Робота із посиланнями та переходами між сторінками.</Text>
-            <br />
-            <Text>
-              Щастить, коли всі маршрути зберігаються у документації, чи хоча би
-              в енумі. Але на практиці, доводиться залазити у файл, та шукати,
-              потрібний шлях.
-            </Text>
-          </li>
-
-          <li className="ml-8">
-            <Text>Модалки.</Text>
-            <br />
-            <Text>
-              Є ситуації коли для модалок прописують окремий маршрут типу:
-            </Text>
-            <br />
-            <ObjectView
-              defaultExpanded
-              data={{
-                routes: [
-                  {
-                    path: "/about",
-                    element: "<About />",
-                  },
-                  {
-                    path: "/about/modal",
-                    element: "<About />",
-                  },
-                ],
-              }}
-            />
-            <br />
-            <Text>І це навіть не перебільшення</Text>
-          </li>
-        </ul>
-        <br />
-        <Text>
-          Тож, зрештою, я написав власне рішення, котре особисто мене би
-          влаштовувало
-        </Text>
-      </section>
+      <Heading title={"PathRouter"} rightBar={<div>github ling be here</div>} />
 
       <section id={css.about}>
-        <Text type="subtitle">Для чого взагалі існує PathRouter</Text>
+        <Text tag="h2" type="subtitle">
+          Для чого взагалі існує PathRouter
+        </Text>
         <br />
+        <br />
+
+        <Text className="ml-8" tag="h3" type="subtitle">
+          <b>I</b>. Типізація
+        </Text>
         <br />
 
         <Text>
-              В багатьох проектах над якими я працював підозріло часто траплялися проблеми із типізацією маршрутів. 
+          В багатьох проектах над якими я працював підозріло часто траплялися
+          проблеми із типізацією маршрутів.
         </Text>
+        <br />
+        <Text>
+          Переважно, типізації взагалі не було. Доводиолся самостійно шукати
+          лінк на потрібну сторінку. Крім того, трапляються й одруки, через що
+          сторінка стає або недоступною, або прихованою.
+        </Text>
+        <br />
+        <br />
+        <Text>
+          PathRouter використовує сувору типізацію маршрутів, що додає
+          зручності, завдяки автодоповненню, та безпеку, оскільки непомічений чи
+          проігнорований хибно вказаний шлях буде виявлено ще під час
+          компіляції.
+        </Text>
+        <br />
+        <br />
+        <Text className="ml-8" tag="h3" type="subtitle">
+          <b>II</b>. Модальні Вікна
+        </Text>
+        <br />
+        <Text>
+          Часто, в React-застосунках модальні вікна не є частиною навігації, а
+          натомість їх поява привʼязується до <Pre inline>state</Pre>. В такому
+          випадку стан модального вікна не зберігається безпосередньо у URL.
+          Таким чином, юзер втрачає можливість зберегти модалку в закладках, або
+          очікувати повторного відкрити після онолвення сторінки.
+        </Text>
+        <br />
+        <br />
+        <Text>
+          Як банальний приклад: Гаманець у модалці. Його відкриття може бути
+          абсолютно очевидним з точки зору UI але завжди буде користувач для
+          якого принцципово відкривати сайт з інформації про свій баланс.
+        </Text>
+        <br />
+        <br />
+        <Text>
+          PathRouter представляє модальне вікно як частину URL, при цьому
+          візуально зручно передає усю інформацію:
+        </Text>
+        <Pre>
+          {`
+https://example.com/path/to/page/modal/wallet/balance
+          `}
+        </Pre>
 
+        <br />
+        <br />
+        <br />
+        <Text tag="h2" type="subtitle">
+          Можливості
+        </Text>
+        <br />
+        <br />
+
+        <Text className="ml-8" tag="h3" type="subtitle">
+          <b>I</b>. Зручна та декларативна робота з маршрутами
+        </Text>
+        <br />
+        <br />
+        <Text>
+          Все, що потрібно прописати, це маршрутні ключі в обʼєкті конфігурації.
+          Замість типового повтору одних і тих же ключів:
+        </Text>
+        <br />
+        <ObjectView
+          defaultExpanded
+          data={{
+            routes: [
+              {
+                path: "about",
+              },
+              {
+                path: "about/terms",
+              },
+              {
+                path: "about/privacy",
+              },
+              {
+                path: "about/privacy/preferences",
+              },
+            ],
+          }}
+        />
+        <br />
+        <br />
+        <Text>PathRouter спрощує це до зручної деревовидної структури:</Text>
+        <br />
+        <ObjectView
+          defaultExpanded
+          data={{
+            routes: {
+              about: {
+                terms: {},
+                privacy: {
+                  preferences: {},
+                },
+              },
+            },
+          }}
+        />
+        <br />
+        <br />
+        <Text className="ml-8" tag="h3" type="subtitle">
+          <b>II</b>. Зручна Типізована Навігація
+        </Text>
+        <br />
+        <br />
+        <Text>
+          PathRouter вирішує головну, особисто мою, проблему із різними
+          системами навігації: Відсутність ts-підказок за типової реалізації
+          роутингу.
+        </Text>
+        <br />
+        <Text>
+          Не рідко доводиться лізти у файл чи компонент для самостійних пошуків
+          потрібного посилання
+        </Text>
+        <br />
+        <br />
+        <Text>
+          Завдяки автозаповненню, PathRouter завжди підказує всі можливі та
+          доступні шляхи наявні в проекті
+        </Text>
+        <br />
+        <Text>
+          <Pre>{`
+const { page, modal } = usePathRouter();
+page.navigate('about/privacy/preferences');`}</Pre>
+        </Text>
       </section>
     </div>
   );

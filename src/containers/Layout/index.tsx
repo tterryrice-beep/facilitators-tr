@@ -11,9 +11,9 @@ import css from "./style.module.scss";
 
 export const Layout: FC<Props> = ({}) => {
   return (
-    <div className="bg-mist-900 p-0 m-0 min-h-screen flex flex-col">
+    <div className="bg-mist-900 p-0 m-0 min-h-screen  flex flex-col">
       <Header />
-      <main className="p-4 md:p-6 flex-1 max-w-7xl mx-auto w-full">
+      <main className="p-4 md:p-6 flex-1 max-w-4xl mx-auto w-full">
         <ErrorBoundary>
           <PathRouterContainer
             fallback={<>Усе ок, ми завантажуємося</>}

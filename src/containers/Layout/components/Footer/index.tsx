@@ -6,7 +6,7 @@ interface Props {
 export const Footer: FC<Props> = ({}) => {
   return (
     <footer className="bg-mist-900 border-t-2 border-mist-800 py-4 px-6">
-      <div className="flex flex-row items-center justify-between max-w-7xl mx-auto">
+      <div className="flex flex-row items-center justify-between mx-auto max-w-6xl">
         <div>Footer</div>
         <div>Copyright</div>
       </div>
