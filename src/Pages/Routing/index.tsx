@@ -9,6 +9,7 @@ import { Text } from "@@/Text";
 
 import css from "./style.module.scss";
 import { Pre } from "@@/Pre";
+import { JSView } from "@@/JSView";
 
 // const { modals, pages } = createRoute(route);
 
@@ -161,9 +162,24 @@ https://example.com/path/to/page/modal/wallet/balance
         </Text>
         <br />
         <Text>
-          <Pre>{`
+          <div>
+            <span className="text-cyan-400">const</span>
+            {` `}
+            <span className="text-blue-400">{`{ page, modal }`}</span>
+            <span className="text-yellow-200">{` = usePathRouter();`}</span>
+            <br />
+            <span className="text-blue-400">page</span>
+            <span className="text-yellow-200">.navigate(</span>
+            <span className="text-orange-400">{`"about/privacy/"`}</span>
+            <span className="text-gray-400">{`preferences`}</span>
+            <span className="text-yellow-200">)</span>
+            {`;`}
+          </div>
+
+          <JSView >{`
 const { page, modal } = usePathRouter();
-page.navigate('about/privacy/preferences');`}</Pre>
+page.navigate("about/privacy");           
+`}</JSView>
         </Text>
       </section>
     </div>
