@@ -23,9 +23,10 @@ const Page: FC = ({}) => {
               return (
                 <li className="w-full list-disc">
                   <NavLink
-                    className="w-full"
+                    className="w-full flex justify-between gap-12"
                     //@ts-ignore
                     to={pathName}>
+                    <p >{data.title}</p>
                     <pre>{pathName}</pre>
                   </NavLink>
                 </li>

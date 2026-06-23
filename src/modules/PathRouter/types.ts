@@ -18,10 +18,10 @@ export type NestedKeyOf<ObjectType extends object, StopKey extends string> = {
 
 /* ───────────────────────── Page / Modal data ───────────────────────── */
 
-export interface PageData {
+export type PageData = {
   component?: ComponentType<any> | LazyExoticComponent<ComponentType<any>>;
   redirect?: string;
-}
+} & Record<string, any>;
 
 export interface ModalProps {
   onClose: () => void;

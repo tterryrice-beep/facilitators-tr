@@ -29,8 +29,7 @@ export const createRoute = (config: RouterConfig<any, any>) => {
         content &&
         !objectIsEmpty(content) &&
         !content.component &&
-        !content.redirect &&
-        !content.data
+        !content.redirect
       ) {
         const newPath = currentPath + pathName;
         walk(

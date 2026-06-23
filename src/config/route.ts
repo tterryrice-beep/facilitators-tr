@@ -8,16 +8,16 @@ const Routing = lazy(() => import("@/Pages/Routing"));
 
 export const route = {
   pages: {
-    "/": setPage({ component: Home }),
-    "/modules": {
-      ...setPage({ component: Default }),
+    "/": setPage({ component: Home, title: "Home" }),
+    modules: {
+      ...setPage({ component: Default, title: "Modules" }),
 
-      routing: setPage({ component: Routing }),
+      routing: setPage({ component: Routing, title: "Routing" }),
 
-      "*": setPage({ component: Routing }),
+      "*": setPage({ component: Routing, title: "Modules Wrong" }),
     },
-    test: setPage({ component: Default }),
-    "*": setPage({ component: Home }),
+    test: setPage({ component: Default, title: "Test Page" }),
+    "*": setPage({ component: Home, title: "Wrong Pages Just show Home" }),
   },
   modals: {
     test: setModal({
