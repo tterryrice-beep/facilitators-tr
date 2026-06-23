@@ -59,7 +59,7 @@ const tokenize = (src: string): Seg[] => {
       continue;
     }
 
-    /* JSX-вираз поза тегом: {...} */
+    /* JSX-вираз поза тегом: {...} — рекурсивно токенізуємо вміст. */
     if (ch === "{") {
       let depth = 1;
       let j = i + 1;
@@ -78,7 +78,9 @@ const tokenize = (src: string): Seg[] => {
         push("error", src.slice(i));
         i = src.length;
       } else {
-        push("expr", src.slice(i, j));
+        push("expr", "{");
+        for (const s of tokenize(src.slice(i + 1, j - 1))) out.push(s);
+        push("expr", "}");
         i = j;
       }
       continue;
@@ -166,6 +168,33 @@ const tokenize = (src: string): Seg[] => {
         break;
       }
 
+      /* Spread / вираз як атрибут: {...data} */
+      if (c === "{") {
+        let depth = 1;
+        let k = j + 1;
+        while (k < src.length && depth > 0) {
+          if (src[k] === "{") depth++;
+          else if (src[k] === "}") {
+            depth--;
+            if (depth === 0) {
+              k++;
+              break;
+            }
+          }
+          k++;
+        }
+        if (depth > 0) {
+          push("error", src.slice(j));
+          j = src.length;
+          break;
+        }
+        push("expr", "{");
+        for (const s of tokenize(src.slice(j + 1, k - 1))) out.push(s);
+        push("expr", "}");
+        j = k;
+        continue;
+      }
+
       /* Атрибут */
       NAME_RE.lastIndex = j;
       const am = NAME_RE.exec(src);
@@ -211,7 +240,9 @@ const tokenize = (src: string): Seg[] => {
             j = src.length;
             break;
           }
-          push("expr", src.slice(j, k));
+          push("expr", "{");
+          for (const s of tokenize(src.slice(j + 1, k - 1))) out.push(s);
+          push("expr", "}");
           j = k;
         } else {
           push("error", src[j] ?? "");

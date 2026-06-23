@@ -8,10 +8,12 @@ interface Props {
 export const Heading: FC<Props> = ({ title, rightBar }) => {
   return (
     <>
-      <div className="flex justify-between w-full">
+      <div className="flex justify-between w-full mt-4 mb-4">
         <Text type="title">{title}</Text>
         <div>{rightBar}</div>
       </div>
+
+      <hr className="border-gray-700 mb-6 " />
     </>
   );
 };
