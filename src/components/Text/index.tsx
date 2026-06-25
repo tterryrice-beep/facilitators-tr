@@ -16,11 +16,11 @@ const TextInner = <T extends TextTag>(
         return "text-2xl";
       case "subtitle":
         return "text-xl";
-      case "caption":
-        return "text-base";
+      case "small":
+        return "text-sm";
       default:
       case "text":
-        return "text-sm";
+        return "text-base";
     }
   };
 

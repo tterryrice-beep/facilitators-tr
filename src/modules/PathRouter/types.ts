@@ -18,8 +18,9 @@ export type NestedKeyOf<ObjectType extends object, StopKey extends string> = {
 
 /* ───────────────────────── Page / Modal data ───────────────────────── */
 
+export type PageComponent = ComponentType<any> | LazyExoticComponent<ComponentType<any>>;
 export type PageData = {
-  component?: ComponentType<any> | LazyExoticComponent<ComponentType<any>>;
+  component?: PageComponent;
   redirect?: string;
 } & Record<string, any>;
 
@@ -27,17 +28,19 @@ export interface ModalProps {
   onClose: () => void;
 }
 
-export interface ModalData {
-  component?:
-    | ComponentType<ModalProps>
-    | LazyExoticComponent<ComponentType<ModalProps>>;
-}
+export type ModalComponent =
+  | ComponentType<ModalProps>
+  | LazyExoticComponent<ComponentType<ModalProps>>;
 
-interface PageContent {
+export type ModalData = {
+  component?: ModalComponent;
+} & Record<string, any>;
+
+export interface PageContent {
   data?: PageData;
 }
 
-interface BreadCrumbsPage {
+export interface BreadCrumbsPage {
   [path: string]: ExtendedPage;
 }
 
@@ -109,7 +112,7 @@ export interface PathContextType<
     delete: (key: string) => void;
     clear: () => void;
   };
-  defaultLocation: Location;
+  // defaultLocation: Location;
 }
 
 /* ───────────────────────── Modal wrapper plugin ───────────────────────── */

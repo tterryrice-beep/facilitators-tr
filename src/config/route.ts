@@ -8,6 +8,7 @@ const Routing = lazy(() => import("@/Pages/Routing"));
 
 export const route = {
   pages: {
+    test2: setPage(Routing),
     "/": setPage({ component: Home, title: "Home" }),
     modules: {
       ...setPage({ component: Default, title: "Modules" }),
@@ -20,8 +21,7 @@ export const route = {
     "*": setPage({ component: Home, title: "Wrong Pages Just show Home" }),
   },
   modals: {
-    test: setModal({
-      component: Modal,
-    }),
+    test: setModal(Modal),
+    test_2: setModal({ component: Modal, title: "Test Modal 2" }),
   },
 } as const;

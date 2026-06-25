@@ -20,7 +20,7 @@ export interface PathRouterProps<C extends RouterConfig<any, any>> {
   fallback?: ReactNode;
 }
 
-export const PathRouterContainer = <C extends RouterConfig<any, any>>({
+export const PagesContainer = <C extends RouterConfig<any, any>>({
   config,
   ModalWrapper,
   fallback = null,

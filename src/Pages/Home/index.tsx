@@ -50,7 +50,8 @@ const Page: FC = ({}) => {
                   <NavLink
                     //@ts-ignore
                     modal={pathName}>
-                    <pre>{pathName}</pre>
+                    <pre>{pathName} </pre>
+                    <p>{data.title ? "-- " + data.title : ""}</p>
                   </NavLink>
                 </li>
               );

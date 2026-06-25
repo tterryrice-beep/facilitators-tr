@@ -4,8 +4,9 @@ import { createPathRouter } from "@/modules";
 export const {
   NavLink,
   PathProvider,
-  PathRouterContainer,
+  PagesContainer,
   getModal,
   getPath,
   usePath,
+  config,
 } = createPathRouter(route);

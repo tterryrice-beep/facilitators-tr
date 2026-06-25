@@ -1,61 +1,17 @@
 import React, { type FC, useMemo } from "react";
 import clsx from "clsx";
-import { JS_VIEW_COLOR } from "./config";
+
+import {
+  JS_IDENT_PART,
+  JS_IDENT_START,
+  JS_KEYWORDS,
+  JS_LITERALS,
+  JS_LONG2_OPS,
+  JS_LONG3_OPS,
+  JS_VIEW_COLOR,
+  JS_VIEW_STYLE,
+} from "./config";
 import type { JSProps, JSSeg, JSSegType } from "./types";
-
-const KEYWORDS = new Set([
-  "const",
-  "let",
-  "var",
-  "function",
-  "return",
-  "if",
-  "else",
-  "for",
-  "while",
-  "do",
-  "switch",
-  "case",
-  "default",
-  "break",
-  "continue",
-  "class",
-  "extends",
-  "super",
-  "new",
-  "this",
-  "await",
-  "async",
-  "try",
-  "catch",
-  "finally",
-  "throw",
-  "import",
-  "export",
-  "from",
-  "as",
-  "in",
-  "of",
-  "typeof",
-  "instanceof",
-  "void",
-  "delete",
-  "yield",
-  "static",
-  "get",
-  "set",
-]);
-const LITERALS = new Set([
-  "true",
-  "false",
-  "null",
-  "undefined",
-  "NaN",
-  "Infinity",
-]);
-
-const IDENT_START = /[A-Za-z_$]/;
-const IDENT_PART = /[A-Za-z0-9_$]/;
 
 /**
  * Грубий, толерантний токенайзер JS. Не валідує семантику —
@@ -195,15 +151,15 @@ const tokenize = (src: string): JSSeg[] => {
     }
 
     /* identifier / keyword / literal */
-    if (IDENT_START.test(ch)) {
+    if (JS_IDENT_START.test(ch)) {
       let j = i;
-      while (j < src.length && IDENT_PART.test(src[j])) j++;
+      while (j < src.length && JS_IDENT_PART.test(src[j])) j++;
       const word = src.slice(i, j);
       let type: JSSegType = "ident";
 
-      if (KEYWORDS.has(word)) {
+      if (JS_KEYWORDS.has(word)) {
         type = "keyword";
-      } else if (LITERALS.has(word)) {
+      } else if (JS_LITERALS.has(word)) {
         type = "literal";
       } else {
         /* peek для виявлення виклику функції / методу */
@@ -221,50 +177,14 @@ const tokenize = (src: string): JSSeg[] => {
     }
 
     /* punctuation — за замовчуванням 1 символ; склеюємо «довгі» оператори */
-    const two = src.slice(i, i + 2);
     const three = src.slice(i, i + 3);
-    const LONG3 = [
-      "===",
-      "!==",
-      "**=",
-      "...",
-      ">>>",
-      "<<=",
-      ">>=",
-      "&&=",
-      "||=",
-      "??=",
-    ];
-    const LONG2 = [
-      "==",
-      "!=",
-      "<=",
-      ">=",
-      "&&",
-      "||",
-      "??",
-      "=>",
-      "++",
-      "--",
-      "+=",
-      "-=",
-      "*=",
-      "/=",
-      "%=",
-      "**",
-      "<<",
-      ">>",
-      "&=",
-      "|=",
-      "^=",
-      "?.",
-    ];
-    if (LONG3.includes(three)) {
+    if (JS_LONG3_OPS.includes(three)) {
       push("punct", three);
       i += 3;
       continue;
     }
-    if (LONG2.includes(two)) {
+    const two = src.slice(i, i + 2);
+    if (JS_LONG2_OPS.includes(two)) {
       push("punct", two);
       i += 2;
       continue;
@@ -291,22 +211,7 @@ export const JSView: FC<JSProps> = ({ children, className }) => {
   const segments = useMemo(() => tokenize(String(children ?? "")), [children]);
 
   return (
-    <pre
-      className={clsx(className)}
-      style={{
-        fontFamily:
-          'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace',
-        fontSize: 13,
-        lineHeight: 1.55,
-        background: "#1e1e1e",
-        color: JS_VIEW_COLOR.ident,
-        padding: 12,
-        borderRadius: 6,
-        margin: 0,
-        overflow: "auto",
-        whiteSpace: "pre-wrap",
-        wordBreak: "break-word",
-      }}>
+    <pre className={clsx(className)} style={JS_VIEW_STYLE}>
       {renderSegments(segments)}
     </pre>
   );
