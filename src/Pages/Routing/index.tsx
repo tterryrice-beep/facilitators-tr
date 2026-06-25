@@ -399,6 +399,423 @@ const {pages } = parsedRoutes;
           </NavLink>
           можна поглянути мапу даного сайту, створену таким самим чинном.
         </Text>
+
+        {/* ─────────────────── PagesContainer ─────────────────── */}
+        <Text tag="h2" type="subtitle" className="mt-20 mb-8">
+          PagesContainer
+        </Text>
+        <Text className="mb-3 block">
+          <Pre inline>PagesContainer</Pre> — компонент, що рендерить усі
+          сторінки та модальні вікна. Всередині він обгортає{" "}
+          <Pre inline>{"<Routes>"}</Pre> (react-router-dom) та поруч рендерить
+          внутрішній <Pre inline>ModalsContainer</Pre> — лише якщо у URL наразі
+          присутня модалка. Місце розташування{" "}
+          <Pre inline>PagesContainer</Pre> у дереві компонентів визначає, де
+          саме зʼявиться вміст сторінки та модалки.
+        </Text>
+
+        <JSView>{`Layout.tsx
+----------------------------------------
+import { PathProvider, PagesContainer } from "routes";
+import { MyModalWrapper } from "components";
+
+export const Layout = () => (
+  <PathProvider>
+    <Header />
+    <main>
+      <PagesContainer
+        fallback={<Spinner />}
+        ModalWrapper={MyModalWrapper}
+      />
+    </main>
+    <Footer />
+  </PathProvider>
+);`}</JSView>
+
+        <Text className="ml-8 mt-12 mb-6" tag="h3" type="subtitle">
+          fallback
+        </Text>
+        <Text className="mb-3 block">
+          Проп <Pre inline>fallback</Pre> передається у внутрішній{" "}
+          <Pre inline>{"<Suspense>"}</Pre> і відображається під час
+          завантаження лінивих (<Pre inline>React.lazy</Pre>) сторінок та
+          модальних вікон. За замовчуванням — <Pre inline>null</Pre>.
+        </Text>
+
+        <Text className="ml-8 mt-12 mb-6" tag="h3" type="subtitle">
+          ModalWrapper
+        </Text>
+        <Text className="mb-3 block">
+          <Pre inline>ModalWrapper</Pre> — необовʼязковий компонент-плагін для
+          обгортки модального вмісту. Якщо його не передати — модалка
+          рендериться прямо у DOM, без будь-якого контейнера чи анімації. Якщо
+          передати — PathRouter відмалює поточний компонент модалки всередину
+          нього, передаючи такі пропси:
+        </Text>
+        <ObjectView
+          defaultExpanded
+          data={{
+            modalName:
+              "string | undefined — ключ поточної модалки (перший сегмент після /modal/)",
+            isOpen: "boolean — чи відкрита модалка зараз",
+            onClose: "() => void — закриває модалку через роутер (змінює URL)",
+            children:
+              "ReactNode — вміст: компонент модалки з конфігу, вже wrapped у <Suspense>",
+          }}
+        />
+        <Text className="mb-3 block mt-6">
+          PathRouter також зчитує forwarded ref із методом{" "}
+          <Pre inline>handleCloseWithAnimation()</Pre>. Якщо він присутній —
+          замість негайного закриття через URL роутер спочатку викличе цей
+          метод, даючи компоненту час завершити анімацію, і лише потім виконає
+          перехід.
+        </Text>
+        <JSView>{`MyModalWrapper.tsx
+----------------------------------------
+import { forwardRef, useImperativeHandle } from "react";
+import type { ModalWrapperProps, ModalWrapperRef } from "path-router-red";
+
+export const MyModalWrapper = forwardRef<ModalWrapperRef, ModalWrapperProps>(
+  ({ isOpen, onClose, children }, ref) => {
+    useImperativeHandle(ref, () => ({
+      handleCloseWithAnimation: () => {
+        // запускаємо анімацію, потім закриваємо
+        runCloseAnimation().then(onClose);
+      },
+    }));
+
+    return (
+      <div className={isOpen ? "modal open" : "modal"}>
+        <button onClick={onClose}>✕</button>
+        {children}
+      </div>
+    );
+  }
+);`}</JSView>
+
+        {/* ─────────────────── getPath / getModal ─────────────────── */}
+        <Text tag="h2" type="subtitle" className="mt-20 mb-8">
+          getPath та getModal
+        </Text>
+        <Text className="mb-3 block">
+          <Pre inline>getPath</Pre> та <Pre inline>getModal</Pre> — це
+          identity-функції: вони просто повертають аргумент незміненим. Їхня
+          єдина мета — TypeScript-звуження типу. Компілятор перевіряє, що
+          переданий рядок є дійсним маршрутом або ключем модалки у вашому
+          конфігу, й видає помилку, якщо він там відсутній.
+        </Text>
+        <Text className="mb-3 block">
+          Корисні там, де немає доступу до <Pre inline>usePath</Pre> або{" "}
+          <Pre inline>NavLink</Pre> — наприклад, у конфігах меню, масивах даних
+          або утилітарних функціях:
+        </Text>
+        <JSView>{`
+import { getPath, getModal } from "routes";
+
+const menuItems = [
+  { label: "Головна",  path: getPath("/") },
+  { label: "Модулі",   path: getPath("modules") },
+  { label: "Профіль",  path: getPath("profile") }, // ← помилка компіляції, якщо "profile" не існує
+];
+
+// Аналогічно для модалок:
+const onOpen = () => modal.open(getModal("wallet"));
+`}</JSView>
+
+        {/* ─────────────────── NavLink ─────────────────── */}
+        <Text tag="h2" type="subtitle" className="mt-20 mb-8">
+          NavLink
+        </Text>
+        <Text className="mb-3 block">
+          <Pre inline>NavLink</Pre> — роутер-свідомий замінник тегу{" "}
+          <Pre inline>{"<a>"}</Pre>. Рендерить справжній{" "}
+          <Pre inline>href</Pre> (тому правий клік → «Відкрити у новій
+          вкладці», SSR та пошукові боти працюють коректно), але перехоплює
+          основний клік лівою кнопкою та викликає{" "}
+          <Pre inline>page.navigate</Pre> всередині SPA — без перезавантаження
+          сторінки.
+        </Text>
+        <Text className="mb-3 block">
+          Натискання з модифікаторами (Cmd / Ctrl / Shift / Alt) або з
+          атрибутом <Pre inline>target</Pre> відмінним від{" "}
+          <Pre inline>_self</Pre> — пропускаються, надаючи браузеру стандартну
+          поведінку.
+        </Text>
+
+        <Text className="ml-8 mt-12 mb-6" tag="h3" type="subtitle">
+          Пропси
+        </Text>
+        <ObjectView
+          defaultExpanded
+          data={{
+            to: "PathNamesOf<C>? — ціль навігації. Якщо не вказано — поточна сторінка зберігається",
+            modal:
+              "ModalNamesOf<C>? — модалка, яку слід відкрити після переходу",
+            modalBreadCrumbs:
+              "string[]? — додаткові сегменти, що додаються після назви модалки у URL",
+            replace:
+              "boolean? — замінити поточний запис у history замість додавання нового",
+            navigateOptions:
+              "NavigateOptions? — додаткові опції, що прокидаються у react-router navigate",
+            activeClassName:
+              "string? — CSS-клас, що застосовується до <a> коли посилання активне",
+          }}
+        />
+
+        <Text className="ml-8 mt-12 mb-6" tag="h3" type="subtitle">
+          Активний стан
+        </Text>
+        <Text className="mb-3 block">
+          NavLink вважається активним, якщо <Pre inline>page.path</Pre>{" "}
+          збігається з <Pre inline>to</Pre>, а при наявності{" "}
+          <Pre inline>modal</Pre> — ще й <Pre inline>modal.name</Pre> збігається
+          із переданим ключем. Активному елементу виставляються{" "}
+          <Pre inline>aria-current="page"</Pre> та{" "}
+          <Pre inline>data-active</Pre>.
+        </Text>
+
+        <JSView>{`
+import { NavLink } from "routes";
+
+// Перехід на сторінку
+<NavLink to="modules/routing">Routing</NavLink>
+
+// Відкрити модалку без зміни сторінки
+<NavLink modal="wallet">Гаманець</NavLink>
+
+// Перехід на іншу сторінку + одночасно відкрити модалку
+<NavLink to="users" modal="confirm" modalBreadCrumbs={["step-2"]}>
+  Підтвердити
+</NavLink>
+
+// Власний клас для активного стану
+<NavLink to="modules" activeClassName="border-b-2 border-white">
+  Модулі
+</NavLink>
+
+// Заміна запису в history (без кнопки "Назад")
+<NavLink to="onboarding" replace>
+  Почати
+</NavLink>
+`}</JSView>
+
+        {/* ─────────────────── usePath ─────────────────── */}
+        <Text tag="h2" type="subtitle" className="mt-20 mb-8">
+          usePath
+        </Text>
+        <Text className="mb-3 block">
+          <Pre inline>usePath</Pre> — хук, що повертає весь стан роутера,
+          типізований під ваш конфіг. Доступний у будь-якому компоненті, що
+          знаходиться нижче <Pre inline>PathProvider</Pre> у дереві.
+        </Text>
+        <JSView>{`const { page, modal, searchParams } = usePath();`}</JSView>
+
+        <Text className="ml-8 mt-12 mb-6" tag="h3" type="subtitle">
+          page
+        </Text>
+        <ObjectView
+          defaultExpanded
+          data={{
+            "page.path":
+              "string — поточний шлях сторінки (без /modal/… сегменту)",
+            "page.navigate":
+              "(path: PathNamesOf<C>, options?: NavigateOptions) => void — програмна навігація",
+            "page.isHavePrevHistory":
+              "boolean — false, якщо сторінку відкрито напряму (немає попередньої history)",
+          }}
+        />
+        <JSView>{`
+const { page } = usePath();
+
+page.path // "modules/routing"
+
+page.navigate("modules/routing");
+page.navigate("modules/routing", { replace: true });
+
+// кнопку "назад" показуємо лише якщо є попередня сторінка
+{page.isHavePrevHistory && (
+  <button onClick={() => history.back()}>← Назад</button>
+)}
+`}</JSView>
+
+        <Text className="ml-8 mt-12 mb-6" tag="h3" type="subtitle">
+          modal
+        </Text>
+        <ObjectView
+          defaultExpanded
+          data={{
+            "modal.isOpen": "boolean — чи відкрита зараз будь-яка модалка",
+            "modal.name":
+              "string | undefined — ключ відкритої модалки (перший сегмент після /modal/)",
+            "modal.path":
+              'string — повний modal-шлях разом із breadCrumbs, наприклад "wallet/balance"',
+            "modal.breadCrumbs":
+              "string[] — додаткові сегменти після імені модалки",
+            "modal.open":
+              "(name: ModalNamesOf<C>, breadCrumbs?: string[]) => void — відкриває модалку",
+            "modal.close":
+              "() => void — закриває модалку, повертаючи до поточної сторінки",
+          }}
+        />
+        <JSView>{`
+const { modal } = usePath();
+
+modal.open("wallet");
+// URL: /page/modal/wallet
+
+modal.open("wallet", ["balance"]);
+// URL: /page/modal/wallet/balance
+
+modal.isOpen      // true
+modal.name        // "wallet"
+modal.path        // "wallet/balance"
+modal.breadCrumbs // ["balance"]
+
+modal.close();
+// URL: /page
+`}</JSView>
+
+        {/* ─────────────────── Search Params ─────────────────── */}
+        <Text tag="h2" type="subtitle" className="mt-20 mb-8">
+          Search Params
+        </Text>
+        <Text className="mb-3 block">
+          PathRouter надає повноцінне API для роботи з параметрами запиту
+          (query string). Всі значення зберігаються як{" "}
+          <Pre inline>{"Record<string, string[]>"}</Pre> — кожен ключ завжди є
+          масивом, навіть якщо передано лише одне значення. Це спрощує роботу
+          із множинними значеннями одного параметра (наприклад,{" "}
+          <Pre inline>?tag=a&tag=b</Pre>).
+        </Text>
+        <ObjectView
+          defaultExpanded
+          data={{
+            "searchParams.params":
+              "Record<string, string[]> — реактивний знімок поточних параметрів",
+            "searchParams.change":
+              "merge: рядок → встановлює одне значення, масив → додає до наявних. Не зачіпає інші ключі",
+            "searchParams.set":
+              "replace: повністю замінює значення ключа (не зачіпає інші ключі)",
+            "searchParams.delete":
+              "(key: string) => void — видаляє конкретний ключ",
+            "searchParams.clear": "() => void — очищає всі search params",
+          }}
+        />
+        <JSView>{`
+const { searchParams } = usePath();
+
+// Читання
+searchParams.params           // { tab: ["settings"], tag: ["a", "b"] }
+searchParams.params["tab"]?.[0]  // "settings"
+
+// change — merge: нові значення додаються до наявних
+searchParams.change({ tab: "profile" });         // ?tab=profile (перезаписує tab)
+searchParams.change({ tag: ["c", "d"] });        // ?tab=profile&tag=a&tag=b&tag=c&tag=d
+
+// set — replace: повністю замінює лише цей ключ, решта незмінна
+searchParams.set({ tab: "dashboard" });          // ?tab=dashboard&tag=a&tag=b
+
+// Видалення
+searchParams.delete("tag");                      // ?tab=dashboard
+searchParams.clear();                            // ?  (порожньо)
+`}</JSView>
+        <Text className="mb-3 block mt-4">
+          Усі операції зберігають поточний URL (pathname, /modal/… сегмент та
+          hash) — змінюється виключно рядок запиту.
+        </Text>
+
+        {/* ─────────────────── Redirects ─────────────────── */}
+        <Text tag="h2" type="subtitle" className="mt-20 mb-8">
+          Редіректи
+        </Text>
+        <Text className="mb-3 block">
+          Щоб перенаправити користувача на інший шлях, передайте{" "}
+          <Pre inline>{"{ redirect: 'path' }"}"</Pre> у{" "}
+          <Pre inline>setPage</Pre> замість компонента. PathRouter підставить{" "}
+          <Pre inline>{"<Navigate to={redirect} replace />"}</Pre> від
+          react-router-dom. Найчастіше редіректи використовують із символом{" "}
+          <Pre inline>*</Pre> (catch-all), щоб обробити невідомі вкладені
+          маршрути:
+        </Text>
+        <JSView>{`
+const routes = {
+  pages: {
+    "/": setPage(Home),
+
+    "modules": {
+      ...setPage(Modules),
+      routing: setPage(RoutingModule),
+
+      // будь-який невідомий /modules/??? → /modules
+      "*": setPage({ redirect: "modules" }),
+    },
+
+    // глобальний 404
+    "*": setPage(NotFound),
+  },
+};
+`}</JSView>
+
+        {/* ─────────────────── Обмеження ─────────────────── */}
+        <Text tag="h2" type="subtitle" className="mt-20 mb-8">
+          Обмеження
+        </Text>
+        <Text className="mb-3 block">
+          PathRouter добре вирішує свою задачу, але підходить не для кожного
+          сценарію:
+        </Text>
+
+        <Text className="ml-8 mt-8 mb-2" tag="h3" type="subtitle">
+          Тільки BrowserRouter / тільки CSR
+        </Text>
+        <Text className="mb-3 block">
+          <Pre inline>PathProvider</Pre> всередині використовує{" "}
+          <Pre inline>{"<BrowserRouter>"}</Pre> із react-router-dom. Це означає
+          відсутність підтримки HashRouter, а також несумісність із серверним
+          рендерингом (Next.js, Remix тощо), де керування роутером відбувається
+          на рівні фреймворку.
+        </Text>
+
+        <Text className="ml-8 mt-6 mb-2" tag="h3" type="subtitle">
+          Зарезервований сегмент <Pre inline>/modal/</Pre>
+        </Text>
+        <Text className="mb-3 block">
+          PathRouter розрізняє сторінку та модалку, розбиваючи URL по
+          роздільнику <Pre inline>/modal/</Pre>. Жоден маршрут сторінки не
+          повинен містити цей сегмент у своєму шляху, оскільки він буде
+          інтерпретований як відкриття модалки.
+        </Text>
+
+        <Text className="ml-8 mt-6 mb-2" tag="h3" type="subtitle">
+          Модалки — плоский список, одна за раз
+        </Text>
+        <Text className="mb-3 block">
+          Секція <Pre inline>modals</Pre> у конфігу є плоским словником:
+          вкладені модалки та одночасне відображення кількох модалок не
+          підтримуються. Навігація всередині однієї модалки реалізується через{" "}
+          <Pre inline>modalBreadCrumbs</Pre>, а не через запуск нової модалки
+          поверх.
+        </Text>
+
+        <Text className="ml-8 mt-6 mb-2" tag="h3" type="subtitle">
+          Анімація — виключно через ModalWrapper
+        </Text>
+        <Text className="mb-3 block">
+          PathRouter не має вбудованих анімацій: модалки зʼявляються та
+          зникають миттєво. Для анімованих переходів необхідно реалізувати
+          власний <Pre inline>ModalWrapper</Pre> із методом{" "}
+          <Pre inline>handleCloseWithAnimation</Pre>.
+        </Text>
+
+        <Text className="ml-8 mt-6 mb-2" tag="h3" type="subtitle">
+          Глибина вкладеності — до 8 рівнів
+        </Text>
+        <Text className="mb-3 block">
+          TypeScript-рекурсія типів у <Pre inline>PageEntries</Pre> обмежена 8
+          рівнями вкладеності маршрутів. Проекти з глибшим деревом
+          компілюватимуться без помилок, але автодоповнення для глибинних
+          шляхів може спрацьовувати некоректно.
+        </Text>
       </section>
     </div>
   );
