@@ -18,7 +18,26 @@ const Page: FC = ({}) => {
 
   return (
     <div className={css.page}>
-      <Heading title={"PathRouter"} rightBar={<div>github ling be here</div>} />
+      <Heading
+        title={"PathRouter"}
+        rightBar={
+          <div className="flex gap-3 items-center">
+            <a href="https://github.com/tterryrice-beep/Path-Router">
+              <img
+                src="https://cdn.simpleicons.org/github/white"
+                alt="git"
+                className="h-6 w-auto"
+              />
+            </a>
+            <a href="https://www.npmjs.com/package/path-router-red">
+              <img
+                src="https://img.shields.io/npm/v/path-router-red"
+                alt="npm version"
+              />
+            </a>
+          </div>
+        }
+      />
 
       <section id={css.about}>
         <Text tag="h2" type="subtitle" className="mt-20 mb-8">
@@ -409,9 +428,9 @@ const {pages } = parsedRoutes;
           сторінки та модальні вікна. Всередині він обгортає{" "}
           <Pre inline>{"<Routes>"}</Pre> (react-router-dom) та поруч рендерить
           внутрішній <Pre inline>ModalsContainer</Pre> — лише якщо у URL наразі
-          присутня модалка. Місце розташування{" "}
-          <Pre inline>PagesContainer</Pre> у дереві компонентів визначає, де
-          саме зʼявиться вміст сторінки та модалки.
+          присутня модалка. Місце розташування <Pre inline>PagesContainer</Pre>{" "}
+          у дереві компонентів визначає, де саме зʼявиться вміст сторінки та
+          модалки.
         </Text>
 
         <JSView>{`Layout.tsx
@@ -437,9 +456,9 @@ export const Layout = () => (
         </Text>
         <Text className="mb-3 block">
           Проп <Pre inline>fallback</Pre> передається у внутрішній{" "}
-          <Pre inline>{"<Suspense>"}</Pre> і відображається під час
-          завантаження лінивих (<Pre inline>React.lazy</Pre>) сторінок та
-          модальних вікон. За замовчуванням — <Pre inline>null</Pre>.
+          <Pre inline>{"<Suspense>"}</Pre> і відображається під час завантаження
+          лінивих (<Pre inline>React.lazy</Pre>) сторінок та модальних вікон. За
+          замовчуванням — <Pre inline>null</Pre>.
         </Text>
 
         <Text className="ml-8 mt-12 mb-6" tag="h3" type="subtitle">
@@ -528,18 +547,16 @@ const onOpen = () => modal.open(getModal("wallet"));
         </Text>
         <Text className="mb-3 block">
           <Pre inline>NavLink</Pre> — роутер-свідомий замінник тегу{" "}
-          <Pre inline>{"<a>"}</Pre>. Рендерить справжній{" "}
-          <Pre inline>href</Pre> (тому правий клік → «Відкрити у новій
-          вкладці», SSR та пошукові боти працюють коректно), але перехоплює
-          основний клік лівою кнопкою та викликає{" "}
-          <Pre inline>page.navigate</Pre> всередині SPA — без перезавантаження
-          сторінки.
+          <Pre inline>{"<a>"}</Pre>. Рендерить справжній <Pre inline>href</Pre>{" "}
+          (тому правий клік → «Відкрити у новій вкладці», SSR та пошукові боти
+          працюють коректно), але перехоплює основний клік лівою кнопкою та
+          викликає <Pre inline>page.navigate</Pre> всередині SPA — без
+          перезавантаження сторінки.
         </Text>
         <Text className="mb-3 block">
-          Натискання з модифікаторами (Cmd / Ctrl / Shift / Alt) або з
-          атрибутом <Pre inline>target</Pre> відмінним від{" "}
-          <Pre inline>_self</Pre> — пропускаються, надаючи браузеру стандартну
-          поведінку.
+          Натискання з модифікаторами (Cmd / Ctrl / Shift / Alt) або з атрибутом{" "}
+          <Pre inline>target</Pre> відмінним від <Pre inline>_self</Pre> —
+          пропускаються, надаючи браузеру стандартну поведінку.
         </Text>
 
         <Text className="ml-8 mt-12 mb-6" tag="h3" type="subtitle">
@@ -570,8 +587,8 @@ const onOpen = () => modal.open(getModal("wallet"));
           збігається з <Pre inline>to</Pre>, а при наявності{" "}
           <Pre inline>modal</Pre> — ще й <Pre inline>modal.name</Pre> збігається
           із переданим ключем. Активному елементу виставляються{" "}
-          <Pre inline>aria-current="page"</Pre> та{" "}
-          <Pre inline>data-active</Pre>.
+          <Pre inline>aria-current="page"</Pre> та <Pre inline>data-active</Pre>
+          .
         </Text>
 
         <JSView>{`
@@ -680,11 +697,11 @@ modal.close();
           Search Params
         </Text>
         <Text className="mb-3 block">
-          PathRouter надає повноцінне API для роботи з параметрами запиту
-          (query string). Всі значення зберігаються як{" "}
+          PathRouter надає повноцінне API для роботи з параметрами запиту (query
+          string). Всі значення зберігаються як{" "}
           <Pre inline>{"Record<string, string[]>"}</Pre> — кожен ключ завжди є
-          масивом, навіть якщо передано лише одне значення. Це спрощує роботу
-          із множинними значеннями одного параметра (наприклад,{" "}
+          масивом, навіть якщо передано лише одне значення. Це спрощує роботу із
+          множинними значеннями одного параметра (наприклад,{" "}
           <Pre inline>?tag=a&tag=b</Pre>).
         </Text>
         <ObjectView
@@ -801,9 +818,9 @@ const routes = {
           Анімація — виключно через ModalWrapper
         </Text>
         <Text className="mb-3 block">
-          PathRouter не має вбудованих анімацій: модалки зʼявляються та
-          зникають миттєво. Для анімованих переходів необхідно реалізувати
-          власний <Pre inline>ModalWrapper</Pre> із методом{" "}
+          PathRouter не має вбудованих анімацій: модалки зʼявляються та зникають
+          миттєво. Для анімованих переходів необхідно реалізувати власний{" "}
+          <Pre inline>ModalWrapper</Pre> із методом{" "}
           <Pre inline>handleCloseWithAnimation</Pre>.
         </Text>
 
@@ -813,8 +830,8 @@ const routes = {
         <Text className="mb-3 block">
           TypeScript-рекурсія типів у <Pre inline>PageEntries</Pre> обмежена 8
           рівнями вкладеності маршрутів. Проекти з глибшим деревом
-          компілюватимуться без помилок, але автодоповнення для глибинних
-          шляхів може спрацьовувати некоректно.
+          компілюватимуться без помилок, але автодоповнення для глибинних шляхів
+          може спрацьовувати некоректно.
         </Text>
       </section>
     </div>
