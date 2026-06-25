@@ -106,7 +106,7 @@ export type PageEntries<
   ? never
   :
       | (T extends { data: infer D }
-          ? { pathName: P; data: D & PageData<{}> }
+          ? { pathName: P; data: Partial<D> & PageData<{}> }
           : never)
       | (T extends object
           ? {

@@ -1,5 +1,5 @@
 import { route } from "@/config";
-import { createPathRouter } from "@/modules";
+import { createPathRouter } from "@/modules/PathRouter";
 
 export const {
   NavLink,

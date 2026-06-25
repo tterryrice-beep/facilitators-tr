@@ -1,5 +1,4 @@
 import React, { type FC } from "react";
-import { createPathRouter, setPage, setModal } from "path-router-red";
 import { useTranslate } from "@/providers/LocaleProvider/hook";
 
 import { ObjectView } from "@@/ObjectView";
@@ -12,8 +11,6 @@ import { Pre } from "@@/Pre";
 import { JSView } from "@@/JSView";
 import { JS_VIEW_COLOR } from "@@/JSView/config";
 import { NavLink, usePath } from "@/providers/Router";
-
-// const { modals, pages } = parseRouteConfig(route);
 
 const Page: FC = ({}) => {
   const { getText, changeLanguage } = useTranslate();
@@ -389,6 +386,7 @@ const {pages } = parsedRoutes;
             ],
           }}
         />
+        <br />
 
         <Text className="mb-3 block">
           Це дозволяє з легкістю швидко міняти шляхи, додавати нові, та
@@ -401,80 +399,9 @@ const {pages } = parsedRoutes;
           </NavLink>
           можна поглянути мапу даного сайту, створену таким самим чинном.
         </Text>
-
-        <Text className="ml-8 mt-12 mb-6" tag="h3" type="subtitle">
-          Деструктуризація та кастомні значення
-        </Text>
       </section>
     </div>
   );
 };
 
 export default Page;
-
-const example = `routes.ts
-----------------------------------------
-import { createPathRouter, setPage, setModal } from "path-router-red";
-import { Home, Modules, RoutingModule, LocaleModule, NotFound } from "pages";
-
-const routes = createPathRouter({
-  pages: {
-      "/": setPage({ component: Home, title: "Home", icon: "/home.png" }),
-
-      "modules": {
-          ...setPage(Modules),
-          routing: setPage(RoutingModule),
-          locale: setPage(LocaleModule),
-          "*": setPage({redirect: "modules"}),
-      },
-
-      "*": setPage({ component: NotFound }),
-  },
-  modals: {
-    wallet: setModal(WalletModal),
-    preferences: setModal({component: PreferencesModal, icon: "/preferences.png"}),
-  },
-});
-
-
-export const {
-  NavLink,
-  PathProvider,
-  PagesContainer,
-  getModal,
-  getPath,
-  usePath,
-  config,
-} = createPathRouter(routes);
-
-Layout.tsx
-----------------------------------------
-import { PathProvider, PagesContainer } from "routes";
-
-export const Layout = () => (
-  <PathProvider>
-    <PagesContainer />
-  </PathProvider>
-);
-`;
-
-// <Text className="mb-3 block">
-//   <Pre inline>setPage</Pre> може приймати не лише безпосередньо
-//   компонент сторінки, але й обʼєкт з додатковими, кастомними
-//   параметрами, котрі <Pre inline>parseRouteConfig</Pre> виведе у зручному для
-//   роботи форматі:
-// </Text>
-
-// <ObjectView
-//   defaultExpanded
-//   data={{
-//     pages: [
-//       {
-//         pathName: "/",
-//         data: {
-//           component: "<><Home /></>",
-//         },
-//       },
-//     ],
-//   }}
-// />
