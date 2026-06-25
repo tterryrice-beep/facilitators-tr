@@ -1,7 +1,20 @@
 import { useState, type FC } from "react";
 import clsx from "clsx";
 
+import { JSXView } from "@@/JSXView";
+
 import type { ObjectViewProps } from "./type";
+
+/**
+ * Якщо рядок виглядає як `<>…</>` (з можливими пробілами/переносами навколо),
+ * повертає вміст між фрагментами. Інакше — `null`.
+ *
+ * Використовується, щоб у `ObjectView` рендерити такі рядки через `JSXView`.
+ */
+const matchJsxFragment = (s: string): string | null => {
+  const m = /^\s*<>([\s\S]*)<\/>\s*$/.exec(s);
+  return m ? m[1] : null;
+};
 
 /* ─────────────────────────── helpers ─────────────────────────── */
 
@@ -220,6 +233,25 @@ const Node: FC<NodeProps> = ({
         )}
       </div>
     );
+  }
+
+  /* Рядок-JSX-фрагмент: "<>…</>" → рендеримо як JSX через JSXView, без обгорток. */
+  if (typeof value === "string") {
+    const jsx = matchJsxFragment(value);
+    if (jsx !== null) {
+      return (
+        <div>
+          <div style={rowStyle}>
+            <Chevron open={false} visible={false} />
+            <KeyLabel name={name} />
+            <span style={{ color: COLOR.muted }}>{"<jsx/>"}</span>
+          </div>
+          <div style={childPad}>
+            <JSXView>{jsx}</JSXView>
+          </div>
+        </div>
+      );
+    }
   }
 
   /* Примітиви + Date / RegExp */

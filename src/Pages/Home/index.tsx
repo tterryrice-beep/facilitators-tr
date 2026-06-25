@@ -3,11 +3,11 @@ import React, { type FC, useState } from "react";
 import { route } from "@/config";
 import { useTranslate } from "@/providers/LocaleProvider/hook";
 import { NavLink } from "@/providers/Router";
-import { createRoute } from "@/modules/PathRouter/utils";
+import { parseRouteConfig } from "@/modules/PathRouter/utils";
 
 import css from "./style.module.scss";
 
-const { modals, pages } = createRoute(route);
+const { modals, pages } = parseRouteConfig(route);
 
 const Page: FC = ({}) => {
   const { getText, changeLanguage } = useTranslate();
@@ -27,7 +27,6 @@ const Page: FC = ({}) => {
                 <li className="w-full list-disc">
                   <NavLink
                     className="w-full flex justify-between gap-12"
-                    //@ts-ignore
                     to={pathName}>
                     <p>{data.title}</p>
                     <pre>{pathName}</pre>

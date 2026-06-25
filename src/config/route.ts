@@ -5,23 +5,25 @@ import { lazy } from "react";
 const Default = lazy(() => import("@/Pages/_Empty"));
 const Home = lazy(() => import("@/Pages/Home"));
 const Routing = lazy(() => import("@/Pages/Routing"));
+const SiteMap = lazy(() => import("@/Pages/SiteMap"));
 
 export const route = {
   pages: {
-    test2: setPage(Routing),
     "/": setPage({ component: Home, title: "Home" }),
+    map: {
+      ...setPage({ component: SiteMap, title: "Site Map" }),
+    },
     modules: {
       ...setPage({ component: Default, title: "Modules" }),
 
       routing: setPage({ component: Routing, title: "Routing" }),
 
-      "*": setPage({ component: Routing, title: "Modules Wrong" }),
+      "*": setPage({ component: Routing, title: "Modules 404" }),
     },
     test: setPage({ component: Default, title: "Test Page" }),
-    "*": setPage({ component: Home, title: "Wrong Pages Just show Home" }),
+    "*": setPage({ component: Home, title: "404" }),
   },
   modals: {
-    test: setModal(Modal),
-    test_2: setModal({ component: Modal, title: "Test Modal 2" }),
+    test: setModal({ component: Modal, title: "Test Modal" }),
   },
 } as const;

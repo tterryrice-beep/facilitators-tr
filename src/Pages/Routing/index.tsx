@@ -11,9 +11,9 @@ import css from "./style.module.scss";
 import { Pre } from "@@/Pre";
 import { JSView } from "@@/JSView";
 import { JS_VIEW_COLOR } from "@@/JSView/config";
-import { usePath } from "@/providers/Router";
+import { NavLink, usePath } from "@/providers/Router";
 
-// const { modals, pages } = createRoute(route);
+// const { modals, pages } = parseRouteConfig(route);
 
 const Page: FC = ({}) => {
   const { getText, changeLanguage } = useTranslate();
@@ -279,7 +279,7 @@ export const Page = () => {
 `}</JSView>
 
         <Text tag="h2" type="subtitle" className="mt-20 mb-8">
-          Router Tree
+          <b>Router Tree</b>
         </Text>
 
         <Text className="mb-3 block">
@@ -323,15 +323,21 @@ const routes = {
 `}</JSView>
 
         <Text className="mb-3 block">
-          Системна функція <Pre inline>createRoute</Pre> виводить повний шлях та
-          дані сторінки для подальшого використання. Її можна використовувати,
-          скажімо для створення мапи сайту, чи у debug цілях.
+          Системна функція <Pre inline>parseRouteConfig</Pre> виводить
+          розпарсений обʼєкт, із повним шляхом та даними кожної сторінки. Ці
+          дані можна використовувати, скажімо для створення мапи сайту, чи у
+          debug цілях.
         </Text>
+
+        <JSView>{`
+import { parseRouteConfig } from "path-router-red";
+const parsedRoutes = parseRouteConfig(routes);
+const {pages } = parsedRoutes;
+`}</JSView>
+
         <Text className="mb-3 block">
-          <Pre inline>setPage</Pre> може приймати не лише безпосередньо
-          компонент сторінки, але й обʼєкт з додатковими, кастомними
-          параметрами, котрі <Pre inline>createRoute</Pre> виведе у зручному для
-          роботи форматі:
+          Тепер можна поглянути, які шляхи PathRouter створює на основі нашого
+          конфігураційного обʼєкта:
         </Text>
 
         <ObjectView
@@ -341,19 +347,64 @@ const routes = {
               {
                 pathName: "/",
                 data: {
-                  component: "<Home />",
+                  component: "<><Home /></>",
+                },
+              },
+              {
+                pathName: "modules",
+                data: {
+                  component: "<><Modules /></>",
+                },
+              },
+              {
+                pathName: "modules/routing",
+                data: {
+                  component: "<><RoutingModule /></>",
+                },
+              },
+              {
+                pathName: "modules/locale",
+                data: {
+                  component: "<><LocaleModule /></>",
+                },
+              },
+              {
+                pathName: "modules/locale/example",
+                data: {
+                  component: "<><LocaleExample /></>",
+                },
+              },
+              {
+                pathName: "modules/*",
+                data: {
+                  redirect: "modules",
+                },
+              },
+              {
+                pathName: "*",
+                data: {
+                  component: "<><NotFound /></>",
                 },
               },
             ],
           }}
         />
 
-        <JSView>{`
-{
-  pathName: string;
-  data: PageData;
-}[]
-        `}</JSView>
+        <Text className="mb-3 block">
+          Це дозволяє з легкістю швидко міняти шляхи, додавати нові, та
+          розширювати навігаційне дерево, без потреби у ручному переписуванні
+          шляхів.
+          <br />
+          Скажімо
+          <NavLink to="map">
+            <Pre> ось тут </Pre>
+          </NavLink>
+          можна поглянути мапу даного сайту, створену таким самим чинном.
+        </Text>
+
+        <Text className="ml-8 mt-12 mb-6" tag="h3" type="subtitle">
+          Деструктуризація та кастомні значення
+        </Text>
       </section>
     </div>
   );
@@ -406,3 +457,24 @@ export const Layout = () => (
   </PathProvider>
 );
 `;
+
+// <Text className="mb-3 block">
+//   <Pre inline>setPage</Pre> може приймати не лише безпосередньо
+//   компонент сторінки, але й обʼєкт з додатковими, кастомними
+//   параметрами, котрі <Pre inline>parseRouteConfig</Pre> виведе у зручному для
+//   роботи форматі:
+// </Text>
+
+// <ObjectView
+//   defaultExpanded
+//   data={{
+//     pages: [
+//       {
+//         pathName: "/",
+//         data: {
+//           component: "<><Home /></>",
+//         },
+//       },
+//     ],
+//   }}
+// />
