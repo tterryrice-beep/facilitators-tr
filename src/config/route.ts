@@ -5,6 +5,7 @@ import { lazy } from "react";
 const Default = lazy(() => import("@/Pages/_Empty"));
 const Home = lazy(() => import("@/Pages/Home"));
 const Routing = lazy(() => import("@/Pages/Routing"));
+const StateDispatcher = lazy(() => import("@/Pages/StateDispatcher"));
 const SiteMap = lazy(() => import("@/Pages/SiteMap"));
 
 export const route = {
@@ -17,6 +18,10 @@ export const route = {
       ...setPage({ component: Default, title: "Modules" }),
 
       routing: setPage({ component: Routing, title: "Routing" }),
+      dispather: setPage({
+        component: StateDispatcher,
+        title: "StateDispatcher",
+      }),
 
       "*": setPage({ component: Routing, title: "Modules 404" }),
     },

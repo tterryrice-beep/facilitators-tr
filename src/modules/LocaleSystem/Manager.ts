@@ -49,7 +49,7 @@ export class LocaleManager<
   private getTranslatedValueByKey = (key: string, translation: LangConfig) => {
     let current: any = translation;
 
-    for (const part of key.split(".")) {
+    for (const part of key.split("/")) {
       current = current?.[part];
 
       if (current === undefined) {
