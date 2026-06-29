@@ -44,5 +44,6 @@ export const useTranslate = () => {
     language: currentLanguage,
     loading: isLoading,
     changeLanguage: manager.changeLanguage,
+    getLanguagesList: () => manager.getLanguagesList(),
   } as const;
 };

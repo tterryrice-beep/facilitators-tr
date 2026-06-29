@@ -175,4 +175,6 @@ export class LocaleManager<
   public destroy = () => {
     this.destroyDispatcher();
   };
+
+  public getLanguagesList = (): LangName[] => this.systemState.languageList;
 }
