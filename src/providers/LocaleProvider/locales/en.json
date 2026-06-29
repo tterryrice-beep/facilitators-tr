@@ -1,3 +1,71 @@
 {
-  "test": "Test"
+  "StateDispatcher": {
+    "reason": "Why StateDispatcher Exists",
+    "discribe": "StateDispatcher is an abstract base class for building strongly typed state managers outside of React. It solves one problem: providing subclasses with a convenient and strictly typed API for declaring state, mutating it through setters, and subscribing via {EventEmitter}.",
+    "discribe_2": "Unlike Redux or Zustand, StateDispatcher is not a global store. It is a foundation for creating isolated classes with their own logic—a localization manager, authentication manager, form manager, and so on. Each class is a self-contained object where all state mutations happen internally, while only a strongly typed API is exposed externally.",
+    "install": "Installation",
+    "concept": {
+      "title": "Concept",
+      "desc": "StateDispatcher is parameterized with two generics:",
+      "state": "the state shape — the complete object stored inside the manager",
+      "events": "Record<string, any> — a dictionary of events: key → value type received by subscribers",
+      "abt": "{StateValues} and {Events} do not have to match. The state may contain more fields than are exposed through Events, or a setter may transform the input value and emit a completely different type. See the {Setters} section for details.",
+      "ex_bornYear": "computed field, has no dedicated setter",
+      "ex_name": "simple replacement",
+      "ex_age": "transformed value"
+    },
+    "initial": {
+      "title": "Initialization",
+      "desc": "To create your own manager, simply extend {StateDispatcher} and pass the initial state and setters object to {super}:",
+      "arguments": {
+        "title": "Constructor Arguments",
+        "initialState": "StateValues — the initial state; stored and mutated in place",
+        "setters": "SetterMap<State, Events> — an object where each Events key has a corresponding mutator function",
+        "maxListeners": "number? — maximum number of listeners per event (defaults to EventEmitter's standard limit of 10)"
+      },
+      "setters": {
+        "title": "setters",
+        "desc": "A public setter {setter} is automatically generated for every key in {Events}. When called, it passes {state} and {value} to the corresponding mutator function, updates the state, and then emits an event to all subscribers.",
+        "desc_2": "If the mutator function returns a value, subscribers receive that value. If nothing is returned ({undefined}), subscribers receive the original {value}. This allows the emitted data to have a different shape from the stored state:",
+        "no_return": "no return → subscribers receive value (string)",
+        "with_return": "returns a value → subscribers receive an object",
+        "using": {
+          "title": "Usage:",
+          "name": "subscribers receive {return}",
+          "age": "subscribers receive {return}"
+        }
+      },
+      "listen": {
+        "desc": "{ex} subscribes to a specific event and returns an unsubscribe function. The callback receives the value emitted by the corresponding setter (including any transformation)."
+      },
+      "getState": {
+        "desc": "{getState} returns {state} — a snapshot of the current state. {readonly} guarantees that nobody outside the manager can mutate the state directly; it can only be modified through setters.",
+        "desc_2": "Inside a subclass, {getState} is convenient for reading the current state between operations."
+      },
+      "destroyDispatcher": {
+        "desc": "{destroyDispatcher} is a protected method that removes all listeners and marks the manager as destroyed using the {isDestroyed} flag. To expose it publicly, the subclass must explicitly decide whether and how to do so.",
+        "react": "A typical pattern in a React component:"
+      },
+      "createHook": {
+        "desc": "{createHook} is a helper utility for React that eliminates repetitive subscription and cleanup boilerplate. It accepts a manager and returns a hook factory that makes subscribing to individual state fields convenient.",
+        "in_component": "Inside a component",
+        "key": "event key from the Events map",
+        "selector": "selector: specifies which field to read and return from StateValues",
+        "arg_1": "keyof Events — the event key the hook subscribes to",
+        "arg_2": "(state: StateValues) => Events[K] — extracts the current value from the state during initialization and after every emit",
+        "tuple_key": "returns a [value, setter] tuple",
+        "tuple_value": "reactive value and manager.setters[key]",
+        "unmount": "The subscription is automatically removed when the component unmounts."
+      },
+      "limits": {
+        "title": "Limitations",
+        "abstract": "Abstract class — cannot be instantiated directly",
+        "disc": "StateDispatcher is {abstract}. It is not intended to be used directly and always requires a subclass. This is a deliberate design decision: the subclass defines the domain, public API, and lifecycle.",
+        "mutate": "Mutable state",
+        "mutate_desc": "State is mutated in place inside setter functions. There is no immutability, diffing, or structural sharing. These features are intentionally excluded from StateDispatcher because they do not align with its philosophy.",
+        "middleware": "No middleware or history",
+        "middleware_desc": "There is no built-in time travel, devtools, middleware chains, or transactions. Each setter is a simple atomic operation."
+      }
+    }
+  }
 }

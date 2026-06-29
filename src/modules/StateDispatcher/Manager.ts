@@ -12,6 +12,9 @@ export abstract class StateDispatcher<
   protected state: StateValues;
   protected isDestroyed = false;
 
+  private activeSubscriptionCount = 0;
+  private readonly minListeners: number;
+
   public readonly setters: {
     [K in keyof Events]: (value: Events[K]) => void;
   };
@@ -37,18 +40,28 @@ export abstract class StateDispatcher<
       [K in keyof Events]: (value: Events[K]) => void;
     };
 
-    if (config) {
-      const { maxListeners } = config;
-      if (maxListeners) this.emitter.setMaxListeners(maxListeners);
-    }
+    this.minListeners = config?.maxListeners ?? Object.keys(setters).length;
+    this.emitter.setMaxListeners(this.minListeners);
+  }
+
+  private updateMaxListeners() {
+    this.emitter.setMaxListeners(
+      Math.max(this.activeSubscriptionCount, this.minListeners),
+    );
   }
 
   public listen = <K extends keyof Events>(
     key: K,
     cb: (value: Events[K]) => void,
   ): (() => void) => {
+    this.activeSubscriptionCount++;
+    this.updateMaxListeners();
     this.emitter.addListener(key as string, cb);
-    return () => this.emitter.removeListener(key as string, cb);
+    return () => {
+      this.emitter.removeListener(key as string, cb);
+      this.activeSubscriptionCount--;
+      this.updateMaxListeners();
+    };
   };
 
   public getState = (): Readonly<StateValues> => this.state;

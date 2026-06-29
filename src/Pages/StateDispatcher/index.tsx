@@ -327,25 +327,6 @@ const [count, setCount] = useCounter(
         <Text className="mb-3 block">
           {getText("StateDispatcher/initial/limits/middleware_desc")}
         </Text>
-
-        <Text className="ml-8 mt-6 mb-2" tag="h3" type="subtitle">
-          Ліміт слухачів EventEmitter
-        </Text>
-        <Text className="mb-3 block text-red-500">
-          Стандартний ліміт Node.js <Pre inline>EventEmitter</Pre> — 10 слухачів
-          на подію. При перевищенні зʼявиться попередження у консолі. Підняти
-          ліміт можна через{" "}
-          <Pre inline>{"super(initial, setters, { maxListeners: 50 })"}</Pre>.
-        </Text>
-
-        <Text className="ml-8 mt-6 mb-2" tag="h3" type="subtitle">
-          Не для серверного рендерингу
-        </Text>
-        <Text className="mb-3 block">
-          StateDispatcher використовує <Pre inline>EventEmitter</Pre> з Node.js
-          та, при потребі, <Pre inline>localStorage</Pre> у підкласах. Ці API
-          недоступні у повноцінному SSR-середовищі.
-        </Text>
       </div>
     </section>
   );
