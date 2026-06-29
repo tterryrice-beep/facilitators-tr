@@ -3,18 +3,16 @@ import { useTranslate } from "@/providers/LocaleProvider/hook";
 
 import { ObjectView } from "@@/ObjectView";
 import { Heading } from "@@/Heading";
-import { JSXView } from "@@/JSXView";
 import { Text } from "@@/Text";
 
 import css from "./style.module.scss";
 import { Pre } from "@@/Pre";
 import { JSView } from "@@/JSView";
 import { JS_VIEW_COLOR } from "@@/JSView/config";
-import { NavLink, usePath } from "@/providers/Router";
+import { NavLink } from "@/providers/Router";
 
 const Page: FC = ({}) => {
   const { getText, changeLanguage } = useTranslate();
-  const { modal, page } = usePath();
 
   return (
     <div className={css.page}>
@@ -22,14 +20,18 @@ const Page: FC = ({}) => {
         title={"PathRouter"}
         rightBar={
           <div className="flex gap-3 items-center">
-            <a href="https://github.com/tterryrice-beep/Path-Router">
+            <a
+              href="https://github.com/tterryrice-beep/Path-Router"
+              target="_blank">
               <img
                 src="https://cdn.simpleicons.org/github/white"
                 alt="git"
                 className="h-6 w-auto"
               />
             </a>
-            <a href="https://www.npmjs.com/package/path-router-red">
+            <a
+              href="https://www.npmjs.com/package/path-router-red"
+              target="_blank">
               <img
                 src="https://img.shields.io/npm/v/path-router-red"
                 alt="npm version"

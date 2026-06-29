@@ -18,14 +18,18 @@ const Page: FC = ({}) => {
         title={"StateDispatcher"}
         rightBar={
           <div className="flex gap-3 items-center">
-            <a href="https://github.com/tterryrice-beep/StateDispatcher">
+            <a
+              href="https://github.com/tterryrice-beep/StateDispatcher"
+              target="_blank">
               <img
                 src="https://cdn.simpleicons.org/github/white"
                 alt="git"
                 className="h-6 w-auto"
               />
             </a>
-            <a href="https://www.npmjs.com/package/state-dispatcher-red">
+            <a
+              href="https://www.npmjs.com/package/state-dispatcher-red"
+              target="_blank">
               <img
                 src="https://img.shields.io/npm/v/state-dispatcher-red"
                 alt="npm version"
@@ -53,7 +57,9 @@ const Page: FC = ({}) => {
           {getText("StateDispatcher/install")}
         </Text>
         <Pre>
-          <a href="https://www.npmjs.com/package/state-dispatcher-red">
+          <a
+            href="https://www.npmjs.com/package/state-dispatcher-red"
+            target="_blank">
             npm i state-dispatcher-red
           </a>
         </Pre>
