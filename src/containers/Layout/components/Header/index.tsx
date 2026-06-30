@@ -1,8 +1,9 @@
+import { type FC } from "react";
+
 import { useTranslate } from "@/providers/LocaleProvider/hook";
 import { LogoTR } from "@@/LogoTR";
 import { Select } from "@@/Select";
 import { Text } from "@@/Text";
-import { useTransition, type FC } from "react";
 
 export const Header: FC = () => {
   const { language, changeLanguage, getLanguagesList } = useTranslate();

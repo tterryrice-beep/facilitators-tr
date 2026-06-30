@@ -12,7 +12,7 @@ import { JS_VIEW_COLOR } from "@@/JSView/config";
 import { NavLink } from "@/providers/Router";
 
 const Page: FC = ({}) => {
-  const { getText, changeLanguage } = useTranslate();
+  const { getText } = useTranslate();
 
   return (
     <div className={css.page}>
@@ -43,52 +43,31 @@ const Page: FC = ({}) => {
 
       <section id={css.about}>
         <Text tag="h2" type="subtitle" className="mt-20 mb-8">
-          Для чого взагалі існує PathRouter
+          {getText("PathRouter/reason")}
         </Text>
         <Text className="ml-8 mt-12 mb-6" tag="h3" type="subtitle">
-          <b className="font-serif">I</b>. Типізація
+          <b className="font-serif">I</b>. {getText("PathRouter/typo/title")}
         </Text>
-        <Text>
-          В багатьох проектах над якими я працював підозріло часто траплялися
-          проблеми із типізацією маршрутів.
-        </Text>
+        <Text>{getText("PathRouter/typo/desc")}</Text>
         <br />
-        <Text>
-          Переважно, типізації взагалі не було. Доводиолся самостійно шукати
-          лінк на потрібну сторінку. Крім того, трапляються й одруки, через що
-          сторінка стає або недоступною, або прихованою.
-        </Text>
+        <Text>{getText("PathRouter/typo/desc_2")}</Text>
         <br />
         <br />
-        <Text>
-          PathRouter використовує сувору типізацію маршрутів, що додає
-          зручності, завдяки автодоповненню, та безпеку, оскільки непомічений чи
-          проігнорований хибно вказаний шлях буде виявлено ще під час
-          компіляції.
-        </Text>
+        <Text>{getText("PathRouter/typo/desc_3")}</Text>
         <Text className="ml-8 mt-12 mb-6" tag="h3" type="subtitle">
-          <b className="font-serif">II</b>. Модальні Вікна
+          <b className="font-serif">II</b>. {getText("PathRouter/modals/title")}
         </Text>
         <Text>
-          Часто, в React-застосунках модальні вікна не є частиною навігації, а
-          натомість їх поява привʼязується до <Pre inline>state</Pre>. В такому
-          випадку стан модального вікна не зберігається безпосередньо у URL.
-          Таким чином, юзер втрачає можливість зберегти модалку в закладках, або
-          очікувати повторного відкрити після онолвення сторінки.
+          {getText("PathRouter/modals/desc", {
+            state: <Pre inline>state</Pre>,
+          })}
         </Text>
         <br />
         <br />
-        <Text>
-          Як банальний приклад: Гаманець у модалці. Його відкриття може бути
-          абсолютно очевидним з точки зору UI але завжди буде користувач для
-          якого принцципово відкривати сайт з інформації про свій баланс.
-        </Text>
+        <Text>{getText("PathRouter/modals/desc_2")}</Text>
         <br />
         <br />
-        <Text>
-          PathRouter представляє модальне вікно як частину URL, при цьому
-          візуально зручно передає усю інформацію:
-        </Text>
+        <Text>{getText("PathRouter/modals/desc_3")}</Text>
         <Pre>
           {`
 https://example.com/path/to/page/modal/wallet/balance
@@ -96,18 +75,14 @@ https://example.com/path/to/page/modal/wallet/balance
         </Pre>
 
         <Text tag="h2" type="subtitle" className="mt-20 mb-8">
-          Можливості
+          {getText("PathRouter/features/title")}
         </Text>
 
         <Text className="ml-8 mt-12 mb-6" tag="h3" type="subtitle">
-          <b className="font-serif">I</b>. Зручна та декларативна робота з
-          маршрутами
+          <b className="font-serif">I</b>.{getText("PathRouter/features/desc")}
         </Text>
 
-        <Text>
-          Все, що потрібно прописати, це маршрутні ключі в обʼєкті конфігурації.
-          Замість типового повтору одних і тих же ключів:
-        </Text>
+        <Text>{getText("PathRouter/features/desc_2")}</Text>
         <br />
         <ObjectView
           defaultExpanded
@@ -130,7 +105,7 @@ https://example.com/path/to/page/modal/wallet/balance
         />
         <br />
         <br />
-        <Text>PathRouter спрощує це до зручної деревовидної структури:</Text>
+        <Text>{getText("PathRouter/features/desc_3")}</Text>
         <br />
         <ObjectView
           defaultExpanded
@@ -146,24 +121,15 @@ https://example.com/path/to/page/modal/wallet/balance
           }}
         />
         <Text className="ml-8 mt-12 mb-6" tag="h3" type="subtitle">
-          <b className="font-serif">II</b>. Зручна Типізована Навігація
+          <b className="font-serif">II</b>.
+          {" " + getText("PathRouter/typo_nav/title")}
         </Text>
-        <Text>
-          PathRouter вирішує головну, особисто мою, проблему із різними
-          системами навігації: Відсутність ts-підказок за типової реалізації
-          роутингу.
-        </Text>
+        <Text>{getText("PathRouter/typo_nav/desc")}</Text>
         <br />
-        <Text>
-          Не рідко доводиться лізти у файл чи компонент для самостійних пошуків
-          потрібного посилання
-        </Text>
+        <Text>{getText("PathRouter/typo_nav/desc_2")}</Text>
         <br />
         <br />
-        <Text>
-          Завдяки автозаповненню, PathRouter завжди підказує всі доступні шляхи
-          які наявні в проекті
-        </Text>
+        <Text>{getText("PathRouter/typo_nav/desc_3")}</Text>
         <br />
         <Text type="small">
           <div className="ml-8 mt-2 mb-2">
@@ -199,12 +165,11 @@ https://example.com/path/to/page/modal/wallet/balance
           </div>
         </Text>
         <Text className="ml-8 mt-12 mb-6" tag="h3" type="subtitle">
-          <b className="font-serif">III</b>. URL-орієнтовані модальні вікна
+          <b className="font-serif">III</b>.
+          {" " + getText("PathRouter/url_modal/title")}
         </Text>
         <Text>
-          PathRouter надає єдине джерело істини для підтвердження наявності
-          модального вікна та його параметрів: URL адреса. Й надає для роботи з
-          ними простий та зрозумілий API:
+          {getText("PathRouter/url_modal/desc")}
           <br />
           <JSView>{`
 const {modal} = usePath()
@@ -214,11 +179,13 @@ modal.close();
         </Text>
         <Text tag="h2" type="subtitle" className="mt-20 mb-8">
           Швидкий Старт
+          {getText("PathRouter/quick_start/title")}
         </Text>
         <Text className="ml-8 mt-12 mb-6" tag="h3" type="subtitle">
-          <b className="font-serif">I</b>. Встановлення
+          <b className="font-serif">I</b>.
+          {getText("PathRouter/quick_start/install/title")}
         </Text>
-        <Text>Для використання PathRouter, слід встановити його із npm:</Text>
+        <Text>{getText("PathRouter/quick_start/install/desc")}</Text>
         <br />
         <br />
         <Pre>
@@ -228,19 +195,19 @@ modal.close();
         </Pre>
 
         <Text className="ml-8 mt-12 mb-6" tag="h3" type="subtitle">
-          <b className="font-serif">II</b>. Ініціалізація
+          <b className="font-serif">II</b>.
+          {getText("PathRouter/quick_start/init/title")}
         </Text>
         <Text>
-          В цілях безпеки та типізації, PathRouter створюється через фабрику, у
-          яку передається <Pre inline>route-config</Pre>
+          {getText("PathRouter/quick_start/init/desc", {
+            "route-config": <Pre inline>route-config</Pre>,
+          })}
         </Text>
         <br />
         <Text>
-          Конфігація розбивається на дві секції: pages та modals. Модальні вікна
-          лишаються однорівневими, в той час як сторінки можна загортати одна у
-          одну.
+          {getText("PathRouter/quick_start/init/desc_2")}
           <br />
-          Простий приклад для створення PathRouter:
+          {getText("PathRouter/quick_start/init/desc_3")}
         </Text>
         <JSView>{`routes.ts
 ----------------------------------------
@@ -297,23 +264,20 @@ export const Page = () => {
 `}</JSView>
 
         <Text tag="h2" type="subtitle" className="mt-20 mb-8">
-          <b>Router Tree</b>
+          <b>{getText("PathRouter/router-tree/title")}</b>
         </Text>
 
         <Text className="mb-3 block">
-          Головна особливість PathRouter полягає у багаторівневій вкладеності
-          сторінок
+          {getText("PathRouter/router-tree/desc")}
         </Text>
         <Text className="mb-3 block">
-          Для формування цього ланцюжка використовується функція{" "}
-          <Pre inline>setPage</Pre>. Саме вона формує та налаштовує конфіг для
-          подальшої роботи із роутером.
+          {getText("PathRouter/router-tree/desc_2", {
+            setPage: <Pre inline>setPage</Pre>,
+          })}
         </Text>
         <Text className="mb-3 block">
-          Все, що нам залишається, це просто передавати її у обʼєкт на
-          потрібному рівні вкладеності:
+          {getText("PathRouter/router-tree/desc_3")}
         </Text>
-
         <JSView>{`
 
 
@@ -341,10 +305,9 @@ const routes = {
 `}</JSView>
 
         <Text className="mb-3 block">
-          Системна функція <Pre inline>parseRouteConfig</Pre> виводить
-          розпарсений обʼєкт, із повним шляхом та даними кожної сторінки. Ці
-          дані можна використовувати, скажімо для створення мапи сайту, чи у
-          debug цілях.
+          {getText("PathRouter/router-tree/desc_4", {
+            parseRouteConfig: <Pre inline>parseRouteConfig</Pre>,
+          })}
         </Text>
 
         <JSView>{`
@@ -354,8 +317,7 @@ const {pages } = parsedRoutes;
 `}</JSView>
 
         <Text className="mb-3 block">
-          Тепер можна поглянути, які шляхи PathRouter створює на основі нашого
-          конфігураційного обʼєкта:
+          {getText("PathRouter/router-tree/desc_5")}
         </Text>
 
         <ObjectView
@@ -410,29 +372,39 @@ const {pages } = parsedRoutes;
         <br />
 
         <Text className="mb-3 block">
-          Це дозволяє з легкістю швидко міняти шляхи, додавати нові, та
-          розширювати навігаційне дерево, без потреби у ручному переписуванні
-          шляхів.
+          {getText("PathRouter/router-tree/desc_6")}
           <br />
-          Скажімо
-          <NavLink to="map">
-            <Pre> ось тут </Pre>
-          </NavLink>
-          можна поглянути мапу даного сайту, створену таким самим чинном.
+          {getText("PathRouter/router-tree/sitemap/text", {
+            hereLink: (
+              <NavLink to="map">
+                <Pre>
+                  {getText("PathRouter/router-tree/sitemap/hereLink_text")}
+                </Pre>
+              </NavLink>
+            ),
+          })}
         </Text>
 
         {/* ─────────────────── PagesContainer ─────────────────── */}
         <Text tag="h2" type="subtitle" className="mt-20 mb-8">
-          PagesContainer
+          <b>
+            <Pre inline>PagesContainer</Pre>
+          </b>
         </Text>
         <Text className="mb-3 block">
-          <Pre inline>PagesContainer</Pre> — компонент, що рендерить усі
-          сторінки та модальні вікна. Всередині він обгортає{" "}
-          <Pre inline>{"<Routes>"}</Pre> (react-router-dom) та поруч рендерить
-          внутрішній <Pre inline>ModalsContainer</Pre> — лише якщо у URL наразі
-          присутня модалка. Місце розташування <Pre inline>PagesContainer</Pre>{" "}
-          у дереві компонентів визначає, де саме зʼявиться вміст сторінки та
-          модалки.
+          {getText("PathRouter/pagesContainer/desc", {
+            PagesContainer: <Pre inline>PagesContainer</Pre>,
+          })}
+          <br />
+          {getText("PathRouter/pagesContainer/desc_2", {
+            Routes: <Pre inline>{"<Routes>"}</Pre>,
+            reactRouterDom: "react-router-dom",
+            ModalsContainer: <Pre inline>ModalsContainer</Pre>,
+          })}
+          <br />
+          {getText("PathRouter/pagesContainer/desc_3", {
+            PagesContainer: <Pre inline>PagesContainer</Pre>,
+          })}
         </Text>
 
         <JSView>{`Layout.tsx
@@ -454,17 +426,19 @@ export const Layout = () => (
 );`}</JSView>
 
         <Text className="ml-8 mt-12 mb-6" tag="h3" type="subtitle">
-          fallback
+          <Pre inline>fallback</Pre>
         </Text>
         <Text className="mb-3 block">
-          Проп <Pre inline>fallback</Pre> передається у внутрішній{" "}
-          <Pre inline>{"<Suspense>"}</Pre> і відображається під час завантаження
-          лінивих (<Pre inline>React.lazy</Pre>) сторінок та модальних вікон. За
-          замовчуванням — <Pre inline>null</Pre>.
+          {getText("PathRouter/pagesContainer/fallback/desc", {
+            fallback: <Pre inline>fallback</Pre>,
+            suspense: <Pre inline>{"<Suspense>"}</Pre>,
+            lazy: <Pre inline>React.lazy</Pre>,
+            null: <Pre inline>null</Pre>,
+          })}
         </Text>
 
         <Text className="ml-8 mt-12 mb-6" tag="h3" type="subtitle">
-          ModalWrapper
+          <Pre inline>ModalWrapper</Pre>
         </Text>
         <Text className="mb-3 block">
           <Pre inline>ModalWrapper</Pre> — необовʼязковий компонент-плагін для
