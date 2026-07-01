@@ -7,6 +7,6 @@ export const {
   PagesContainer,
   getModal,
   getPath,
-  usePath,
   config,
+  usePath,
 } = createPathRouter(route);

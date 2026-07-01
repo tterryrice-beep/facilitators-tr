@@ -4,6 +4,7 @@ import { useTranslate } from "@/providers/LocaleProvider/hook";
 import { LogoTR } from "@@/LogoTR";
 import { Select } from "@@/Select";
 import { Text } from "@@/Text";
+import { NavBar } from "../NavBar";
 
 export const Header: FC = () => {
   const { language, changeLanguage, getLanguagesList } = useTranslate();
@@ -12,14 +13,14 @@ export const Header: FC = () => {
   const index = languages.indexOf(language);
 
   return (
-    <header className=" bg-mist-800 border-b-2 border-mist-600 ">
-      <div className="mx-auto flex gap-3 flex-row items-center justify-between py-4 px-6 max-w-6xl">
+    <header className=" bg-mist-800 border-b-2 border-mist-600 sticky top-0 z-10">
+      <div className="mx-auto flex gap-3 flex-row items-center justify-between px-6 max-w-6xl ">
         <div>
           <LogoTR />
         </div>
 
-        <div className="flex items-center gap-2">
-          <div>Navigation</div>
+        <div className="flex items-center gap-2  ">
+          <NavBar />
           <Select
             index={index}
             setIndex={(index) => {

@@ -27,6 +27,9 @@ const resolveAnchorElement = (
   if (typeof anchor === "string") {
     return document.querySelector<HTMLElement>(anchor);
   }
+  if ("current" in anchor) {
+    return anchor.current;
+  }
   return anchor;
 };
 

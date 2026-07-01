@@ -1,4 +1,14 @@
 {
+  "main": {
+    "header": {
+      "modules": {
+        "title": "Modules"
+      },
+      "takes": {
+        "title": "Takes"
+      }
+    }
+  },
   "StateDispatcher": {
     "reason": "Why StateDispatcher Exists",
     "discribe": "StateDispatcher is an abstract base class for building strongly typed state managers outside of React. It solves one problem: providing subclasses with a convenient and strictly typed API for declaring state, mutating it through setters, and subscribing via {EventEmitter}.",
@@ -65,6 +75,174 @@
         "mutate_desc": "State is mutated in place inside setter functions. There is no immutability, diffing, or structural sharing. These features are intentionally excluded from StateDispatcher because they do not align with its philosophy.",
         "middleware": "No middleware or history",
         "middleware_desc": "There is no built-in time travel, devtools, middleware chains, or transactions. Each setter is a simple atomic operation."
+      }
+    }
+  },
+  "PathRouter": {
+    "reason": "Why PathRouter Exists",
+    "typo": {
+      "title": "Type Safety",
+      "desc": "Across many projects I've worked on, route typing was surprisingly often a source of problems.",
+      "desc_2": "In most cases, there was no route typing at all. I had to manually search for links to the required pages. On top of that, simple typos could make a page either inaccessible or effectively hidden.",
+      "desc_3": "PathRouter provides strict route typing, making navigation more convenient through autocompletion while also improving safety, since incorrect or misspelled paths are caught at compile time."
+    },
+    "modals": {
+      "title": "Modal Windows",
+      "desc": "In many React applications, modal windows are not part of the navigation and are instead controlled by {state}. As a result, the modal state is not reflected in the URL, meaning users cannot bookmark an opened modal or expect it to reopen after refreshing the page.",
+      "desc_2": "A simple example is a wallet modal. Opening it may seem perfectly natural from a UI perspective, yet there will always be users who prefer the site to open directly with their account balance displayed.",
+      "desc_3": "PathRouter treats a modal window as part of the URL while keeping the resulting URL clean and easy to understand:"
+    },
+    "features": {
+      "title": "Features",
+      "desc": "Convenient, declarative route management",
+      "desc_2": "All you need to define are the route keys in the configuration object. Instead of repeating the same keys over and over:",
+      "desc_3": "PathRouter simplifies this into a convenient tree structure:"
+    },
+    "typo_nav": {
+      "title": "Strongly Typed Navigation",
+      "desc": "PathRouter solves what has always been my biggest issue with routing systems: the lack of TypeScript autocompletion in conventional routing implementations.",
+      "desc_2": "It's surprisingly common to dig through files or components just to find the correct route.",
+      "desc_3": "Thanks to autocompletion, PathRouter always suggests every available route defined in your project."
+    },
+    "url_modal": {
+      "title": "URL-Driven Modals",
+      "desc": "PathRouter uses the URL as the single source of truth for determining whether a modal is open and what parameters it contains. It also provides a simple and intuitive API for working with them:"
+    },
+    "quick_start": {
+      "title": "Quick Start",
+      "install": {
+        "title": "Installation",
+        "desc": "To use PathRouter, install it from npm:"
+      },
+      "init": {
+        "title": "Initialization",
+        "desc": "For both type safety and runtime safety, PathRouter is created through a factory that accepts a {route-config}.",
+        "desc_2": "The configuration is divided into two sections: pages and modals. Modals remain a flat list, while pages can be nested arbitrarily.",
+        "desc_3": "A simple example of creating a PathRouter:"
+      }
+    },
+    "router-tree": {
+      "title": "Router Tree",
+      "desc": "The core feature of PathRouter is its support for deeply nested page hierarchies.",
+      "desc_2": "This hierarchy is built using the {setPage} function. It constructs and configures the routing tree for further use by the router.",
+      "desc_3": "From there, all that's left is to place it into the configuration object at the desired nesting level:",
+      "desc_4": "The internal {parseRouteConfig} function produces a parsed configuration object containing the full path and metadata for every page. This information can be used, for example, to generate a sitemap or for debugging purposes.",
+      "desc_5": "Now let's take a look at the routes PathRouter generates from our configuration object:",
+      "desc_6": "This makes it easy to change routes, add new ones, and expand the navigation tree without manually rewriting paths.",
+      "sitemap": {
+        "text": "For example, you can view this site's sitemap {hereLink}, generated using the very same approach.",
+        "hereLink_text": "here"
+      }
+    },
+    "pagesContainer": {
+      "desc": "{PagesContainer} is the component responsible for rendering all pages and modal windows.",
+      "desc_2": "Internally, it wraps {Routes} from react-router-dom and renders an internal {ModalsContainer} only when a modal is currently present in the URL.",
+      "desc_3": "The position of {PagesContainer} within your component tree determines where both the page content and modal content will be rendered.",
+      "fallback": {
+        "desc": "The {fallback} prop is passed to the internal {suspense} component and is displayed while lazy-loaded ({lazy}) pages and modals are loading. Defaults to {null}."
+      },
+      "modalWrapper": {
+        "desc": "{ModalWrapper} is an optional wrapper component for modal content. If omitted, the modal is rendered directly into the DOM without any container or animation. If provided, PathRouter renders the active modal component inside it and passes the following props:",
+        "modalName": "string | undefined — the current modal key (the first segment after /modal/)",
+        "isOpen": "boolean — whether a modal is currently open",
+        "onClose": "() => void — closes the modal through the router (updates the URL)",
+        "children": "ReactNode — the modal component from the configuration, already wrapped in <Suspense>",
+        "ref": "PathRouter also reads a forwarded ref exposing the {handleCloseWithAnimation} method. If present, the router calls this method before updating the URL, allowing the component to finish its closing animation before the navigation occurs.",
+        "animation_comment": "play the animation, then close the modal"
+      }
+    },
+    "getPath": {
+      "title": "getPath and getModal",
+      "desc": "{getPath} and {getModal} are identity functions: they simply return the argument unchanged. Their sole purpose is TypeScript type narrowing. The compiler verifies that the provided string is a valid route or modal key defined in your configuration and reports a compile-time error if it isn't.",
+      "desc_2": "They're useful anywhere {usePath} or {NavLink} isn't available—for example, in menu configurations, data arrays, or utility functions:",
+      "home": "Home",
+      "modules": "Modules",
+      "profile": "Profile",
+      "compile_error": "compile-time error if \"profile\" does not exist",
+      "modals_analog": "The same applies to modals:"
+    },
+    "navLink": {
+      "desc": "{NavLink} is a router-aware replacement for the {a} tag. It renders a real {href} (so right-click → \"Open in New Tab\", SSR, and search engine crawlers all work correctly), while intercepting the primary left-click and invoking {pageNavigate} within the SPA—without reloading the page.",
+      "desc_2": "Clicks with modifier keys (Cmd / Ctrl / Shift / Alt) or with a {target} attribute other than {self} are ignored, allowing the browser to handle them normally.",
+      "props": "Props",
+      "to": "PathNamesOf<C>? — navigation target. If omitted, the current page is preserved",
+      "modal": "ModalNamesOf<C>? — the modal to open after navigation",
+      "modalBreadCrumbs": "string[]? — additional URL segments appended after the modal name",
+      "replace": "boolean? — replaces the current history entry instead of creating a new one",
+      "navigateOptions": "NavigateOptions? — additional options passed to react-router's navigate function",
+      "activeClassName": "string? — CSS class applied to the <a> element when the link is active",
+      "active": {
+        "title": "Active State",
+        "desc": "NavLink is considered active when {pagePath} matches {to}. If {modal} is specified, {modalName} must also match the provided key. Active links automatically receive the {ariaCurrent} and {dataActive} attributes."
+      },
+      "examples": {
+        "navigate_page": "Navigate to a page",
+        "open_modal": "Open a modal without changing the current page",
+        "navigate_and_open_modal": "Navigate to another page and open a modal at the same time",
+        "confirm": "Confirm",
+        "active_class": "Custom active-state class",
+        "modules": "Modules",
+        "replace_history": "Replace the current history entry (no \"Back\" button)",
+        "start": "Get Started"
+      }
+    },
+    "usePath": {
+      "desc": "{usePath} is a hook that returns the entire router state, fully typed according to your configuration. It is available in any component rendered below {PathProvider}.",
+      "pagePath": "string — the current page path (excluding the /modal/... segment)",
+      "pageNavigate": "(path: PathNamesOf<C>, options?: NavigateOptions) => void — programmatic navigation",
+      "pageIsHavePrevHistory": "boolean — false if the page was opened directly (there is no previous history entry)",
+      "back_button_condition": "show the \"Back\" button only if a previous page exists",
+      "back": "← Back",
+      "modalIsOpen": "boolean — whether any modal is currently open",
+      "modalName": "string | undefined — the key of the currently open modal (the first segment after /modal/)",
+      "modalPath": "string — the full modal path including breadcrumbs, for example \"wallet/balance\"",
+      "modalBreadCrumbs": "string[] — additional segments following the modal name",
+      "modalOpen": "(name: ModalNamesOf<C>, breadCrumbs?: string[]) => void — opens a modal",
+      "modalClose": "() => void — closes the modal and returns to the current page"
+    },
+    "searchParams": {
+      "desc": "PathRouter provides a complete API for working with query string parameters. All values are stored as a {record}, where every key always contains an array—even if only a single value is provided. This makes working with multiple values for the same parameter (for example, {tag}) straightforward.",
+      "params": "Record<string, string[]> — a reactive snapshot of the current query parameters",
+      "change": "merge: string → sets a single value, array → appends values to the existing ones. Other keys remain unchanged",
+      "set": "replace: completely replaces the value of the specified key without affecting any other keys",
+      "delete": "(key: string) => void — removes the specified key",
+      "clear": "() => void — clears all search parameters",
+      "footer": "All operations preserve the current URL (pathname, the /modal/... segment, and the hash). Only the query string is modified.",
+      "read": "Reading",
+      "change_merge": "change — merge: new values are appended to the existing ones",
+      "overwrite_tab": "overwrites the tab parameter",
+      "set_replace": "set — replace: completely replaces only this key while leaving all others untouched",
+      "delete_title": "Removing",
+      "empty": "empty"
+    },
+    "redirects": {
+      "title": "Redirects",
+      "desc": "To redirect users to another route, pass {redirect} to {setPage} instead of a component. PathRouter will internally use {navigate} from react-router-dom. Redirects are most commonly used together with the {catchAll} wildcard to handle unknown nested routes:",
+      "unknown_modules": "any unknown /modules/??? → /modules",
+      "global_404": "global 404"
+    },
+    "limits": {
+      "title": "Limitations",
+      "desc": "PathRouter is designed to solve its problem well, but it isn't the right fit for every use case:",
+      "browserRouter": {
+        "title": "BrowserRouter Only / CSR Only",
+        "desc": "{PathProvider} internally uses {BrowserRouter} from react-router-dom. As a result, HashRouter is not supported, and server-side rendering frameworks (such as Next.js or Remix), where routing is managed by the framework itself, are not compatible."
+      },
+      "modalSegment": {
+        "title": "Reserved {modalSegment} Segment",
+        "desc": "PathRouter distinguishes between pages and modals by splitting the URL at the {modalSegment} delimiter. No page route should contain this segment in its path, as it will be interpreted as the start of a modal route."
+      },
+      "flatModals": {
+        "title": "Flat Modals — One at a Time",
+        "desc": "The {modals} section of the configuration is a flat dictionary. Nested modals and displaying multiple modals simultaneously are not supported. Navigation within a modal should be implemented using {modalBreadCrumbs} rather than opening another modal on top of the current one."
+      },
+      "animation": {
+        "title": "Animations via ModalWrapper Only",
+        "desc": "PathRouter does not include built-in animations. Modals appear and disappear instantly. To support animated transitions, implement your own {ModalWrapper} exposing the {handleCloseWithAnimation} method."
+      },
+      "depth": {
+        "title": "Maximum Nesting Depth: 8 Levels",
+        "desc": "TypeScript's type recursion used by {PageEntries} is limited to eight levels of route nesting. Projects with deeper hierarchies will still compile successfully, but autocompletion for deeply nested routes may become unreliable."
       }
     }
   }

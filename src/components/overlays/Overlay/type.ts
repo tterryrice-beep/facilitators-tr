@@ -10,7 +10,12 @@ export enum OverlayPosition {
 export interface OverlayProps {
   children?: React.ReactNode;
   withoutBlind?: boolean;
-  anchor?: HTMLElement | null | OverlayPosition | string; // string => querySelectorText
+  anchor?:
+    | HTMLElement
+    | null
+    | OverlayPosition
+    | string // string => querySelectorText
+    | { current: HTMLElement | null };
   isOpen?: boolean;
   onClose?: () => void;
 
