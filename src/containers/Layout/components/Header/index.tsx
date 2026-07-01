@@ -13,30 +13,32 @@ export const Header: FC = () => {
   const index = languages.indexOf(language);
 
   return (
-    <header className=" bg-mist-800 border-b-2 border-mist-600 sticky top-0 z-10">
-      <div className="mx-auto flex gap-3 flex-row items-center justify-between px-6 max-w-6xl ">
-        <div>
-          <LogoTR />
-        </div>
+    <div className="pt-[72px]" >
+      <header className=" bg-mist-800 border-b-2 border-mist-600 fixed top-0 z-10 w-full" >
+        <div className="mx-auto flex gap-3 flex-row items-center justify-between px-6 max-w-6xl ">
+          <div>
+            <LogoTR />
+          </div>
 
-        <div className="flex items-center gap-2  ">
-          <NavBar />
-          <Select
-            index={index}
-            setIndex={(index) => {
-              const newLang = languages[index];
-              changeLanguage(newLang);
-            }}>
-            {languages.map((v) => {
-              return (
-                <Text className="px-2 py-1 block" type="small">
-                  {v}
-                </Text>
-              );
-            })}
-          </Select>
+          <div className="flex items-center gap-2  ">
+            <NavBar />
+            <Select
+              index={index}
+              setIndex={(index) => {
+                const newLang = languages[index];
+                changeLanguage(newLang);
+              }}>
+              {languages.map((v) => {
+                return (
+                  <Text className="px-2 py-1 block" type="small">
+                    {v}
+                  </Text>
+                );
+              })}
+            </Select>
+          </div>
         </div>
-      </div>
-    </header>
+      </header>
+    </div>
   );
 };

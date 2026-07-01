@@ -26,14 +26,14 @@ const Page: FC = ({}) => {
       </div>
 
       {/* -- Content -- */}
-      <div className="flex flex-col gap-3 max-w-[650px]">
+      <div className="flex flex-col gap-6 max-w-[650px]">
         {/* -- Router -- */}
         <BannerItem
           to="modules/routing"
           title="PathRouter"
           banner={
             <>
-              <div className="w-[260px]">
+              <div className="mim-w-[auto] w-full sm:w-auto min-w-[260px]">
                 <JSXView>{`{
     "/": <Home />,
     "goods": <Goods />,
@@ -58,7 +58,7 @@ const Page: FC = ({}) => {
           title="StateDispatcher"
           banner={
             <>
-              <div className="w-[300px]">
+              <div className="mim-w-[auto] w-full sm:w-auto sm:min-w-[300px]">
                 <JSView>{`class User extends StateDispatcher
 ...
   user.listen("name", setName);

@@ -7,7 +7,7 @@ interface Props {
 }
 export const Footer: FC<Props> = ({}) => {
   return (
-    <footer className="bg-mist-900 border-t-2 border-mist-800 py-6 px-6">
+    <footer className="bg-mist-900 border-t-2 border-mist-800 py-6 px-6 mt-[100px]">
       <div className="flex flex-row items-center justify-between mx-auto max-w-6xl">
         <div>
           <Text type="small" className="text-xs block">

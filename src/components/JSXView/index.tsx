@@ -268,7 +268,7 @@ const tokenize = (src: string): Seg[] => {
 
 /* ─────────────────────────── styling ─────────────────────────── */
 
-const COLOR: Record<SegType, string> = {
+export const JSX_VIEW_COLORS: Record<SegType, string> = {
   text: "#d4d4d4",
   punct: "#808080",
   tag: "#569cd6",
@@ -284,7 +284,7 @@ const renderSegments = (segs: Seg[]) =>
     <span
       key={i}
       style={{
-        color: COLOR[s.type],
+        color: JSX_VIEW_COLORS[s.type],
         ...(s.type === "error"
           ? {
               textDecoration: "underline wavy #f48771",
@@ -310,7 +310,7 @@ export const JSXView: FC<Props> = ({ children, className }) => {
         fontSize: 13,
         lineHeight: 1.55,
         background: "#1e1e1e",
-        color: COLOR.text,
+        color: JSX_VIEW_COLORS.text,
         padding: 12,
         borderRadius: 6,
         margin: 0,

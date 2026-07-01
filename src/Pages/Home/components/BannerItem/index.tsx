@@ -19,7 +19,7 @@ export const BannerItem: FC<Props> = ({ banner, discribe, title, to }) => {
         <Text type="text" className="text-teal-400 block">
           {title}
         </Text>
-        <div className="flex gap-8 mt-2">
+        <div className="flex flex-col gap-8 mt-2 sm:flex-row">
           <div className="flex justify-center items-center">{banner}</div>
           <div className="">
             <Text type="small" className="block text-xs">

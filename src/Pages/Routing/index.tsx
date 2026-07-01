@@ -10,6 +10,8 @@ import { Pre } from "@@/Pre";
 import { JSView } from "@@/JSView";
 import { JS_VIEW_COLOR } from "@@/JSView/config";
 import { NavLink } from "@/providers/Router";
+import { ScrollBox } from "@@/ScrollBox";
+import { JSX_VIEW_COLORS, JSXView } from "@@/JSXView";
 
 const Page: FC = ({}) => {
   const { getText } = useTranslate();
@@ -71,17 +73,14 @@ const Page: FC = ({}) => {
         <Pre>
           {`
 https://example.com/path/to/page/modal/wallet/balance
-          `}
+`}
         </Pre>
-
         <Text tag="h2" type="subtitle" className="mt-20 mb-8">
           {getText("PathRouter/features/title")}
         </Text>
-
         <Text className="ml-8 mt-12 mb-6" tag="h3" type="subtitle">
           <b className="font-serif">I</b>.{getText("PathRouter/features/desc")}
         </Text>
-
         <Text>{getText("PathRouter/features/desc_2")}</Text>
         <br />
         <ObjectView
@@ -131,39 +130,45 @@ https://example.com/path/to/page/modal/wallet/balance
         <br />
         <Text>{getText("PathRouter/typo_nav/desc_3")}</Text>
         <br />
-        <Text type="small">
-          <div className="ml-8 mt-2 mb-2">
-            <span style={{ color: JS_VIEW_COLOR.keyword }}>const</span>
-            {` `}
-            <span
-              style={{ color: JS_VIEW_COLOR.ident }}>{`{ page, modal }`}</span>
-            <span
-              style={{ color: JS_VIEW_COLOR.fn }}>{` = usePathRouter();`}</span>
-            <br />
-            <span style={{ color: JS_VIEW_COLOR.ident }}>page</span>
-            <span style={{ color: JS_VIEW_COLOR.fn }}>.navigate(</span>
-            <span
-              style={{
-                color: JS_VIEW_COLOR.string,
-              }}>{`"about/privacy/`}</span>
-            <span
-              className={css.cursor}
-              style={{
-                color: JS_VIEW_COLOR.punct,
-                fontSize: "1.75em",
-                position: "relative",
-                bottom: "-0.1em",
-                marginRight: "-0.1em",
-                marginLeft: "-0.1em",
-              }}>
-              |
-            </span>
-            <span className="text-gray-400">{`preferences/`}</span>
-            <span style={{ color: JS_VIEW_COLOR.string }}>{`"`}</span>
-            <span style={{ color: JS_VIEW_COLOR.fn }}>)</span>
-            {`;`}
-          </div>
-        </Text>
+        <ScrollBox minWidth={340}>
+          <Text type="small">
+            <div className="ml-8 mt-2 mb-2">
+              <span style={{ color: JS_VIEW_COLOR.keyword }}>const</span>
+              {` `}
+              <span
+                style={{
+                  color: JS_VIEW_COLOR.ident,
+                }}>{`{ page, modal }`}</span>
+              <span
+                style={{
+                  color: JS_VIEW_COLOR.fn,
+                }}>{` = usePathRouter();`}</span>
+              <br />
+              <span style={{ color: JS_VIEW_COLOR.ident }}>page</span>
+              <span style={{ color: JS_VIEW_COLOR.fn }}>.navigate(</span>
+              <span
+                style={{
+                  color: JS_VIEW_COLOR.string,
+                }}>{`"about/privacy/`}</span>
+              <span
+                className={css.cursor}
+                style={{
+                  color: JS_VIEW_COLOR.punct,
+                  fontSize: "1.75em",
+                  position: "relative",
+                  bottom: "-0.1em",
+                  marginRight: "-0.1em",
+                  marginLeft: "-0.1em",
+                }}>
+                |
+              </span>
+              <span className="text-gray-400">{`preferences/`}</span>
+              <span style={{ color: JS_VIEW_COLOR.string }}>{`"`}</span>
+              <span style={{ color: JS_VIEW_COLOR.fn }}>)</span>
+              {`;`}
+            </div>
+          </Text>
+        </ScrollBox>
         <Text className="ml-8 mt-12 mb-6" tag="h3" type="subtitle">
           <b className="font-serif">III</b>.
           {" " + getText("PathRouter/url_modal/title")}
@@ -192,7 +197,6 @@ modal.close();
             npm i path-router-red
           </a>
         </Pre>
-
         <Text className="ml-8 mt-12 mb-6" tag="h3" type="subtitle">
           <b className="font-serif">II</b>.
           {getText("PathRouter/quick_start/init/title")}
@@ -208,7 +212,8 @@ modal.close();
           <br />
           {getText("PathRouter/quick_start/init/desc_3")}
         </Text>
-        <JSView>{`routes.ts
+        <ScrollBox>
+          <JSView>{`routes.ts
 ----------------------------------------
 import { createPathRouter, setPage, setModal } from "path-router-red";
 
@@ -261,11 +266,10 @@ export const Page = () => {
   </div>
 );
 `}</JSView>
-
+        </ScrollBox>
         <Text tag="h2" type="subtitle" className="mt-20 mb-8">
           <b>{getText("PathRouter/router-tree/title")}</b>
         </Text>
-
         <Text className="mb-3 block">
           {getText("PathRouter/router-tree/desc")}
         </Text>
@@ -277,10 +281,8 @@ export const Page = () => {
         <Text className="mb-3 block">
           {getText("PathRouter/router-tree/desc_3")}
         </Text>
-        <JSView>{`
-
-
-import { setPage } from "path-router-red";
+        <ScrollBox minWidth={400}>
+          <JSView>{`import { setPage } from "path-router-red";
 
 const routes = {
   pages: {
@@ -298,27 +300,21 @@ const routes = {
 
       "*": setPage(NotFound),
   },
-}
-
-
-`}</JSView>
-
+}`}</JSView>
+        </ScrollBox>
         <Text className="mb-3 block">
           {getText("PathRouter/router-tree/desc_4", {
             parseRouteConfig: <Pre inline>parseRouteConfig</Pre>,
           })}
         </Text>
-
         <JSView>{`
 import { parseRouteConfig } from "path-router-red";
 const parsedRoutes = parseRouteConfig(routes);
 const {pages } = parsedRoutes;
 `}</JSView>
-
         <Text className="mb-3 block">
           {getText("PathRouter/router-tree/desc_5")}
         </Text>
-
         <ObjectView
           defaultExpanded
           data={{
@@ -369,7 +365,6 @@ const {pages } = parsedRoutes;
           }}
         />
         <br />
-
         <Text className="mb-3 block">
           {getText("PathRouter/router-tree/desc_6")}
           <br />
@@ -383,7 +378,6 @@ const {pages } = parsedRoutes;
             ),
           })}
         </Text>
-
         {/* ─────────────────── PagesContainer ─────────────────── */}
         <Text tag="h2" type="subtitle" className="mt-20 mb-8">
           <b>
@@ -405,11 +399,16 @@ const {pages } = parsedRoutes;
             PagesContainer: <Pre inline>PagesContainer</Pre>,
           })}
         </Text>
-
-        <JSView>{`Layout.tsx
-----------------------------------------
-import { PathProvider, PagesContainer } from "routes";
-import { MyModalWrapper } from "components";
+        <ScrollBox minWidth={340}>
+          <JSView>{`Layout.tsx
+---------------------------------------
+import { 
+  PathProvider,
+  PagesContainer
+} from "routes";
+import {
+  MyModalWrapper
+} from "components";
 
 export const Layout = () => (
   <PathProvider>
@@ -423,7 +422,7 @@ export const Layout = () => (
     <Footer />
   </PathProvider>
 );`}</JSView>
-
+        </ScrollBox>
         <Text className="ml-8 mt-12 mb-6" tag="h3" type="subtitle">
           <Pre inline>fallback</Pre>
         </Text>
@@ -435,7 +434,6 @@ export const Layout = () => (
             null: <Pre inline>null</Pre>,
           })}
         </Text>
-
         <Text className="ml-8 mt-12 mb-6" tag="h3" type="subtitle">
           <Pre inline>ModalWrapper</Pre>
         </Text>
@@ -447,14 +445,69 @@ export const Layout = () => (
         <ObjectView
           defaultExpanded
           data={{
-            modalName: getText(
-              "PathRouter/pagesContainer/modalWrapper/modalName",
-            ),
-            isOpen: getText("PathRouter/pagesContainer/modalWrapper/isOpen"),
-            onClose: getText("PathRouter/pagesContainer/modalWrapper/onClose"),
-            children: getText("PathRouter/pagesContainer/modalWrapper/children"),
+            modalName: "string | undefined",
           }}
         />
+        <div
+          className="mb-8"
+          dangerouslySetInnerHTML={{
+            __html: getText("PathRouter/pagesContainer/modalWrapper/modalName"),
+          }}
+        />
+
+        <ObjectView
+          defaultExpanded
+          data={{
+            isOpen: "boolean",
+          }}
+        />
+        <div className="mb-8">
+          <span className="text-sm">
+            {getText("PathRouter/pagesContainer/modalWrapper/isOpen")}
+          </span>
+        </div>
+
+        <ObjectView
+          defaultExpanded
+          data={{
+            onClose: "() => void",
+          }}
+        />
+        <div
+          className="mb-8 "
+          dangerouslySetInnerHTML={{
+            __html: getText("PathRouter/pagesContainer/modalWrapper/onClose"),
+          }}
+        />
+
+        <ObjectView
+          defaultExpanded
+          data={{
+            children: "ReactNode",
+          }}
+        />
+        <div className="mb-8">
+          <span className="text-sm">
+            {getText("PathRouter/pagesContainer/modalWrapper/children", {
+              Suspense: (
+                <span
+                  style={{
+                    color: JSX_VIEW_COLORS.punct,
+                  }}>
+                  {"<"}
+                  <span
+                    style={{
+                      color: JSX_VIEW_COLORS.component,
+                    }}>
+                    {"Suspense"}
+                  </span>
+                  {"/>"}
+                </span>
+              ),
+            })}
+          </span>
+        </div>
+
         <Text className="mb-3 block mt-6">
           {getText("PathRouter/pagesContainer/modalWrapper/ref", {
             handleCloseWithAnimation: (
@@ -462,10 +515,19 @@ export const Layout = () => (
             ),
           })}
         </Text>
-        <JSView>{`MyModalWrapper.tsx
+
+        <ScrollBox minWidth={500}>
+          <JSView>{`MyModalWrapper.tsx
 ----------------------------------------
-import { forwardRef, useImperativeHandle } from "react";
-import type { ModalWrapperProps, ModalWrapperRef } from "path-router-red";
+import {
+  forwardRef,
+  useImperativeHandle
+} from "react";
+import type {
+  ModalWrapperProps,
+  ModalWrapperRef
+} from "path-router-red";
+
 
 export const MyModalWrapper = forwardRef<ModalWrapperRef, ModalWrapperProps>(
   ({ isOpen, onClose, children }, ref) => {
@@ -484,10 +546,11 @@ export const MyModalWrapper = forwardRef<ModalWrapperRef, ModalWrapperProps>(
     );
   }
 );`}</JSView>
+        </ScrollBox>
 
         {/* ─────────────────── getPath / getModal ─────────────────── */}
         <Text tag="h2" type="subtitle" className="mt-20 mb-8">
-          {getText("PathRouter/getPath/title")}
+          <Pre inline>getPath and getModal</Pre>
         </Text>
         <Text className="mb-3 block">
           {getText("PathRouter/getPath/desc", {
@@ -501,7 +564,8 @@ export const MyModalWrapper = forwardRef<ModalWrapperRef, ModalWrapperProps>(
             NavLink: <Pre inline>NavLink</Pre>,
           })}
         </Text>
-        <JSView>{`
+        <ScrollBox minWidth={740}>
+          <JSView>{`
 import { getPath, getModal } from "routes";
 
 const menuItems = [
@@ -513,6 +577,7 @@ const menuItems = [
 // ${getText("PathRouter/getPath/modals_analog")}
 const onOpen = () => modal.open(getModal("wallet"));
 `}</JSView>
+        </ScrollBox>
 
         {/* ─────────────────── NavLink ─────────────────── */}
         <Text tag="h2" type="subtitle" className="mt-20 mb-8">
@@ -532,37 +597,103 @@ const onOpen = () => modal.open(getModal("wallet"));
             self: <Pre inline>_self</Pre>,
           })}
         </Text>
-
         <Text className="ml-8 mt-12 mb-6" tag="h3" type="subtitle">
           {getText("PathRouter/navLink/props")}
         </Text>
+
         <ObjectView
           defaultExpanded
           data={{
-            to: getText("PathRouter/navLink/to"),
-            modal: getText("PathRouter/navLink/modal"),
-            modalBreadCrumbs: getText("PathRouter/navLink/modalBreadCrumbs"),
-            replace: getText("PathRouter/navLink/replace"),
-            navigateOptions: getText("PathRouter/navLink/navigateOptions"),
-            activeClassName: getText("PathRouter/navLink/activeClassName"),
+            to: "PagePath",
           }}
         />
+        <div className="mb-8">
+          <span className="text-sm">{getText("PathRouter/navLink/to")}</span>
+        </div>
+
+        <ObjectView
+          defaultExpanded
+          data={{
+            modal: "ModalPath",
+          }}
+        />
+        <div className="mb-8">
+          <span className="text-sm">{getText("PathRouter/navLink/modal")}</span>
+        </div>
+
+        <ObjectView
+          defaultExpanded
+          data={{
+            modalBreadCrumbs: "string[]",
+          }}
+        />
+        <div className="mb-8">
+          <span className="text-sm">
+            {getText("PathRouter/navLink/modalBreadCrumbs")}
+          </span>
+        </div>
+
+        <ObjectView
+          defaultExpanded
+          data={{
+            replace: "boolean",
+          }}
+        />
+        <div className="mb-8">
+          <span className="text-sm">
+            {getText("PathRouter/navLink/replace")}
+          </span>
+        </div>
+
+        <ObjectView
+          defaultExpanded
+          data={{
+            navigateOptions: "NavigateOptions",
+          }}
+        />
+        <div className="mb-8">
+          <span className="text-sm">
+            {getText("PathRouter/navLink/navigateOptions")}
+          </span>
+        </div>
+
+        <ObjectView
+          defaultExpanded
+          data={{
+            activeClassName: "string",
+          }}
+        />
+        <div className="mb-8">
+          <span className="text-sm">
+            {getText("PathRouter/navLink/activeClassName")}
+          </span>
+        </div>
 
         <Text className="ml-8 mt-12 mb-6" tag="h3" type="subtitle">
           {getText("PathRouter/navLink/active/title")}
         </Text>
         <Text className="mb-3 block">
           {getText("PathRouter/navLink/active/desc", {
-            pagePath: <Pre inline>page.path</Pre>,
-            to: <Pre inline>to</Pre>,
-            modal: <Pre inline>modal</Pre>,
-            modalName: <Pre inline>modal.name</Pre>,
-            ariaCurrent: <Pre inline>aria-current="page"</Pre>,
-            dataActive: <Pre inline>data-active</Pre>,
+            pagePath: (
+              <span className="text-nowrap text-orange-400">page.path</span>
+            ),
+            to: <span className="text-nowrap text-orange-400">to</span>,
+            modal: <span className="text-nowrap text-orange-400">modal</span>,
+            modalName: (
+              <span className="text-nowrap text-orange-400">modal.name</span>
+            ),
+            ariaCurrent: (
+              <span className="text-nowrap text-orange-400">
+                aria-current="page"
+              </span>
+            ),
+            dataActive: (
+              <span className="text-nowrap text-orange-400">data-active</span>
+            ),
           })}
         </Text>
-
-        <JSView>{`
+        <ScrollBox>
+          <JSView>{`
 import { NavLink } from "routes";
 
 // ${getText("PathRouter/navLink/examples/navigate_page")}
@@ -586,7 +717,7 @@ import { NavLink } from "routes";
   ${getText("PathRouter/navLink/examples/start")}
 </NavLink>
 `}</JSView>
-
+        </ScrollBox>
         {/* ─────────────────── usePath ─────────────────── */}
         <Text tag="h2" type="subtitle" className="mt-20 mb-8">
           usePath
@@ -598,21 +729,49 @@ import { NavLink } from "routes";
           })}
         </Text>
         <JSView>{`const { page, modal, searchParams } = usePath();`}</JSView>
-
         <Text className="ml-8 mt-12 mb-6" tag="h3" type="subtitle">
           page
         </Text>
         <ObjectView
           defaultExpanded
           data={{
-            "page.path": getText("PathRouter/usePath/pagePath"),
-            "page.navigate": getText("PathRouter/usePath/pageNavigate"),
-            "page.isHavePrevHistory": getText(
-              "PathRouter/usePath/pageIsHavePrevHistory",
-            ),
+            "page.path": "string",
           }}
         />
-        <JSView>{`
+        <div className="mb-8">
+          <span className="text-sm">
+            {getText("PathRouter/usePath/pagePath")}
+          </span>
+        </div>
+
+        <ScrollBox minWidth={600}>
+          <ObjectView
+            defaultExpanded
+            data={{
+              "page.navigate":
+                "(path: PagePath, options?: NavigateOptions) => void",
+            }}
+          />
+        </ScrollBox>
+        <div className="mb-8">
+          <span className="text-sm">
+            {getText("PathRouter/usePath/pageNavigate")}
+          </span>
+        </div>
+
+        <ObjectView
+          defaultExpanded
+          data={{
+            "page.isHavePrevHistory": "boolean",
+          }}
+        />
+        <div className="mb-8">
+          <span className="text-sm">
+            {getText("PathRouter/usePath/pageIsHavePrevHistory")}
+          </span>
+        </div>
+        <ScrollBox minWidth={500}>
+          <JSView>{`
 const { page } = usePath();
 
 page.path // "modules/routing"
@@ -625,24 +784,86 @@ page.navigate("modules/routing", { replace: true });
   <button onClick={() => history.back()}>${getText("PathRouter/usePath/back")}</button>
 )}
 `}</JSView>
-
+        </ScrollBox>
         <Text className="ml-8 mt-12 mb-6" tag="h3" type="subtitle">
           modal
         </Text>
         <ObjectView
           defaultExpanded
           data={{
-            "modal.isOpen": getText("PathRouter/usePath/modalIsOpen"),
-            "modal.name": getText("PathRouter/usePath/modalName"),
-            "modal.path": getText("PathRouter/usePath/modalPath"),
-            "modal.breadCrumbs": getText(
-              "PathRouter/usePath/modalBreadCrumbs",
-            ),
-            "modal.open": getText("PathRouter/usePath/modalOpen"),
-            "modal.close": getText("PathRouter/usePath/modalClose"),
+            "modal.isOpen": "boolean",
           }}
         />
-        <JSView>{`
+        <div className="mb-8">
+          <span className="text-sm">
+            {getText("PathRouter/usePath/modalIsOpen")}
+          </span>
+        </div>
+
+        <ObjectView
+          defaultExpanded
+          data={{
+            "modal.name": "string | undefined",
+          }}
+        />
+        <div className="mb-8">
+          <span className="text-sm">
+            {getText("PathRouter/usePath/modalName")}
+          </span>
+        </div>
+
+        <ObjectView
+          defaultExpanded
+          data={{
+            "modal.path": "string",
+          }}
+        />
+        <div className="mb-8">
+          <span className="text-sm">
+            {getText("PathRouter/usePath/modalPath")}
+          </span>
+        </div>
+
+        <ObjectView
+          defaultExpanded
+          data={{
+            "modal.breadCrumbs": "string[]",
+          }}
+        />
+        <div className="mb-8">
+          <span className="text-sm">
+            {getText("PathRouter/usePath/modalBreadCrumbs")}
+          </span>
+        </div>
+
+        <ScrollBox minWidth={600}>
+          <ObjectView
+            defaultExpanded
+            data={{
+              "modal.open": "(name: ModalPath, breadCrumbs?: string[]) => void",
+            }}
+          />
+        </ScrollBox>
+        <div className="mb-8">
+          <span className="text-sm">
+            {getText("PathRouter/usePath/modalOpen")}
+          </span>
+        </div>
+
+        <ObjectView
+          defaultExpanded
+          data={{
+            "modal.close": "() => void",
+          }}
+        />
+        <div className="mb-8">
+          <span className="text-sm">
+            {getText("PathRouter/usePath/modalClose")}
+          </span>
+        </div>
+
+        <ScrollBox>
+          <JSView>{`
 const { modal } = usePath();
 
 modal.open("wallet");
@@ -659,6 +880,7 @@ modal.breadCrumbs // ["balance"]
 modal.close();
 // URL: /page
 `}</JSView>
+        </ScrollBox>
 
         {/* ─────────────────── Search Params ─────────────────── */}
         <Text tag="h2" type="subtitle" className="mt-20 mb-8">
@@ -670,38 +892,109 @@ modal.close();
             tag: <Pre inline>?tag=a&tag=b</Pre>,
           })}
         </Text>
+        <ScrollBox minWidth={430}>
+          <ObjectView
+            defaultExpanded
+            data={{
+              "searchParams.params": "Record<string, string[]>",
+            }}
+          />
+        </ScrollBox>
+        <div className="mb-8">
+          <span className="text-sm">
+            {getText("PathRouter/searchParams/params")}
+          </span>
+        </div>
+
+        <ScrollBox minWidth={640}>
+          <ObjectView
+            defaultExpanded
+            data={{
+              "searchParams.change":
+                "(state: Record<string, string | string[]>) => void",
+            }}
+          />
+        </ScrollBox>
+        <div className="mb-8">
+          <span className="text-sm">
+            {getText("PathRouter/searchParams/change")}
+          </span>
+        </div>
+        <ScrollBox minWidth={640}>
+          <ObjectView
+            defaultExpanded
+            data={{
+              "searchParams.set":
+                "(next: Record<string, string | string[]>) => void",
+            }}
+          />
+        </ScrollBox>
+        <div className="mb-8">
+          <span className="text-sm">
+            {getText("PathRouter/searchParams/set")}
+          </span>
+        </div>
+        <ScrollBox minWidth={420}>
+          <ObjectView
+            defaultExpanded
+            data={{
+              "searchParams.delete": "(key: string) => void",
+            }}
+          />
+        </ScrollBox>
+        <div className="mb-8">
+          <span className="text-sm">
+            {getText("PathRouter/searchParams/delete")}
+          </span>
+        </div>
+
         <ObjectView
           defaultExpanded
           data={{
-            "searchParams.params": getText("PathRouter/searchParams/params"),
-            "searchParams.change": getText("PathRouter/searchParams/change"),
-            "searchParams.set": getText("PathRouter/searchParams/set"),
-            "searchParams.delete": getText("PathRouter/searchParams/delete"),
-            "searchParams.clear": getText("PathRouter/searchParams/clear"),
+            "searchParams.clear": "() => void",
           }}
         />
-        <JSView>{`
-const { searchParams } = usePath();
+        <div className="mb-8">
+          <span className="text-sm">
+            {getText("PathRouter/searchParams/clear")}
+          </span>
+        </div>
 
-// ${getText("PathRouter/searchParams/read")}
-searchParams.params           // { tab: ["settings"], tag: ["a", "b"] }
+        <ScrollBox minWidth={440}>
+          <JSView>{`
+const { searchParams } = usePath();
+/* ${getText("PathRouter/searchParams/read")} */
+
+searchParams.params 
+// { tab: ["settings"], tag: ["a", "b"] }
+
 searchParams.params["tab"]?.[0]  // "settings"
 
-// ${getText("PathRouter/searchParams/change_merge")}
-searchParams.change({ tab: "profile" });         // ?tab=profile (${getText("PathRouter/searchParams/overwrite_tab")})
-searchParams.change({ tag: ["c", "d"] });        // ?tab=profile&tag=a&tag=b&tag=c&tag=d
+/* ${getText("PathRouter/searchParams/change_merge")} */
 
-// ${getText("PathRouter/searchParams/set_replace")}
-searchParams.set({ tab: "dashboard" });          // ?tab=dashboard&tag=a&tag=b
+searchParams.change({ tab: "profile" });
+// ?tab=profile (${getText("PathRouter/searchParams/overwrite_tab")})
 
-// ${getText("PathRouter/searchParams/delete_title")}
-searchParams.delete("tag");                      // ?tab=dashboard
-searchParams.clear();                            // ?  (${getText("PathRouter/searchParams/empty")})
+searchParams.change({ tag: ["c", "d"] });
+// ?tab=profile&tag=a&tag=b&tag=c&tag=d
+
+/* ${getText("PathRouter/searchParams/set_replace")} */
+
+searchParams.set({ tab: "dashboard" });
+// ?tab=dashboard&tag=a&tag=b
+
+/* ${getText("PathRouter/searchParams/delete_title")} */
+
+searchParams.delete("tag"); // ?tab=dashboard
+
+searchParams.clear();
+// ?  (${getText("PathRouter/searchParams/empty")})
 `}</JSView>
+        </ScrollBox>
+
         <Text className="mb-3 block mt-4">
           {getText("PathRouter/searchParams/footer")}
         </Text>
-
         {/* ─────────────────── Redirects ─────────────────── */}
         <Text tag="h2" type="subtitle" className="mt-20 mb-8">
           {getText("PathRouter/redirects/title")}
@@ -714,7 +1007,8 @@ searchParams.clear();                            // ?  (${getText("PathRouter/se
             catchAll: <Pre inline>*</Pre>,
           })}
         </Text>
-        <JSView>{`
+        <ScrollBox>
+          <JSView>{`
 const routes = {
   pages: {
     "/": setPage(Home),
@@ -732,15 +1026,13 @@ const routes = {
   },
 };
 `}</JSView>
+        </ScrollBox>
 
         {/* ─────────────────── Обмеження ─────────────────── */}
         <Text tag="h2" type="subtitle" className="mt-20 mb-8">
           {getText("PathRouter/limits/title")}
         </Text>
-        <Text className="mb-3 block">
-          {getText("PathRouter/limits/desc")}
-        </Text>
-
+        <Text className="mb-3 block">{getText("PathRouter/limits/desc")}</Text>
         <Text className="ml-8 mt-8 mb-2" tag="h3" type="subtitle">
           {getText("PathRouter/limits/browserRouter/title")}
         </Text>
@@ -750,7 +1042,6 @@ const routes = {
             BrowserRouter: <Pre inline>{"<BrowserRouter>"}</Pre>,
           })}
         </Text>
-
         <Text className="ml-8 mt-6 mb-2" tag="h3" type="subtitle">
           {getText("PathRouter/limits/modalSegment/title", {
             modalSegment: <Pre inline>/modal/</Pre>,
@@ -761,7 +1052,6 @@ const routes = {
             modalSegment: <Pre inline>/modal/</Pre>,
           })}
         </Text>
-
         <Text className="ml-8 mt-6 mb-2" tag="h3" type="subtitle">
           {getText("PathRouter/limits/flatModals/title")}
         </Text>
@@ -771,17 +1061,17 @@ const routes = {
             modalBreadCrumbs: <Pre inline>modalBreadCrumbs</Pre>,
           })}
         </Text>
-
         <Text className="ml-8 mt-6 mb-2" tag="h3" type="subtitle">
           {getText("PathRouter/limits/animation/title")}
         </Text>
         <Text className="mb-3 block">
           {getText("PathRouter/limits/animation/desc", {
             ModalWrapper: <Pre inline>ModalWrapper</Pre>,
-            handleCloseWithAnimation: <Pre inline>handleCloseWithAnimation</Pre>,
+            handleCloseWithAnimation: (
+              <Pre inline>handleCloseWithAnimation</Pre>
+            ),
           })}
         </Text>
-
         <Text className="ml-8 mt-6 mb-2" tag="h3" type="subtitle">
           {getText("PathRouter/limits/depth/title")}
         </Text>

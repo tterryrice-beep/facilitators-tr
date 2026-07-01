@@ -3,4 +3,9 @@
   justify-content: space-between;
   width: 100%;
   gap: 2rem;
+
+  @media (max-width: 1024px) {
+    flex-direction: column;
+    justify-content: flex-start;
+  }
 }
