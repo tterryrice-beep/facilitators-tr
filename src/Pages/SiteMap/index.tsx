@@ -1,10 +1,9 @@
 import React, { type FC, useState } from "react";
+import { parseRouteConfig } from "path-router-red/dist/PathRouter/utils";
 
 import { route } from "@/config";
 import { NavLink } from "@/providers/Router";
 import { useTranslate } from "@/providers/LocaleProvider/hook";
-
-import { parseRouteConfig } from "@/modules/PathRouter/utils";
 
 import { ObjectView } from "@@/ObjectView";
 import { Text } from "@@/Text";

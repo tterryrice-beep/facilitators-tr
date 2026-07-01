@@ -1,5 +1,5 @@
 import { useTranslate } from "@/providers/LocaleProvider/hook";
-import { usePath } from "@/providers/Router";
+import { usePath, type PagePath } from "@/providers/Router";
 import { NavOverlay } from "@@/NavOverlay";
 import React, { type FC } from "react";
 
@@ -16,7 +16,7 @@ export const NavBar: FC<Props> = ({}) => {
       /> */}
       <NavOverlay
         name={getText("main/header/modules/title")}
-        page={path}
+        page={path as PagePath}
         sections={[
           { name: "PathRouter", page: "modules/routing" },
           { name: "StateDispatcher", page: "modules/dispather" },

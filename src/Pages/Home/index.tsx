@@ -1,19 +1,12 @@
 import React, { type FC, useState } from "react";
-
-import { route } from "@/config";
-import { useTranslate } from "@/providers/LocaleProvider/hook";
-import { NavLink } from "@/providers/Router";
-import { parseRouteConfig } from "@/modules/PathRouter/utils";
-
-import css from "./style.module.scss";
 import clsx from "clsx";
-import { Text } from "@@/Text";
-import { ObjectView } from "@@/ObjectView";
+
+import { useTranslate } from "@/providers/LocaleProvider";
 import { JSXView } from "@@/JSXView";
-import { BannerItem } from "./components";
 import { JSView } from "@@/JSView";
 
-const { modals, pages } = parseRouteConfig(route);
+import { BannerItem } from "./components";
+import css from "./style.module.scss";
 
 const Page: FC = ({}) => {
   const { getText } = useTranslate();

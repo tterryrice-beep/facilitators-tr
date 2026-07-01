@@ -1,12 +1,14 @@
-import { setModal, setPage } from "@/modules";
-import { Modal } from "@/Modals/Empty";
 import { lazy } from "react";
+import { setModal, setPage } from "path-router-red";
+
 
 const Default = lazy(() => import("@/Pages/_Empty"));
 const Home = lazy(() => import("@/Pages/Home"));
 const Routing = lazy(() => import("@/Pages/Routing"));
 const StateDispatcher = lazy(() => import("@/Pages/StateDispatcher"));
 const SiteMap = lazy(() => import("@/Pages/SiteMap"));
+
+const Modal = lazy(() => import("@/Modals/Empty"));
 
 export const route = {
   pages: {

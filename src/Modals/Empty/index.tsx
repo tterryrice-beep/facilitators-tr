@@ -1,8 +1,11 @@
 import React, { type FC } from "react";
-import type { ModalProps } from "@/modules";
+import type { types } from "path-router-red";
+
 import { usePath } from "@/providers/Router";
 import css from "./style.module.scss";
 
-export const Modal: FC<ModalProps> = ({ onClose }) => {
+const Modal: FC<types.ModalProps> = ({ onClose }) => {
   return <div>Modal</div>;
 };
+
+export default Modal;
