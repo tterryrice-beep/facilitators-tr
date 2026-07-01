@@ -154,7 +154,7 @@ export interface PathContextType<
   C extends RouterConfig<any, any> = RouterConfig<any, any>,
 > {
   page: {
-    path: string;
+    path: PathNamesOf<C>;
     navigate: (path: PathNamesOf<C>, options?: NavigateOptions) => void;
     isHavePrevHistory: boolean;
   };

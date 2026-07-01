@@ -5,7 +5,7 @@
         "title": "Modules"
       },
       "takes": {
-        "title": "Takes"
+        "title": "Cases"
       }
     }
   },
@@ -244,6 +244,19 @@
         "title": "Maximum Nesting Depth: 8 Levels",
         "desc": "TypeScript's type recursion used by {PageEntries} is limited to eight levels of route nesting. Projects with deeper hierarchies will still compile successfully, but autocompletion for deeply nested routes may become unreliable."
       }
+    }
+  },
+  "Home": {
+    "title": "<span class=\"text-5xl font-bold\">A Catalog of <span class=\"text-teal-400\">Engineering</span> Solutions</span>",
+    "description": "Modules, architectural patterns, and optimizations built for real-world problems.",
+    "abt": "Each case study includes an implementation, API reference, and an explanation of the design decisions.",
+    "PathRouter": {
+      "desc": "A React routing engine where the URL is the single source of truth.",
+      "desc_2": "Provides route autocompletion, nested routing, and type-safe navigation."
+    },
+    "StateDispatcher": {
+      "desc": "A base class for building isolated, strongly typed state managers.",
+      "desc_2": "Combines encapsulated state, controlled state transformations, and EventEmitter-based subscriptions."
     }
   }
 }

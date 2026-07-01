@@ -6,57 +6,83 @@ import { NavLink } from "@/providers/Router";
 import { parseRouteConfig } from "@/modules/PathRouter/utils";
 
 import css from "./style.module.scss";
+import clsx from "clsx";
+import { Text } from "@@/Text";
+import { ObjectView } from "@@/ObjectView";
+import { JSXView } from "@@/JSXView";
+import { BannerItem } from "./components";
+import { JSView } from "@@/JSView";
 
 const { modals, pages } = parseRouteConfig(route);
 
 const Page: FC = ({}) => {
-  const { getText, changeLanguage } = useTranslate();
+  const { getText } = useTranslate();
 
   return (
-    <section className={css.page}>
-      <br />
-      <div className="flex justify-between items-center">
-        <div>
-          <p>Сторінки</p>
-          <hr />
-          <br />
-          <br />
-          <ul className="w-full">
-            {pages.map(({ data, pathName }) => {
-              return (
-                <li className="w-full list-disc">
-                  <NavLink
-                    className="w-full flex justify-between gap-12"
-                    to={pathName}>
-                    <p>{data.title}</p>
-                    <pre>{pathName}</pre>
-                  </NavLink>
-                </li>
-              );
-            })}
-          </ul>
-        </div>
+    <section className={clsx(css.page, "")}>
+      {/* -- Main Banner -- */}
 
-        <div>
-          <p>Модалки</p>
-          <hr />
-          <br />
-          <br />
-          <ul>
-            {modals.map(({ data, pathName }) => {
-              return (
-                <li className="w-full list-disc">
-                  <NavLink
-                    //@ts-ignore
-                    modal={pathName}>
-                    <pre>{pathName} </pre>
-                    <p>{data.title ? "-- " + data.title : ""}</p>
-                  </NavLink>
-                </li>
-              );
-            })}
-          </ul>
-        </div>
+      <div className="pt-10 max-w-[370px]">
+        <span
+          dangerouslySetInnerHTML={{
+            __html: getText("Home/title"),
+          }}
+        />
+        <span className="mt-6 mb-2 block">{getText("Home/description")}</span>
+        <span className="text-sm text-gray-400">{getText("Home/abt")}</span>
+      </div>
+
+      {/* -- Content -- */}
+      <div className="flex flex-col gap-3 max-w-[650px]">
+        {/* -- Router -- */}
+        <BannerItem
+          to="modules/routing"
+          title="PathRouter"
+          banner={
+            <>
+              <div className="w-[260px]">
+                <JSXView>{`{
+    "/": <Home />,
+    "goods": <Goods />,
+    "services": <Services />,
+}`}</JSXView>
+              </div>
+            </>
+          }
+          discribe={
+            <>
+              {getText("Home/PathRouter/desc")}
+              <br />
+              <br />
+              {getText("Home/PathRouter/desc_2")}
+            </>
+          }
+        />
+
+        {/* -- StateDispatcher -- */}
+        <BannerItem
+          to="modules/dispather"
+          title="StateDispatcher"
+          banner={
+            <>
+              <div className="w-[300px]">
+                <JSView>{`class User extends StateDispatcher
+...
+  user.listen("name", setName);
+  user.setters.name("John");
+`}</JSView>
+              </div>
+            </>
+          }
+          discribe={
+            <>
+              {getText("Home/StateDispatcher/desc")}
+              <br />
+              <br />
+              {getText("Home/StateDispatcher/desc_2")}
+            </>
+          }
+        />
       </div>
     </section>
   );

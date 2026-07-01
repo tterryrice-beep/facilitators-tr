@@ -21,6 +21,7 @@ import Sun from "./sun.svg?react";
 import Wash from "./wash.svg?react";
 import Wine from "./wine.svg?react";
 import Add from "./add.svg?react";
+import Email from "./email.svg?react";
 
 export const main = {
   Add,
@@ -45,4 +46,5 @@ export const main = {
   Sun,
   Wash,
   Wine,
+  Email,
 } as const;
