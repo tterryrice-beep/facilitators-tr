@@ -4,6 +4,7 @@ interface Props {}
 
 import { Overlay, OverlayPosition } from "@@/overlays";
 import { ErrorBoundary } from "@@/ErrorBoundary";
+import { Loader } from "@@/Loader";
 
 import { PagesContainer } from "../../providers/Router";
 import { Footer, Header } from "./components";
@@ -16,7 +17,13 @@ export const Layout: FC<Props> = ({}) => {
       <main className="p-4 md:p-6 flex-1 max-w-6xl mx-auto w-full">
         <ErrorBoundary>
           <PagesContainer
-            fallback={<>Усе ок, ми завантажуємося</>}
+            fallback={
+              <>
+                <div className="fixed top-0 left-0 w-full h-full flex items-center justify-center">
+                  <Loader />
+                </div>
+              </>
+            }
             ModalWrapper={({ isOpen, onClose, children, key, modalName }) => {
               return (
                 <Fragment key={`${key}-${modalName || "unknown"}`}>

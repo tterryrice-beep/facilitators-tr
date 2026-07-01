@@ -6,5 +6,9 @@ interface Props {
 }
 
 export const RouterProvider: FC<Props> = ({ children }) => {
-  return <PathProvider>{children}</PathProvider>;
+  return (
+    <PathProvider basename={import.meta.env.BASE_URL || "/"}>
+      {children}
+    </PathProvider>
+  );
 };

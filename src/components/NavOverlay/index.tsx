@@ -2,7 +2,7 @@ import React, { Fragment, useRef, useState, type FC } from "react";
 import clsx from "clsx";
 
 import { NavLink, type ModalPath, type PagePath } from "@/providers/Router";
-import { Text } from "@@/Text";
+import { Text } from "@@/Text/";
 import { Overlay } from "@@/overlays";
 import { Button } from "@@/Button";
 
@@ -38,9 +38,9 @@ export const NavOverlay: FC<NavOverlayProps> = ({
       onMouseOver={open}
       onMouseEnter={open}
       onMouseLeave={close}>
-      <Button className="h-full w-full flex items-center justify-center gap-1">
+      <Button className="h-full w-full">
         <NavLink
-          className="px-6 h-full w-full"
+          className="px-6 h-full w-full flex items-center justify-center gap-1"
           to={page}
           modal={modal}
           modalBreadCrumbs={breadcrumbs}

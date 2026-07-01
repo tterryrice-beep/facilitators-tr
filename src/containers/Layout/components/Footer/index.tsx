@@ -1,3 +1,4 @@
+import { CopyText } from "@@/CopyText";
 import { Text } from "@@/Text";
 import React, { type FC } from "react";
 
@@ -17,11 +18,9 @@ export const Footer: FC<Props> = ({}) => {
           </Text>
         </div>
         <div>
-          <a href="mailto:t.terry.rice@gmail.com">
-            <Text type="small" className="text-xs">
-              t.terry.rice@gmail.com
-            </Text>
-          </a>
+          <CopyText type="small" className="text-xs">
+            t.terry.rice@gmail.com
+          </CopyText>
         </div>
       </div>
     </footer>
