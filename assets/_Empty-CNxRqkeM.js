@@ -1,0 +1,1 @@
+import{c as e,n as t,r as n,t as r}from"./jsx-runtime-CKZy1FJb.js";import{n as i}from"./index-DESGqikR.js";var a=e(n(),1),o=t(),s={},c=r(),l=e=>{let t=(0,o.c)(1);(0,a.useState)(!1),i();let n;return t[0]===Symbol.for(`react.memo_cache_sentinel`)?(n=(0,c.jsx)(`section`,{className:s.page,children:(0,c.jsx)(`div`,{children:`Page Content`})}),t[0]=n):n=t[0],n};export{l as default};
