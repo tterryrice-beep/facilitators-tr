@@ -1,1 +1,0 @@
-import{n as e,r as t,t as n}from"./jsx-runtime-CKZy1FJb.js";import"./index-Dk8ypP0F.js";var r=e();t();var i=n(),a=e=>{let t=(0,r.c)(1),n;return t[0]===Symbol.for(`react.memo_cache_sentinel`)?(n=(0,i.jsx)(`div`,{children:`Modal`}),t[0]=n):n=t[0],n};export{a as default};
