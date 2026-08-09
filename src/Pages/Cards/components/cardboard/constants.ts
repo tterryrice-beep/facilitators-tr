@@ -19,6 +19,8 @@ export const ARROW_CELL_STEP = 5;
 // ── Cards ─────────────────────────────────────────────────────────────
 /** Default card width in grid cells */
 export const DEFAULT_CARD_WIDTH = 4;
+/** Default card background color */
+export const DEFAULT_CARD_BACKGROUND = "#2d5a87";
 /** Default card height in grid cells */
 export const DEFAULT_CARD_HEIGHT = 4;
 
@@ -34,3 +36,5 @@ export const GRID_LINE_ALPHA = 0.06;
 export const GRID_MAJOR_ALPHA = 0.12;
 /** Every Nth line is a "major" line */
 export const MAJOR_EVERY = 5;
+
+export const DEFAULT_COLORS_LIST = ["#ff0000", "#ffff00", "#00ffff", "#0000ff", "#00ff00", "#ff00ff", "#ff6600", "#6600ff", "#006600", "#aa22ff"];

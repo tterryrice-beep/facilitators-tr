@@ -15,6 +15,7 @@ type EditorState = {
   coordinates: CellCoord;
   title: string;
   text: string;
+  background: string;
   width: number;
   height: number;
 } | null;
@@ -47,6 +48,7 @@ const BoardCanvas: FC = () => {
           coordinates: { ...card.coordinates },
           title: card.title,
           text: card.text,
+          background: card.background,
           width: card.width,
           height: card.height,
         }),
@@ -71,6 +73,7 @@ const BoardCanvas: FC = () => {
       coordinates: { ...card.coordinates },
       title: "",
       text: "",
+      background: card.background,
       width: DEFAULT_CARD_WIDTH,
       height: DEFAULT_CARD_HEIGHT,
     });
@@ -82,6 +85,7 @@ const BoardCanvas: FC = () => {
       coordinates: { ...card.coordinates },
       title: card.title,
       text: card.text,
+      background: card.background,
       width: card.width,
       height: card.height,
     });
@@ -233,6 +237,10 @@ const BoardCanvas: FC = () => {
                 value={editor.text}
                 onChange={(e) => setEditor({ ...editor, text: e.target.value })}
               />
+            </label>
+            <label>
+              Background
+              <input type="color" value={editor.background} onChange={(e) => setEditor({ ...editor, background: e.target.value })} />
             </label>
             <div className="cardboardFields">
               <label>

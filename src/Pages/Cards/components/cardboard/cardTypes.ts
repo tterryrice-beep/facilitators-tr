@@ -1,9 +1,11 @@
 import type { CellCoord } from './types';
+import { DEFAULT_CARD_BACKGROUND } from './constants';
 
 export interface CardEntity {
   id: string;
   title: string;
   text: string;
+  background: string;
   connects: CardConnection[];
   coordinates: CellCoord;
   width: number;
@@ -36,6 +38,9 @@ export function readCards(): CardMap {
     const parsed = JSON.parse(raw) as CardMap;
     if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) return {};
     for (const card of Object.values(parsed)) {
+      card.background = isValidColor(card.background)
+        ? card.background
+        : DEFAULT_CARD_BACKGROUND;
       card.connects = Array.isArray(card.connects)
         ? card.connects.map((connection) => typeof connection === 'string'
           ? { id: connection, color: '#ffffff' }
@@ -46,6 +51,10 @@ export function readCards(): CardMap {
   } catch {
     return {};
   }
+}
+
+function isValidColor(value: unknown): value is string {
+  return typeof value === 'string' && /^#[0-9a-f]{6}$/i.test(value);
 }
 
 export function writeCards(cards: CardMap): void {

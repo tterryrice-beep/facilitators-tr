@@ -13,7 +13,7 @@ import {
   type CardMap,
 } from "./cardTypes";
 import { GridRenderer } from "./GridRenderer";
-import { COLOR_BG } from "./constants";
+import { COLOR_BG, DEFAULT_CARD_BACKGROUND, DEFAULT_COLORS_LIST } from "./constants";
 import type { CellCoord, ViewportSize } from "./types";
 
 export interface CardBoardAppCallbacks {
@@ -45,7 +45,7 @@ export class CardBoardApp {
   private dirty = true;
   private destroyed = false;
   private readonly wrapper: HTMLElement;
-  private readonly defaultColorHistory = ["#ff0000", "#ffff00", "#00ffff", "#0000ff", "#00ff00", "#ff00ff", "#ff6600", "#6600ff", "#006600", "#aa22ff"];
+  private readonly defaultColorHistory = [...DEFAULT_COLORS_LIST];
   private colorHistory = [...this.defaultColorHistory];
 
   constructor(wrapper: HTMLElement, callbacks: CardBoardAppCallbacks = {}) {
@@ -85,7 +85,7 @@ export class CardBoardApp {
 
   createCard(cell: CellCoord, width: number, height: number): CardEntity {
     const id = String(Date.now());
-    const card: CardEntity = { id, title: "", text: "", connects: [], coordinates: cell, width, height, cells: getCardCells(cell, width, height) };
+    const card: CardEntity = { id, title: "", text: "", background: DEFAULT_CARD_BACKGROUND, connects: [], coordinates: cell, width, height, cells: getCardCells(cell, width, height) };
     this.cards[id] = card;
     this.rebuildOccupancy();
     this.markDirty();
@@ -94,13 +94,13 @@ export class CardBoardApp {
 
   save(): void { writeCards(this.cards); }
 
-  updateCard(cardId: string, data: Pick<CardEntity, "title" | "text" | "coordinates" | "width" | "height">): CardEntity | null {
+  updateCard(cardId: string, data: Pick<CardEntity, "title" | "text" | "background" | "coordinates" | "width" | "height">): CardEntity | null {
     const card = this.cards[cardId];
     if (!card) return null;
     const position = checkPlacement(this.occupancy, data.coordinates, data.width, data.height, card.id).available
       ? data.coordinates
       : findNearestFreePosition(this.occupancy, data.coordinates, data.width, data.height, card.id);
-    Object.assign(card, data, { coordinates: position, cells: getCardCells(position, data.width, data.height) });
+    Object.assign(card, data, { background: isValidColor(data.background) ? data.background : DEFAULT_CARD_BACKGROUND, coordinates: position, cells: getCardCells(position, data.width, data.height) });
     this.rebuildOccupancy(); this.save(); this.markDirty();
     return card;
   }
@@ -156,4 +156,8 @@ export class CardBoardApp {
   private tick = (): void => { if (!this.dirty || this.destroyed) return; this.dirty = false; const camera = this.controller.camera; this.grid.redraw(camera, this.viewport, this.controller.anchorCell ?? undefined); const moving = this.moveCardId ? this.cards[this.moveCardId] : undefined; const preview = moving ? { card: moving, coordinates: this.controller.getCellAt(this.viewport, this.pointer), available: checkPlacement(this.occupancy, this.controller.getCellAt(this.viewport, this.pointer), moving.width, moving.height, moving.id).available } : undefined; this.connectionRenderer.render(Object.values(this.cards), camera, this.viewport, this.connectSourceId ? { fromId: this.connectSourceId, toId: this.hoveredCardId, color: this.connectColor, dashed: true } : undefined); this.cardRenderer.render(Object.values(this.cards), camera, this.viewport, preview); };
 
   destroy(): void { if (this.destroyed) return; this.destroyed = true; this.app.ticker.remove(this.tick); this.wrapper.removeEventListener("wheel", this.onWheel); this.wrapper.removeEventListener("pointerdown", this.onPointerDown); window.removeEventListener("pointermove", this.onPointerMove); window.removeEventListener("pointerup", this.onPointerUp); this.wrapper.removeEventListener("contextmenu", this.onContextMenu); this.wrapper.removeEventListener("dblclick", this.onDoubleClick); this.wrapper.removeEventListener("keydown", this.onKeyDown); window.removeEventListener("resize", this.onResize); this.grid.destroy(); this.connectionRenderer.destroy(); this.cardRenderer.destroy(); this.app.destroy(true, { children: true, texture: true }); }
+}
+
+function isValidColor(value: unknown): value is string {
+  return typeof value === "string" && /^#[0-9a-f]{6}$/i.test(value);
 }

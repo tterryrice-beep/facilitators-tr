@@ -65,7 +65,7 @@ export class CardRenderer {
       }
       const background = view.getChildAt(0) as Graphics;
       background.clear();
-      background.beginFill(0x2d5a87, 0.96);
+      background.beginFill(parseColor(card.background), 0.96);
       background.lineStyle(1, 0x75bfff, 0.8);
       background.drawRoundedRect(0, 0, width, height, Math.min(8, CELL_SIZE / 4));
       background.endFill();
@@ -132,4 +132,9 @@ export class CardRenderer {
     this.cardViews.clear();
     this.container.destroy({ children: true });
   }
+}
+
+function parseColor(value: string): number {
+  const parsed = Number.parseInt(value.replace('#', ''), 16);
+  return Number.isFinite(parsed) ? parsed : 0x2d5a87;
 }
