@@ -4,11 +4,16 @@ export interface CardEntity {
   id: string;
   title: string;
   text: string;
-  connects: string[];
+  connects: CardConnection[];
   coordinates: CellCoord;
   width: number;
   height: number;
   cells: CellCoord[];
+}
+
+export interface CardConnection {
+  id: string;
+  color: string;
 }
 
 export type CardMap = Record<string, CardEntity>;
@@ -30,6 +35,13 @@ export function readCards(): CardMap {
     if (!raw) return {};
     const parsed = JSON.parse(raw) as CardMap;
     if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) return {};
+    for (const card of Object.values(parsed)) {
+      card.connects = Array.isArray(card.connects)
+        ? card.connects.map((connection) => typeof connection === 'string'
+          ? { id: connection, color: '#ffffff' }
+          : connection)
+        : [];
+    }
     return parsed;
   } catch {
     return {};

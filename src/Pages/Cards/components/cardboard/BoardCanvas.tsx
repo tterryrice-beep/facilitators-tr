@@ -10,6 +10,7 @@ import React, {
 import { Application } from "pixi.js";
 import { BoardController } from "./BoardController";
 import { CardRenderer } from "./CardRenderer";
+import { ConnectionRenderer } from "./ConnectionRenderer";
 import {
   buildOccupancy,
   checkPlacement,
@@ -52,6 +53,9 @@ const BoardCanvas: FC = () => {
   const [editor, setEditor] = useState<EditorState>(null);
   const [moveCardId, setMoveCardId] = useState<string | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [connectSourceId, setConnectSourceId] = useState<string | null>(null);
+  const [connectColor, setConnectColor] = useState("#ffffff");
+  const [hoveredCardId, setHoveredCardId] = useState<string | null>(null);
   const [, refreshCards] = useState(0);
 
   const markDirty = useCallback(() => {
@@ -95,7 +99,8 @@ const BoardCanvas: FC = () => {
 
     const grid = new GridRenderer();
     const cardRenderer = new CardRenderer();
-    app.stage.addChild(grid.container, cardRenderer.container);
+    const connectionRenderer = new ConnectionRenderer();
+    app.stage.addChild(grid.container, connectionRenderer.container, cardRenderer.container);
 
     const onWheel = (e: WheelEvent) => {
       e.preventDefault();
@@ -108,6 +113,22 @@ const BoardCanvas: FC = () => {
       wrapper.focus({ preventScroll: true });
       const point = getScreenPoint(e);
       const cell = controllerRef.current.getCellAt(vpRef.current, point);
+      const clickedCard = getCardAt(cell);
+      if (connectSourceId) {
+        if (clickedCard && clickedCard.id !== connectSourceId) {
+          const source = cardsRef.current[connectSourceId];
+          if (source && !source.connects.some((connection) => connection.id === clickedCard.id)) {
+            source.connects.push({ id: clickedCard.id, color: connectColor });
+            clickedCard.connects.push({ id: source.id, color: connectColor });
+            saveCards();
+            refreshCards((v) => v + 1);
+          }
+          setConnectSourceId(null);
+          setHoveredCardId(null);
+          markDirty();
+        }
+        return;
+      }
       if (moveCardId) {
         const card = cardsRef.current[moveCardId];
         if (
@@ -147,6 +168,13 @@ const BoardCanvas: FC = () => {
     const onPointerMoveAny = (e: PointerEvent) => {
       pointerRef.current = getScreenPoint(e);
       onPointerMove(e);
+      if (connectSourceId) {
+        const hovered = getCardAt(
+          controllerRef.current.getCellAt(vpRef.current, pointerRef.current),
+        );
+        setHoveredCardId(hovered?.id ?? null);
+        markDirty();
+      }
       if (moveCardId) markDirty();
     };
     const onContextMenu = (e: MouseEvent) => {
@@ -211,6 +239,14 @@ const BoardCanvas: FC = () => {
         vpRef.current,
         controllerRef.current.anchorCell ?? undefined,
       );
+      connectionRenderer.render(
+        Object.values(cardsRef.current),
+        camera,
+        vpRef.current,
+        connectSourceId
+          ? { fromId: connectSourceId, toId: hoveredCardId, color: connectColor }
+          : undefined,
+      );
       const moving = moveCardId ? cardsRef.current[moveCardId] : undefined;
       const preview = moving
         ? (() => {
@@ -236,6 +272,9 @@ const BoardCanvas: FC = () => {
         camera,
         vpRef.current,
         preview,
+        connectSourceId
+          ? { sourceId: connectSourceId, hoveredId: hoveredCardId }
+          : undefined,
       );
     };
     app.ticker.add(tick);
@@ -251,6 +290,7 @@ const BoardCanvas: FC = () => {
       wrapper.removeEventListener("keydown", onKeyDown);
       window.removeEventListener("resize", onResize);
       grid.destroy();
+      connectionRenderer.destroy();
       cardRenderer.destroy();
       app.destroy(true, { children: true, texture: true });
     };
@@ -259,6 +299,9 @@ const BoardCanvas: FC = () => {
     getScreenPoint,
     markDirty,
     moveCardId,
+    connectColor,
+    connectSourceId,
+    hoveredCardId,
     occupancy,
     refreshCards,
     saveCards,
@@ -362,6 +405,15 @@ const BoardCanvas: FC = () => {
           Move mode: choose a green position and click
         </div>
       )}
+      {connectSourceId && (
+        <div className="cardboardConnectPanel">
+          <label>
+            Thread color
+            <input type="color" value={connectColor} onChange={(e) => { setConnectColor(e.target.value); markDirty(); }} />
+          </label>
+          <button onClick={() => { setConnectSourceId(null); setHoveredCardId(null); markDirty(); }}>Cancel</button>
+        </div>
+      )}
       {tooltip && (
         <div
           className="cardboardTooltip"
@@ -385,6 +437,15 @@ const BoardCanvas: FC = () => {
                   markDirty();
                 }}>
                 Move Card
+              </button>
+              <button
+                onClick={() => {
+                  setConnectSourceId(tooltip.cardId);
+                  setHoveredCardId(null);
+                  setTooltip(null);
+                  markDirty();
+                }}>
+                Connect
               </button>
               <button
                 onClick={() => {

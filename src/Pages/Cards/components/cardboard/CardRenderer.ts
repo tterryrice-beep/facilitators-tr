@@ -14,6 +14,7 @@ export class CardRenderer {
     camera: CameraState,
     viewport: ViewportSize,
     previewPlacement?: { card: CardEntity; coordinates: { x: number; y: number }; available: boolean },
+    connectMode?: { sourceId: string; hoveredId: string | null },
   ): void {
     // Card views live in world coordinates. Apply the camera transform once
     // to the layer so cards move and scale together with the board.
@@ -47,6 +48,7 @@ export class CardRenderer {
       }
       view.position.set(x, y);
       view.visible = true;
+      view.alpha = connectMode && card.id !== connectMode.sourceId && card.id !== connectMode.hoveredId ? 0.75 : 1;
       const mask = view.mask as Graphics | null;
       if (mask) {
         mask.clear();
