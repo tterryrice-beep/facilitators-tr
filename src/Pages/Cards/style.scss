@@ -46,6 +46,9 @@
     height: auto;
   }
 }
+
+.cardsDataButton { position: relative; min-width: 72px; margin-left: 8px; padding: 7px 12px; color: #fff; background: #3b4a68; border-radius: 6px; cursor: pointer; }
+.cardsImportInput { position: absolute; width: 1px; height: 1px; overflow: hidden; opacity: 0; pointer-events: none; }
 .cardsModeButton.enabled {
   background: #718096;
   color: white;
