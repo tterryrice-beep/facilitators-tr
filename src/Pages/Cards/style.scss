@@ -1,0 +1,85 @@
+.page {
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: #1a1a2e;
+  overflow: hidden;
+  user-select: none;
+}
+
+.cardboardZoom {
+  padding: 4px 0;
+  color: rgba(255, 255, 255, 0.65);
+  background: rgba(0, 0, 0, 0.3);
+  font: 13px monospace;
+  text-align: center;
+}
+
+.cardboardCanvas {
+  flex: 1;
+  width: 100%;
+  overflow: hidden;
+  outline: none;
+}
+
+.cardboardTooltip {
+  position: fixed;
+  z-index: 20;
+  min-width: 150px;
+  padding: 5px;
+  background: #292943;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 7px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+}
+
+.cardboardTooltip button,
+.cardboardActions button {
+  display: block;
+  width: 100%;
+  padding: 8px 10px;
+  color: #fff;
+  background: transparent;
+  border: 0;
+  border-radius: 4px;
+  cursor: pointer;
+  text-align: left;
+}
+
+.cardboardTooltip button:hover,
+.cardboardActions button:hover { background: rgba(74, 158, 255, 0.25); }
+
+.cardboardModalOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.55);
+}
+
+.cardboardModal {
+  width: min(420px, calc(100vw - 32px));
+  padding: 22px;
+  color: #e9e9f5;
+  background: #292943;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 10px;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.5);
+}
+
+.cardboardModal h3 { margin: 0 0 16px; }
+.cardboardModal label { display: block; margin: 10px 0; color: #bdbdd0; font-size: 13px; }
+.cardboardModal input,
+.cardboardModal textarea { display: block; box-sizing: border-box; width: 100%; margin-top: 5px; padding: 8px; color: #fff; background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 5px; }
+.cardboardModal textarea { min-height: 90px; resize: vertical; }
+.cardboardFields { display: flex; gap: 12px; }
+.cardboardFields label { flex: 1; }
+.cardboardActions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 18px; }
+.cardboardActions button { width: auto; background: rgba(255, 255, 255, 0.1); text-align: center; }
+.cardboardActions button:last-child { background: #4a9eff; }
+.cardboardActions .danger { background: #d94848; }
+.cardboardWarning { color: #ffc857; font-size: 13px; }
+.cardboardMoveHint { position: fixed; top: 36px; left: 50%; z-index: 10; padding: 6px 12px; color: #fff; background: rgba(25, 120, 65, 0.9); border-radius: 5px; transform: translateX(-50%); font-size: 13px; }
