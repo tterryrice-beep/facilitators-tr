@@ -15,6 +15,14 @@ export class CardRenderer {
     viewport: ViewportSize,
     previewPlacement?: { card: CardEntity; coordinates: { x: number; y: number }; available: boolean },
   ): void {
+    // Card views live in world coordinates. Apply the camera transform once
+    // to the layer so cards move and scale together with the board.
+    this.container.position.set(
+      viewport.width / 2 - camera.x * camera.zoom,
+      viewport.height / 2 - camera.y * camera.zoom,
+    );
+    this.container.scale.set(camera.zoom);
+
     const visibleIds = new Set<string>();
     const worldLeft = Camera.screenToWorld({ x: 0, y: 0 }, camera, viewport);
     const worldRight = Camera.screenToWorld({ x: viewport.width, y: viewport.height }, camera, viewport);
@@ -89,18 +97,16 @@ export class CardRenderer {
       this.preview = new Graphics();
       this.container.addChild(this.preview);
     }
-    const topLeft = Camera.worldToScreen(
-      { x: placement.coordinates.x * CELL_SIZE, y: placement.coordinates.y * CELL_SIZE },
-      camera,
-      viewport,
-    );
-    const width = placement.card.width * CELL_SIZE * camera.zoom;
-    const height = placement.card.height * CELL_SIZE * camera.zoom;
-    const scale = camera.zoom;
+    // The preview is a child of the world-space card layer, so it must also
+    // be drawn in world coordinates. The layer's camera transform scales it.
+    const x = placement.coordinates.x * CELL_SIZE;
+    const y = placement.coordinates.y * CELL_SIZE;
+    const width = placement.card.width * CELL_SIZE;
+    const height = placement.card.height * CELL_SIZE;
     this.preview.clear();
     this.preview.beginFill(placement.available ? 0x39c16c : 0xe05252, 0.22);
     this.preview.lineStyle(2, placement.available ? 0x57e389 : 0xff6b6b, 0.95);
-    this.preview.drawRect(topLeft.x / scale, topLeft.y / scale, width / scale, height / scale);
+    this.preview.drawRect(x, y, width, height);
     this.preview.endFill();
   }
 
