@@ -33,7 +33,7 @@ export const ANCHOR_CELL_ALPHA = 0.3;
 
 // ── Grid line alpha ───────────────────────────────────────────────────
 export const GRID_LINE_ALPHA = 0.06;
-export const GRID_MAJOR_ALPHA = 0.12;
+export const GRID_MAJOR_ALPHA = 0.06;
 /** Every Nth line is a "major" line */
 export const MAJOR_EVERY = 5;
 
