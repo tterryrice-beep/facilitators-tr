@@ -32,6 +32,7 @@ const BoardCanvas: FC = () => {
   const [disconnectMode, setDisconnectMode] = useState<string | null>(null);
   const [connectColor, setConnectColor] = useState("#ffffff");
   const [pendingColor, setPendingColor] = useState("#ffffff");
+  const [colorHistory, setColorHistory] = useState<string[]>([]);
 
   useEffect(() => {
     if (!wrapperRef.current) return;
@@ -39,6 +40,7 @@ const BoardCanvas: FC = () => {
       onZoomChange: setZoomPercent,
       onPointerStateChange: setDragging,
       onContextMenu: setTooltip,
+      onColorHistoryChange: setColorHistory,
       onOpenCard: (card) =>
         setEditor({
           cardId: card.id,
@@ -50,6 +52,7 @@ const BoardCanvas: FC = () => {
         }),
     });
     appRef.current = app;
+    setColorHistory(app.getColorHistory());
     return () => {
       app.destroy();
       appRef.current = null;
@@ -162,10 +165,15 @@ const BoardCanvas: FC = () => {
               <button
                 onClick={() => {
                   setConnectColor(pendingColor);
+                  appRef.current?.addColorToHistory(pendingColor);
                   appRef.current?.setConnectColor(pendingColor);
                 }}>
                 OK
               </button>
+              <div className="cardboardColorHistory">
+                {colorHistory.map((color) => <button key={color} title={color} style={{ backgroundColor: color }} onClick={() => setPendingColor(color)} />)}
+              </div>
+              <button onClick={() => { appRef.current?.clearColorHistory(); setColorHistory([]); }}>Clear history</button>
             </>
           )}
           <button onClick={cancelMode}>Cancel</button>

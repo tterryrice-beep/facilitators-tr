@@ -7,6 +7,7 @@ export interface ConnectionPreview {
   fromId: string;
   toId: string | null;
   color: string;
+  dashed?: boolean;
 }
 
 export class ConnectionRenderer {
@@ -41,15 +42,26 @@ export class ConnectionRenderer {
       const to = preview.toId ? byId.get(preview.toId) : undefined;
       if (from && to) {
         const a = anchor(from); const b = anchor(to);
-        this.drawLine(a.x, a.y, b.x, b.y, preview.color);
+        this.drawLine(a.x, a.y, b.x, b.y, preview.color, true);
       }
     }
   }
 
-  private drawLine(x1: number, y1: number, x2: number, y2: number, color: string): void {
+  private drawLine(x1: number, y1: number, x2: number, y2: number, color: string, dashed = false): void {
     this.graphics.lineStyle(3, parseColor(color), 1);
-    this.graphics.moveTo(x1, y1);
-    this.graphics.lineTo(x2, y2);
+    if (!dashed) {
+      this.graphics.moveTo(x1, y1);
+      this.graphics.lineTo(x2, y2);
+      return;
+    }
+    const length = Math.hypot(x2 - x1, y2 - y1);
+    const stepX = (x2 - x1) / length;
+    const stepY = (y2 - y1) / length;
+    for (let distance = 0; distance < length; distance += 12) {
+      const end = Math.min(distance + 7, length);
+      this.graphics.moveTo(x1 + stepX * distance, y1 + stepY * distance);
+      this.graphics.lineTo(x1 + stepX * end, y1 + stepY * end);
+    }
   }
 
   destroy(): void {

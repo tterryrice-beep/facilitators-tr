@@ -48,7 +48,7 @@ export class CardRenderer {
       }
       view.position.set(x, y);
       view.visible = true;
-      view.alpha = connectMode && card.id !== connectMode.sourceId && card.id !== connectMode.hoveredId ? 0.75 : 1;
+      view.alpha = 1;
       const mask = view.mask as Graphics | null;
       if (mask) {
         mask.clear();

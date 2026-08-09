@@ -23,6 +23,7 @@ export interface CardBoardAppCallbacks {
   onOpenCard?: (card: CardEntity) => void;
   onEditorChange?: (card: CardEntity) => void;
   onDeleteRequest?: (card: CardEntity) => void;
+  onColorHistoryChange?: (colors: string[]) => void;
 }
 
 export class CardBoardApp {
@@ -44,6 +45,8 @@ export class CardBoardApp {
   private dirty = true;
   private destroyed = false;
   private readonly wrapper: HTMLElement;
+  private readonly defaultColorHistory = ["#ff0000", "#ffff00", "#00ffff", "#0000ff", "#00ff00", "#ff00ff", "#ff6600", "#6600ff", "#006600", "#aa22ff"];
+  private colorHistory = [...this.defaultColorHistory];
 
   constructor(wrapper: HTMLElement, callbacks: CardBoardAppCallbacks = {}) {
     this.wrapper = wrapper;
@@ -74,6 +77,9 @@ export class CardBoardApp {
   setConnectMode(cardId: string | null, color = this.connectColor): void { this.connectSourceId = cardId; this.disconnectSourceId = null; this.connectColor = color; this.hoveredCardId = null; this.markDirty(); }
   setDisconnectMode(cardId: string | null): void { this.disconnectSourceId = cardId; this.connectSourceId = null; this.hoveredCardId = null; this.markDirty(); }
   setConnectColor(color: string): void { this.connectColor = color; }
+  getColorHistory(): string[] { return [...this.colorHistory]; }
+  addColorToHistory(color: string): string[] { this.colorHistory = [color, ...this.colorHistory.filter((item) => item !== color)].slice(0, 10); const history = this.getColorHistory(); this.callbacks.onColorHistoryChange?.(history); return history; }
+  clearColorHistory(): string[] { this.colorHistory = []; this.callbacks.onColorHistoryChange?.([]); return []; }
   getCard(id: string): CardEntity | undefined { return this.cards[id]; }
   getCards(): CardMap { return this.cards; }
 
@@ -147,7 +153,7 @@ export class CardBoardApp {
   private rebuildOccupancy(): void { this.occupancy.clear(); const next = buildOccupancy(this.cards); for (const [key, value] of next) this.occupancy.set(key, value); }
   private screenPoint(event: { clientX: number; clientY: number }): { x: number; y: number } { const rect = this.wrapper.getBoundingClientRect(); return { x: event.clientX - rect.left, y: event.clientY - rect.top }; }
   private markDirty(): void { this.dirty = true; }
-  private tick = (): void => { if (!this.dirty || this.destroyed) return; this.dirty = false; const camera = this.controller.camera; this.grid.redraw(camera, this.viewport, this.controller.anchorCell ?? undefined); this.connectionRenderer.render(Object.values(this.cards), camera, this.viewport); const moving = this.moveCardId ? this.cards[this.moveCardId] : undefined; const preview = moving ? { card: moving, coordinates: this.controller.getCellAt(this.viewport, this.pointer), available: checkPlacement(this.occupancy, this.controller.getCellAt(this.viewport, this.pointer), moving.width, moving.height, moving.id).available } : undefined; this.cardRenderer.render(Object.values(this.cards), camera, this.viewport, preview, this.connectSourceId || this.disconnectSourceId ? { sourceId: this.connectSourceId ?? this.disconnectSourceId!, hoveredId: this.hoveredCardId } : undefined); };
+  private tick = (): void => { if (!this.dirty || this.destroyed) return; this.dirty = false; const camera = this.controller.camera; this.grid.redraw(camera, this.viewport, this.controller.anchorCell ?? undefined); const moving = this.moveCardId ? this.cards[this.moveCardId] : undefined; const preview = moving ? { card: moving, coordinates: this.controller.getCellAt(this.viewport, this.pointer), available: checkPlacement(this.occupancy, this.controller.getCellAt(this.viewport, this.pointer), moving.width, moving.height, moving.id).available } : undefined; this.connectionRenderer.render(Object.values(this.cards), camera, this.viewport, this.connectSourceId ? { fromId: this.connectSourceId, toId: this.hoveredCardId, color: this.connectColor, dashed: true } : undefined); this.cardRenderer.render(Object.values(this.cards), camera, this.viewport, preview); };
 
   destroy(): void { if (this.destroyed) return; this.destroyed = true; this.app.ticker.remove(this.tick); this.wrapper.removeEventListener("wheel", this.onWheel); this.wrapper.removeEventListener("pointerdown", this.onPointerDown); window.removeEventListener("pointermove", this.onPointerMove); window.removeEventListener("pointerup", this.onPointerUp); this.wrapper.removeEventListener("contextmenu", this.onContextMenu); this.wrapper.removeEventListener("dblclick", this.onDoubleClick); this.wrapper.removeEventListener("keydown", this.onKeyDown); window.removeEventListener("resize", this.onResize); this.grid.destroy(); this.connectionRenderer.destroy(); this.cardRenderer.destroy(); this.app.destroy(true, { children: true, texture: true }); }
 }
