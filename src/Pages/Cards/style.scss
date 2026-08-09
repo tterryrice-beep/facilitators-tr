@@ -12,6 +12,96 @@
   }
 }
 
+.cardsModeHeader {
+  display: flex;
+  justify-content: flex-start;
+  padding: 6px 10px;
+  background: rgba(0, 0, 0, 0.28);
+  flex-shrink: 0;
+}
+.cardsModeButton {
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+
+  position: relative;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  & svg {
+    position: absolute;
+    top: auto;
+    left: auto;
+    right: auto;
+    bottom: auto;
+
+    width: 20px;
+    height: auto;
+  }
+}
+.cardsModeButton.enabled {
+  background: #718096;
+  color: white;
+}
+.cardsModeButton.disabled {
+  background: #252538;
+  color: rgba(255, 255, 255, 0.357);
+}
+.simpleLayout {
+  flex: 1;
+  min-height: 0;
+  padding: 18px;
+  overflow: auto;
+}
+.simpleLayoutGroups {
+  display: flex;
+  flex-direction: column;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 14px;
+
+  width: fit-content;
+  margin: 0 auto;
+}
+.simpleLayoutGroup {
+  display: flex;
+  flex-direction: column;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+}
+.simpleLayoutCard {
+  width: 300px;
+  @media (max-width: 400px) {
+    width: 220px;
+  }
+  min-height: 42px;
+  padding: 10px 14px;
+  overflow: hidden;
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 6px;
+  cursor: pointer;
+  text-align: left;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.simpleLayoutCard:hover {
+  filter: brightness(1.15);
+}
+.simpleLayoutModal .simpleLayoutText {
+  white-space: pre-wrap;
+}
+
 .cardboardZoom {
   padding: 4px 0;
   color: rgba(255, 255, 255, 0.65);
