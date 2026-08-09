@@ -17,12 +17,13 @@ import type { BaseTool } from './tools/BaseTool';
 
 export class InputManager {
   private state: InputState = createEmptyInputState();
-  private selectTool: SelectTool;
+  selectTool: SelectTool;
   private panTool: PanTool;
-  private connectTool: ConnectCardsTool;
+  connectTool: ConnectCardsTool;
   private activeTool: BaseTool;
   private panKeyHeld = false;
   private destroyed = false;
+  public onContextMenu: ((screenX: number, screenY: number, worldX: number, worldY: number, cardId: CardId | null) => void) | null = null;
 
   constructor(
     private cameraManager: CameraManager,
@@ -37,7 +38,7 @@ export class InputManager {
   ) {
     this.selectTool = new SelectTool(cameraManager, viewportManager, selectionManager, cardManager, connectionManager, historyManager, boardManager, spatialIndex);
     this.panTool = new PanTool(cameraManager, viewportManager);
-    this.connectTool = new ConnectCardsTool(selectionManager, connectionManager, historyManager);
+    this.connectTool = new ConnectCardsTool(boardManager, connectionManager, historyManager);
     this.activeTool = this.selectTool;
   }
 
@@ -51,10 +52,12 @@ export class InputManager {
     container.on('pointermove', this.onPointerMove.bind(this));
     container.on('pointerup', this.onPointerUp.bind(this));
     container.on('pointerupoutside', this.onPointerUp.bind(this));
+    container.on('rightclick', (e: any) => { e.stopPropagation(); });
   }
 
   attachWheel(element: HTMLElement): void {
     element.addEventListener('wheel', this.onWheel.bind(this), { passive: false });
+    element.addEventListener('contextmenu', this.onContextMenuEvent.bind(this));
   }
 
   attachKeyboard(element: HTMLElement): void {
@@ -62,7 +65,36 @@ export class InputManager {
     element.addEventListener('keyup', this.onKeyUpWrapper.bind(this));
     if (element.tabIndex < 0) element.tabIndex = 0;
   }
-private updateWorldPosition(): void {
+
+  switchToConnect(cardId: CardId): void {
+    this.selectionManager.selectCard(cardId, false);
+    this.connectTool.activate(cardId);
+    this.activeTool = this.connectTool;
+  }
+
+  cancelConnect(): void {
+    this.connectTool.deactivate();
+    this.activeTool = this.selectTool;
+  }
+
+  private onContextMenuEvent(e: MouseEvent): void {
+    e.preventDefault();
+    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+    const sx = e.clientX - rect.left;
+    const sy = e.clientY - rect.top;
+    this.state.screenPosition = { x: sx, y: sy };
+    this.state.worldPosition = this.cameraManager.screenToWorld({ x: sx, y: sy });
+    const candidates = this.spatialIndex.queryPoint(this.state.worldPosition);
+    const cardId = (candidates.length > 0 ? candidates[candidates.length - 1] : null) as CardId | null;
+    if (this.onContextMenu) {
+      this.onContextMenu(e.clientX, e.clientY, this.state.worldPosition.x, this.state.worldPosition.y, cardId);
+    }
+    if (this.connectTool.isConnecting) {
+      this.cancelConnect();
+    }
+  }
+
+  private updateWorldPosition(): void {
     this.state.worldPosition = this.cameraManager.screenToWorld(this.state.screenPosition);
     const candidates = this.spatialIndex.queryPoint(this.state.worldPosition);
     this.state.hoveredCardId = (candidates.length > 0 ? candidates[candidates.length - 1] : null) as CardId | null;
@@ -74,7 +106,10 @@ private updateWorldPosition(): void {
     this.state.pressedButtons.add(e.button ?? 0);
     this.state.dragStart = { ...this.state.screenPosition };
     this.updateWorldPosition();
+    // RMB (button 2) - handled by contextmenu event
+    if (e.button === 2) return;
     if (this.panKeyHeld || e.button === 1) this.activeTool = this.panTool;
+    else this.activeTool = this.selectTool;
     this.activeTool.onPointerDown(this.state);
   }
 
@@ -118,23 +153,21 @@ private updateWorldPosition(): void {
     this.state.modifierKeys.meta = e.metaKey;
     this.activeTool.onKeyDown(e.key, this.state);
 
-    if ((e.ctrlKey || e.metaKey) && e.key === 'z' && !e.shiftKey) {
-      e.preventDefault(); this.historyManager.undo();
-    } else if ((e.ctrlKey || e.metaKey) && (e.key === 'y' || (e.key === 'z' && e.shiftKey))) {
-      e.preventDefault(); this.historyManager.redo();
-    } else if ((e.ctrlKey || e.metaKey) && e.key === 'c') {
-      e.preventDefault(); this.clipboardManager.copySelectedCards();
-    } else if ((e.ctrlKey || e.metaKey) && e.key === 'v') {
-      e.preventDefault(); this.clipboardManager.pasteCardsAtScreen(this.state.worldPosition);
-    } else if ((e.ctrlKey || e.metaKey) && e.key === 'd') {
-      e.preventDefault(); this.clipboardManager.duplicateSelected();
-    } else if (e.key === 'Delete' || e.key === 'Backspace') {
+    if ((e.ctrlKey || e.metaKey) && e.key === 'z' && !e.shiftKey) { e.preventDefault(); this.historyManager.undo(); }
+    else if ((e.ctrlKey || e.metaKey) && (e.key === 'y' || (e.key === 'z' && e.shiftKey))) { e.preventDefault(); this.historyManager.redo(); }
+    else if ((e.ctrlKey || e.metaKey) && e.key === 'c') { e.preventDefault(); this.clipboardManager.copySelectedCards(); }
+    else if ((e.ctrlKey || e.metaKey) && e.key === 'v') { e.preventDefault(); this.clipboardManager.pasteCardsAtScreen(this.state.worldPosition); }
+    else if ((e.ctrlKey || e.metaKey) && e.key === 'd') { e.preventDefault(); this.clipboardManager.duplicateSelected(); }
+    else if (e.key === 'Delete' || e.key === 'Backspace') {
       const sel = this.selectionManager.getSelectedCardIds();
       if (sel.length > 0) this.cardManager.deleteCards(sel);
-    } else if (e.key === '0') {
+    }
+    else if (e.key === '0') {
       this.fitBoard();
-    } else if (e.key === 'Escape') {
-      this.selectionManager.clearSelection();
+    }
+    else if (e.key === 'Escape') {
+      if (this.connectTool.isConnecting) { this.cancelConnect(); }
+      else this.selectionManager.clearSelection();
     }
   }
 
@@ -146,10 +179,7 @@ private updateWorldPosition(): void {
   }
 
   private fitBoard(): void {
-    this.cameraManager.fitBounds(
-      { x: -500, y: -500, width: 1000, height: 1000 },
-      window.innerWidth, window.innerHeight,
-    );
+    this.cameraManager.fitBounds({ x: -500, y: -500, width: 1000, height: 1000 }, window.innerWidth, window.innerHeight);
   }
 
   destroy(): void {

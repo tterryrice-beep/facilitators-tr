@@ -17,6 +17,7 @@ export const DEFAULT_BOARD_SETTINGS: BoardSettings = {
     cullingEnabled: true,
     showDebugBounds: false,
     devicePixelRatioLimit: 2,
+    backgroundColor: '#1a1a2e',
   },
   storage: {
     enabled: true,
@@ -29,7 +30,7 @@ export const DEFAULT_CAMERA_STATE = {
   x: 0,
   y: 0,
   zoom: 1,
-  minZoom: 0.1,
+  minZoom: 0.05,
   maxZoom: 5,
 };
 
@@ -37,3 +38,4 @@ export const VIEWPORT_CULLING_PADDING = 500;
 export const HIST0RY_MAX_SIZE = 100;
 export const SPATIAL_CELL_SIZE = 256;
 export const PASTE_OFFSET = { x: 40, y: 40 };
+export const ARROW_KEY_PAN_SPEED = 50;

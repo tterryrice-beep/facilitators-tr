@@ -145,21 +145,24 @@ constructor(options: BoardRendererOptions) {
     this.inputManager.attachKeyboard(wrapper);
 
     // 18. Pixi ticker
-    this.tickerFn = () => this.renderManager.update();
+    this.tickerFn = () => {
+      // Sync connect preview from input manager
+      const preview = this.inputManager.connectTool.getPreview();
+      if (preview) {
+        this.renderManager.connectPreviewSource = preview.cardId;
+        this.renderManager.connectPreviewPoint = preview.point;
+      } else if (!this.inputManager.connectTool.isConnecting) {
+        this.renderManager.hideConnectPreview();
+      }
+      this.renderManager.update();
+    };
     this.starter.app.ticker.add(this.tickerFn);
 
     // 19. Initial resize
     this.resize();
   }
-  private cardManager: CardManager;
-  private connectionManager: ConnectionManager;
-  private clipboardManager: ClipboardManager;
-  private storageManager: StorageManager;
-  private settingsManager: SettingsManager;
-  private renderManager: RenderManager;
-  private inputManager: InputManager;
-  private destroyed = false;
-resize(): void {
+
+  resize(): void {
     this.starter.resize();
     this.viewportManager.setSize(
       this.starter.wrapper.clientWidth,
@@ -179,40 +182,115 @@ resize(): void {
 
   // ── Public API for React ──────────────────────────────────────────
 
-  /** Create a demo card at the given world position */
-  addDemoCard(title: string, x: number, y: number): CardId {
+  /** Get card at screen position (returns card ID or null) */
+  getCardAtScreen(screenX: number, screenY: number): CardId | null {
+    const world = this.cameraManager.screenToWorld({ x: screenX, y: screenY });
+    const candidates = this.spatialManager.cardIndex.queryPoint(world);
+    return (candidates.length > 0 ? candidates[candidates.length - 1] : null) as CardId | null;
+  }
+
+  /** Get card by id */
+  getCard(id: CardId) { return this.boardManager.getCard(id); }
+
+  /** Get card at world point */
+  getCardAtWorld(wx: number, wy: number): CardId | null {
+    const candidates = this.spatialManager.cardIndex.queryPoint({ x: wx, y: wy });
+    return (candidates.length > 0 ? candidates[candidates.length - 1] : null) as CardId | null;
+  }
+
+  /** Create a card at given world position with specified size */
+  createCard(opts: { title: string; text: string; x: number; y: number; width: number; height: number }): CardId {
     return this.cardManager.createCard({
-      position: { x, y },
-      title,
-      text: 'Double-click to edit',
+      position: { x: opts.x, y: opts.y },
+      title: opts.title,
+      text: opts.text,
       color: randomColor(),
-      size: { width: 200, height: 120 },
+      size: { width: opts.width, height: opts.height },
     });
   }
 
-  /** Connect two cards */
-  connectCards(from: CardId, to: CardId): void {
-    this.connectionManager.createConnection(from, to);
+  /** Update card content and size */
+  updateCard(id: CardId, title: string, text: string, width: number, height: number): void {
+    const card = this.boardManager.getCard(id);
+    if (!card) return;
+    card.title = title;
+    card.text = text;
+    card.size = { width, height };
+    card.updatedAt = Date.now();
+    this.boardManager.markCardsDirty([id]);
+    this.spatialManager.updateCardSpatial(id, {
+      minX: card.position.x, minY: card.position.y,
+      maxX: card.position.x + width, maxY: card.position.y + height,
+    });
+    this.connectionManager.markConnectionsDirtyForCard(id);
   }
 
-  /** Get all card IDs */
-  getCardIds(): CardId[] {
-    return Object.keys(this.boardManager.getCards());
+  /** Delete a card and its connections */
+  deleteCard(id: CardId): void {
+    this.cardManager.deleteCards([id]);
+    this.selectionManager.deleteSelectedFromState([id]);
+    this.renderManager.hideConnectPreview();
   }
 
-  /** Get the history state */
-  getHistoryState() {
-    return { canUndo: this.historyManager.canUndo(), canRedo: this.historyManager.canRedo() };
+  /** Remove all connections from a card */
+  disconnectCard(id: CardId): void {
+    const connIds = this.connectionManager.getConnectionsForCard(id);
+    if (connIds.length > 0) this.connectionManager.deleteConnections(connIds);
   }
 
-  /** Subscribe to selection changes */
-  onSelectionChange(fn: () => void): () => void {
-    return this.selectionManager.onChange(fn);
+  /** Start connect mode from given card */
+  startConnectMode(cardId: CardId): void {
+    this.renderManager.showConnectPreview(cardId);
+    this.inputManager.switchToConnect(cardId);
   }
 
-  /** Subscribe to history changes */
-  onHistoryChange(fn: (state: { canUndo: boolean; canRedo: boolean }) => void): () => void {
-    return this.historyManager.onHistoryChanged(fn);
+  cancelConnectMode(): void {
+    this.renderManager.hideConnectPreview();
+    this.inputManager.cancelConnect();
+  }
+
+  isConnectActive(): boolean { return this.inputManager.connectTool.isConnecting; }
+
+  /** Context menu callback */
+  onContextMenu(fn: (screenX: number, screenY: number, worldX: number, worldY: number, cardId: CardId | null) => void): void {
+    this.inputManager.onContextMenu = fn;
+  }
+
+  /** Get board settings */
+  getBoardSettings() { return this.boardManager.getSettings(); }
+
+  /** Update board settings */
+  updateSettings(partial: Partial<import('../types').BoardSettings>): void {
+    const s = { ...this.boardManager.getSettings(), ...partial };
+    if (partial.rendering?.backgroundColor) {
+      this.starter.app.renderer.background.color = partial.rendering.backgroundColor;
+    }
+    this.boardManager.setSettings(s);
+    this.renderManager.markAllDirty();
+  }
+
+  /** Set background color */
+  setBackgroundColor(color: string): void {
+    this.starter.app.renderer.background.color = color;
+    const s = this.boardManager.getSettings();
+    s.rendering.backgroundColor = color;
+    this.boardManager.setSettings(s);
+  }
+
+  /** Toggle grid */
+  setGridEnabled(enabled: boolean): void {
+    const s = this.boardManager.getSettings();
+    s.grid.enabled = enabled;
+    this.boardManager.setSettings(s);
+    this.renderManager.markAllDirty();
+  }
+
+  /** Set grid color */
+  setGridColor(color: string): void {
+    const s = this.boardManager.getSettings();
+    s.grid.color = color;
+    this.boardManager.setSettings(s);
+    this.renderManager.markAllDirty();
   }
 
   /** Save to localStorage */
@@ -234,20 +312,28 @@ resize(): void {
   seedDemoData(): void {
     const ids: CardId[] = [];
     for (let i = 0; i < 5; i++) {
-      const id = this.addDemoCard(
-        `Card ${i + 1}`,
-        -400 + i * 200,
-        -200 + Math.sin(i * 1.5) * 100,
-      );
+      const id = this.createCard({
+        title: `Card ${i + 1}`, text: 'Double-click to edit',
+        x: -400 + i * 200, y: -200 + Math.sin(i * 1.5) * 100,
+        width: 200, height: 120,
+      });
       ids.push(id);
     }
-    // Connect some cards
     if (ids.length >= 3) {
       this.connectionManager.createConnection(ids[0], ids[1], { color: '#4a9eff' });
       this.connectionManager.createConnection(ids[1], ids[2], { color: '#ff6b6b' });
       this.connectionManager.createConnection(ids[2], ids[3], { color: '#51cf66' });
       this.connectionManager.createConnection(ids[3], ids[4], { color: '#ffd43b' });
     }
+  }
+
+  getHistoryState() {
+    return { canUndo: this.historyManager.canUndo(), canRedo: this.historyManager.canRedo() };
+  }
+
+  onSelectionChange(fn: () => void): () => void { return this.selectionManager.onChange(fn); }
+  onHistoryChange(fn: (state: { canUndo: boolean; canRedo: boolean }) => void): () => void {
+    return this.historyManager.onHistoryChanged(fn);
   }
 
   destroy(): void {

@@ -105,6 +105,7 @@ export interface RenderingSettings {
   cullingEnabled: boolean;
   showDebugBounds: boolean;
   devicePixelRatioLimit: number;
+  backgroundColor: string;
 }
 
 export interface StorageSettings {

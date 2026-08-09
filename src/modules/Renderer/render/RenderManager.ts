@@ -6,6 +6,7 @@ import type { SelectionManager } from '../managers/SelectionManager';
 import type { CameraManager } from '../camera/CameraManager';
 import type { ViewportManager } from '../viewport/ViewportManager';
 import type { SpatialIndex } from '../spatial';
+import { Graphics } from 'pixi.js';
 import { RenderLayers } from './RenderLayers';
 import { createCardView, type CardView } from './views/CardView';
 import { createConnectionView, type ConnectionView } from './views/ConnectionView';
@@ -21,6 +22,9 @@ export class RenderManager implements IRenderInvalidator {
   private selectionBox: SelectionBoxView;
   private resizeHandles: ResizeHandlesView;
   private gridDirty = true;
+  private connectPreview: Graphics | null = null;
+  public connectPreviewSource: CardId | null = null;
+  public connectPreviewPoint: { x: number; y: number } | null = null;
 
   constructor(
     private boardManager: BoardManager,
@@ -80,6 +84,7 @@ export class RenderManager implements IRenderInvalidator {
     this.updateDirtyCards();
     this.updateDirtyConnections();
     this.updateSelectionVisuals();
+    this.updateConnectPreview();
   }
 
   // eslint-disable-next-line @typescript-eslint/consistent-indexed-object-style
@@ -205,8 +210,52 @@ export class RenderManager implements IRenderInvalidator {
     this.gridView.destroy();
     this.selectionBox.destroy();
     this.resizeHandles.destroy();
+    if (this.connectPreview) { this.connectPreview.destroy(); this.connectPreview = null; }
     this.layers.destroy();
     this.cardViews.clear();
     this.connectionViews.clear();
+  }
+
+  private updateConnectPreview(): void {
+    if (this.connectPreviewSource && this.connectPreviewPoint) {
+      const card = this.boardManager.getCard(this.connectPreviewSource);
+      if (!card) { this.hideConnectPreview(); return; }
+      if (!this.connectPreview) {
+        this.connectPreview = new Graphics();
+        this.layers.overlayLayer.addChild(this.connectPreview);
+      }
+      const dotX = card.position.x + card.size.width / 2;
+      const dotY = card.position.y;
+      this.connectPreview.clear();
+      // Red dot at top-center
+      this.connectPreview.beginFill(0xff0000, 1);
+      this.connectPreview.drawCircle(dotX, dotY, 6);
+      this.connectPreview.endFill();
+      // Red line to cursor
+      this.connectPreview.lineStyle(2, 0xff0000, 0.8);
+      this.connectPreview.moveTo(dotX, dotY);
+      this.connectPreview.lineTo(this.connectPreviewPoint.x, this.connectPreviewPoint.y);
+      this.connectPreview.visible = true;
+    } else {
+      this.hideConnectPreview();
+    }
+  }
+
+  showConnectPreview(cardId: CardId): void {
+    this.connectPreviewSource = cardId;
+    this.connectPreviewPoint = null;
+  }
+
+  updateConnectPreviewPoint(point: { x: number; y: number } | null): void {
+    this.connectPreviewPoint = point;
+  }
+
+  hideConnectPreview(): void {
+    if (this.connectPreview) {
+      this.connectPreview.visible = false;
+      this.connectPreview.clear();
+    }
+    this.connectPreviewSource = null;
+    this.connectPreviewPoint = null;
   }
 }

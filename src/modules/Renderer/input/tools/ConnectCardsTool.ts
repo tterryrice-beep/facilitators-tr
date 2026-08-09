@@ -1,73 +1,67 @@
 import { BaseTool } from './BaseTool';
 import type { InputState } from '../InputState';
-import type { CameraManager } from '../../camera/CameraManager';
-import type { SelectionManager } from '../../managers/SelectionManager';
+import type { BoardManager } from '../../managers/BoardManager';
 import type { ConnectionManager } from '../../managers/ConnectionManager';
 import type { HistoryManager } from '../../managers/HistoryManager';
 import type { CardId } from '../../types';
-import { ConnectCardsCommand } from '../../commands/ConnectCardsCommand';
-import { generateId } from '../../utils';
 
 export class ConnectCardsTool extends BaseTool {
   name = 'connect';
-  private sourceCardId: CardId | null = null;
-  private isConnecting = false;
-  private currentPoint: { x: number; y: number } | null = null;
+  sourceCardId: CardId | null = null;
+  isConnecting = false;
+  currentPoint: { x: number; y: number } | null = null;
+  private supressNextClick = false;
 
   constructor(
-    private selectionManager: SelectionManager,
+    private boardManager: BoardManager,
     private connectionManager: ConnectionManager,
     private historyManager: HistoryManager,
   ) { super(); }
 
+  activate(cardId: CardId): void {
+    this.sourceCardId = cardId;
+    this.isConnecting = true;
+    this.currentPoint = null;
+    this.supressNextClick = true; // suppress the click that triggered the menu
+  }
+
   onPointerDown(state: InputState): void {
-    const hitIds = state.hoveredCardId ? [state.hoveredCardId] : [];
-    if (hitIds.length > 0) {
-      const cardId = hitIds[0];
-      if (this.isConnecting && this.sourceCardId && cardId !== this.sourceCardId) {
-        // Complete connection
-        this.connectionManager.createConnection(this.sourceCardId, cardId);
-        this.isConnecting = false;
-        this.sourceCardId = null;
-        this.currentPoint = null;
-      } else {
-        this.sourceCardId = cardId;
-        this.isConnecting = true;
-        this.currentPoint = state.worldPosition;
-      }
+    if (this.supressNextClick) { this.supressNextClick = false; return; }
+    if (!this.isConnecting || !this.sourceCardId) return;
+    const candidates = state.hoveredCardId ? [state.hoveredCardId] : [];
+    if (candidates.length > 0 && candidates[0] !== this.sourceCardId) {
+      this.connectionManager.createConnection(this.sourceCardId, candidates[0], { color: '#ff4444' });
+      this.deactivate();
     }
   }
 
   onPointerMove(state: InputState): void {
-    if (this.isConnecting) {
-      this.currentPoint = state.worldPosition;
-    }
+    if (this.isConnecting) this.currentPoint = state.worldPosition;
   }
 
   onPointerUp(_state: InputState): void {}
 
-  onWheel(state: InputState, deltaY: number): void {}
+  onWheel(_state: InputState, _deltaY: number): void {}
 
   onKeyDown(key: string, _state: InputState): void {
-    if (key === 'Escape') {
-      this.isConnecting = false;
-      this.sourceCardId = null;
-      this.currentPoint = null;
-    }
+    if (key === 'Escape') { this.deactivate(); }
   }
 
   onKeyUp(_key: string, _state: InputState): void {}
 
-  getPreviewLine(): { from: CardId; to: { x: number; y: number } } | null {
+  getPreview(): { cardId: CardId; point: { x: number; y: number } } | null {
     if (this.isConnecting && this.sourceCardId && this.currentPoint) {
-      return { from: this.sourceCardId, to: this.currentPoint };
+      return { cardId: this.sourceCardId, point: this.currentPoint };
     }
     return null;
   }
+
+  getSourceCardId(): CardId | null { return this.sourceCardId; }
 
   deactivate(): void {
     this.isConnecting = false;
     this.sourceCardId = null;
     this.currentPoint = null;
+    this.supressNextClick = false;
   }
 }

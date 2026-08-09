@@ -8,17 +8,19 @@ import type { ConnectionManager } from '../../managers/ConnectionManager';
 import type { HistoryManager } from '../../managers/HistoryManager';
 import type { BoardManager } from '../../managers/BoardManager';
 import type { SpatialIndex } from '../../spatial';
-import type { CardId, Rect } from '../../types';
+import type { CardId } from '../../types';
 import { MoveCardsCommand } from '../../commands/MoveCardsCommand';
+
+type DragMode = 'none' | 'pan' | 'cards';
 
 export class SelectTool extends BaseTool {
   name = 'select';
-  private dragging = false;
+  private mode: DragMode = 'none';
   private dragCardIds: CardId[] = [];
   private dragStartPositions: { id: CardId; x: number; y: number }[] = [];
   private dragStartWorld: { x: number; y: number } | null = null;
-  private selectingRect = false;
-  private selStart: { x: number; y: number } | null = null;
+  private dragStartCamera: { x: number; y: number } | null = null;
+  private isDragging = false;
 
   constructor(
     private cameraManager: CameraManager,
@@ -29,137 +31,112 @@ export class SelectTool extends BaseTool {
     private historyManager: HistoryManager,
     private boardManager: BoardManager,
     private spatialIndex: SpatialIndex<CardId>,
+    public onDoubleClick?: (cardId: CardId) => void,
   ) { super(); }
 
   onPointerDown(state: InputState): void {
     const world = state.worldPosition;
-    this.dragging = false;
+    this.isDragging = false;
     this.dragCardIds = [];
     this.dragStartPositions = [];
-
     const candidates = this.spatialIndex.queryPoint(world);
-    let hitCardId: CardId | null = (candidates.length > 0 ? candidates[candidates.length - 1] : null) as CardId | null;
+    const hitCardId: CardId | null = (candidates.length > 0 ? candidates[candidates.length - 1] : null) as CardId | null;
 
     if (hitCardId) {
       const toggle = state.modifierKeys.shift || state.modifierKeys.ctrl;
       this.selectionManager.selectCard(hitCardId, toggle);
-
+      this.mode = 'cards';
       const selectedIds = this.selectionManager.getSelectedCardIds();
       this.dragCardIds = selectedIds;
       this.dragStartWorld = { x: world.x, y: world.y };
       for (const id of selectedIds) {
         const card = this.boardManager.getCard(id);
-        if (card) {
-          this.dragStartPositions.push({ id, x: card.position.x, y: card.position.y });
-        }
+        if (card) this.dragStartPositions.push({ id, x: card.position.x, y: card.position.y });
       }
     } else {
       this.selectionManager.clearSelection();
-      this.selectingRect = true;
-      this.selStart = { x: world.x, y: world.y };
+      this.mode = 'pan';
+      this.dragStartCamera = { x: this.cameraManager.camera.x, y: this.cameraManager.camera.y };
       this.dragStartWorld = { x: world.x, y: world.y };
     }
   }
 
   onPointerMove(state: InputState): void {
     const world = state.worldPosition;
-
-    if (this.selectingRect && this.selStart) {
-      const rect: Rect = {
-        x: Math.min(this.selStart.x, world.x),
-        y: Math.min(this.selStart.y, world.y),
-        width: Math.abs(world.x - this.selStart.x),
-        height: Math.abs(world.y - this.selStart.y),
-      };
-      this.selectionManager.selectByRectangle(rect);
-      return;
-    }
-
-    if (this.dragCardIds.length > 0 && this.dragStartWorld) {
+    if (this.mode === 'pan' && this.dragStartCamera && this.dragStartWorld) {
       const dx = world.x - this.dragStartWorld.x;
       const dy = world.y - this.dragStartWorld.y;
-
-      if (!this.dragging) {
-        if (Math.abs(dx) > 3 || Math.abs(dy) > 3) this.dragging = true;
+      if (!this.isDragging) { if (Math.abs(dx) > 3 || Math.abs(dy) > 3) this.isDragging = true; }
+      if (this.isDragging) {
+        this.cameraManager.camera.setPosition(
+          this.dragStartCamera.x + dx * this.cameraManager.camera.zoom,
+          this.dragStartCamera.y + dy * this.cameraManager.camera.zoom);
+        this.cameraManager.camera.markDirty();
       }
-
-      if (this.dragging) {
-        // Live preview: directly update card positions on the board
+      return;
+    }
+    if (this.mode === 'cards' && this.dragCardIds.length > 0 && this.dragStartWorld) {
+      const dx = world.x - this.dragStartWorld.x;
+      const dy = world.y - this.dragStartWorld.y;
+      if (!this.isDragging) { if (Math.abs(dx) > 3 || Math.abs(dy) > 3) this.isDragging = true; }
+      if (this.isDragging) {
         for (const entry of this.dragStartPositions) {
           const card = this.boardManager.getCard(entry.id);
           if (card) {
-            const newPos = { x: entry.x + dx, y: entry.y + dy };
-            card.position = newPos;
-            this.cardManager.updateSpatial(entry.id, newPos, card.size);
+            const np = { x: entry.x + dx, y: entry.y + dy };
+            card.position = np;
+            this.cardManager.updateSpatial(entry.id, np, card.size);
             this.boardManager.markCardsDirty([entry.id]);
           }
         }
-        // Mark affected connections dirty
         for (const id of this.dragCardIds) {
-          this.boardManager.markConnectionsDirty(
-            this.boardManager.getConnectionIdsForCard(id),
-          );
+          this.boardManager.markConnectionsDirty(this.boardManager.getConnectionIdsForCard(id));
         }
       }
     }
   }
 
   onPointerUp(state: InputState): void {
-    if (this.selectingRect) {
-      this.selectingRect = false;
-      this.selStart = null;
-      this.dragStartWorld = null;
-      return;
-    }
-
-    if (this.dragging && this.dragCardIds.length > 0 && this.dragStartWorld) {
-      const world = state.worldPosition;
+    const world = state.worldPosition;
+    if (this.mode === 'pan') { this.reset(); return; }
+    if (this.mode === 'cards' && this.isDragging && this.dragCardIds.length > 0 && this.dragStartWorld) {
       const dx = world.x - this.dragStartWorld.x;
       const dy = world.y - this.dragStartWorld.y;
-
-      // First undo the live preview positions
       for (const entry of this.dragStartPositions) {
         const card = this.boardManager.getCard(entry.id);
-        if (card) {
-          card.position = { x: entry.x, y: entry.y };
-        }
+        if (card) card.position = { x: entry.x, y: entry.y };
       }
-
-      // Then execute the move command
-      const entries = this.dragStartPositions.map(entry => ({
-        cardId: entry.id,
-        from: { x: entry.x, y: entry.y },
-        to: { x: entry.x + dx, y: entry.y + dy },
+      const entries = this.dragStartPositions.map(e => ({
+        cardId: e.id, from: { x: e.x, y: e.y }, to: { x: e.x + dx, y: e.y + dy },
       }));
-
-      const cmd = new MoveCardsCommand(entries);
-      this.historyManager.executeCommand(cmd);
-
-      // Mark connections dirty
+      this.historyManager.executeCommand(new MoveCardsCommand(entries));
       for (const id of this.dragCardIds) {
-        this.boardManager.markConnectionsDirty(
-          this.boardManager.getConnectionIdsForCard(id),
-        );
+        this.boardManager.markConnectionsDirty(this.boardManager.getConnectionIdsForCard(id));
       }
     }
-
-    this.dragging = false;
-    this.dragCardIds = [];
-    this.dragStartPositions = [];
-    this.dragStartWorld = null;
+    this.reset();
   }
 
   onWheel(state: InputState, deltaY: number): void {
-    const zoomDelta = deltaY > 0 ? 0.9 : 1.1;
-    this.cameraManager.zoomAt(state.screenPosition, zoomDelta);
+    this.cameraManager.zoomAt(state.screenPosition, deltaY > 0 ? 0.9 : 1.1);
   }
 
-  onKeyDown(_key: string, _state: InputState): void {}
+  onKeyDown(key: string, _state: InputState): void {
+    const cam = this.cameraManager.camera;
+    const s = 50 / cam.zoom;
+    if (key === 'ArrowUp') { cam.y += s; cam.markDirty(); }
+    else if (key === 'ArrowDown') { cam.y -= s; cam.markDirty(); }
+    else if (key === 'ArrowLeft') { cam.x += s; cam.markDirty(); }
+    else if (key === 'ArrowRight') { cam.x -= s; cam.markDirty(); }
+  }
+
   onKeyUp(_key: string, _state: InputState): void {}
 
-  deactivate(): void {
-    this.dragging = false;
-    this.dragCardIds = [];
-    this.selectingRect = false;
+  private reset(): void {
+    this.mode = 'none'; this.isDragging = false;
+    this.dragCardIds = []; this.dragStartPositions = [];
+    this.dragStartWorld = null; this.dragStartCamera = null;
   }
+
+  deactivate(): void { this.reset(); }
 }
