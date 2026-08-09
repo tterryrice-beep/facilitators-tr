@@ -16,7 +16,7 @@ export const route = {
     map: {
       ...setPage({ component: SiteMap, title: "Site Map" }),
     },
-    utils: {
+    int: {
       cards: setPage({ component: Cards, title: "Cards App page" }),
     },
     modules: {

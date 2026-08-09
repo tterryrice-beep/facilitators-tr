@@ -6,6 +6,9 @@
       },
       "takes": {
         "title": "Cases"
+      },
+      "instruments": {
+        "title": "Instruments"
       }
     }
   },
@@ -256,6 +259,11 @@
     "StateDispatcher": {
       "desc": "A base class for building isolated, strongly typed state managers.",
       "desc_2": "Combines encapsulated state, controlled state transformations, and EventEmitter-based subscriptions."
+    }
+  },
+  "instruments": {
+    "cards": {
+      "title": "CardBoard"
     }
   }
 }

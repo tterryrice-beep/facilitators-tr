@@ -9,6 +9,13 @@ export const NavBar: FC<Props> = ({}) => {
   const { path } = usePath().page;
   return (
     <>
+      <NavOverlay
+        name={getText("main/header/instruments/title")}
+        page="modules"
+        sections={[
+          { name: getText("instruments/cards/title"), page: "int/cards" },
+        ]}
+      />
       {/* <NavOverlay
         name={getText("main/header/takes/title")}
         page="modules"
