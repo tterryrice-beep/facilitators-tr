@@ -20,6 +20,45 @@
   text-align: center;
 }
 
+.cardboardAppShell {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  flex-direction: column;
+  background: #1a1a2e;
+}
+
+.cardboardAppShell:fullscreen {
+  width: 100vw;
+  height: 100vh;
+}
+
+.cardboardHeader {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.cardboardFullscreenButton {
+  position: absolute;
+  top: 3px;
+  right: 10px;
+  z-index: 2;
+  padding: 4px 10px;
+  color: #fff;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.cardboardFullscreenButton:hover {
+  background: rgba(74, 158, 255, 0.35);
+}
+
 .cardboardCanvas {
   flex: 1;
   width: 100%;
@@ -122,6 +161,41 @@
 .cardboardActions button:last-child {
   background: #4a9eff;
 }
+
+.cardboardRelatedCards {
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.cardboardRelatedCardsTitle {
+  margin-bottom: 8px;
+  color: #bdbdd0;
+  font-size: 13px;
+}
+
+.cardboardRelatedCardsList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.cardboardRelatedCardsList button {
+  max-width: 100%;
+  padding: 6px 9px;
+  overflow: hidden;
+  color: #fff;
+  background: rgba(74, 158, 255, 0.18);
+  border: 2px solid;
+  border-radius: 5px;
+  cursor: pointer;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cardboardRelatedCardsList button:hover {
+  background: rgba(74, 158, 255, 0.35);
+}
 .cardboardActions .danger {
   background: #d94848;
 }
@@ -195,4 +269,26 @@
   border: 1px solid rgba(255, 255, 255, 0.45);
   border-radius: 4px;
   cursor: pointer;
+}
+
+.cardboardEditorColors {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: -2px 0 12px;
+}
+
+.cardboardEditorColors button {
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border: 2px solid transparent;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.cardboardEditorColors button:hover,
+.cardboardEditorColors button.selected {
+  border-color: #fff;
+  box-shadow: 0 0 0 1px rgba(74, 158, 255, 0.9);
 }

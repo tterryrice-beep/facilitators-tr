@@ -1,7 +1,8 @@
 import React, { useEffect, useRef, useState, type FC } from "react";
+import { toast } from "react-toastify";
 import { CardBoardApp } from "./CardBoardApp";
 import type { CardEntity } from "./cardTypes";
-import { DEFAULT_CARD_HEIGHT, DEFAULT_CARD_WIDTH } from "./constants";
+import { DEFAULT_CARD_HEIGHT, DEFAULT_CARD_WIDTH, DEFAULT_COLORS_LIST } from "./constants";
 import type { CellCoord } from "./types";
 
 type TooltipState = {
@@ -22,6 +23,7 @@ type EditorState = {
 
 const BoardCanvas: FC = () => {
   const wrapperRef = useRef<HTMLDivElement>(null);
+  const boardAppRef = useRef<HTMLDivElement>(null);
   const appRef = useRef<CardBoardApp | null>(null);
   const [zoomPercent, setZoomPercent] = useState(100);
   const [dragging, setDragging] = useState(false);
@@ -34,6 +36,35 @@ const BoardCanvas: FC = () => {
   const [connectColor, setConnectColor] = useState("#ffffff");
   const [pendingColor, setPendingColor] = useState("#ffffff");
   const [colorHistory, setColorHistory] = useState<string[]>([]);
+  const [editorColors, setEditorColors] = useState<string[]>(DEFAULT_COLORS_LIST);
+  const tooltipRef = useRef<HTMLDivElement>(null);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+
+  useEffect(() => {
+    const onFullscreenChange = () => setIsFullscreen(document.fullscreenElement === boardAppRef.current);
+    document.addEventListener("fullscreenchange", onFullscreenChange);
+    return () => document.removeEventListener("fullscreenchange", onFullscreenChange);
+  }, []);
+
+  const toggleFullscreen = async () => {
+    const element = boardAppRef.current;
+    if (!element) return;
+    if (document.fullscreenElement) {
+      await document.exitFullscreen();
+    } else if (element.requestFullscreen) {
+      await element.requestFullscreen();
+    }
+  };
+
+  useEffect(() => {
+    if (!tooltip) return;
+    const closeOnOutsideClick = (event: MouseEvent) => {
+      const target = event.target as Node | null;
+      if (target && !tooltipRef.current?.contains(target)) setTooltip(null);
+    };
+    document.addEventListener("click", closeOnOutsideClick);
+    return () => document.removeEventListener("click", closeOnOutsideClick);
+  }, [tooltip]);
 
   useEffect(() => {
     if (!wrapperRef.current) return;
@@ -68,6 +99,7 @@ const BoardCanvas: FC = () => {
       DEFAULT_CARD_WIDTH,
       DEFAULT_CARD_HEIGHT,
     );
+    setEditorColors(getEditorColors());
     setEditor({
       cardId: card.id,
       coordinates: { ...card.coordinates },
@@ -80,6 +112,7 @@ const BoardCanvas: FC = () => {
     setTooltip(null);
   };
   const openCard = (card: CardEntity) => {
+    setEditorColors(getEditorColors());
     setEditor({
       cardId: card.id,
       coordinates: { ...card.coordinates },
@@ -91,10 +124,35 @@ const BoardCanvas: FC = () => {
     });
     setTooltip(null);
   };
+  const getEditorColors = (): string[] => {
+    const existing = appRef.current
+      ? Object.values(appRef.current.getCards()).map((card) => card.background)
+      : [];
+    return [...new Set([...DEFAULT_COLORS_LIST, ...existing])];
+  };
   const saveEditor = () => {
     if (!editor || !appRef.current) return;
-    appRef.current.updateCard(editor.cardId, editor);
-    setEditor(null);
+    const savedCard = appRef.current.updateCard(editor.cardId, editor);
+    if (savedCard) toast.success(`${savedCard.title || "Untitled card"} saved access`);
+  };
+  const getRelatedCards = (cardId: string): CardEntity[] => {
+    const current = appRef.current?.getCard(cardId);
+    if (!current || !appRef.current) return [];
+    return current.connects
+      .map((connection) => appRef.current?.getCard(connection.id))
+      .filter((card): card is CardEntity => Boolean(card));
+  };
+  const openRelatedCard = (card: CardEntity) => {
+    setEditorColors(getEditorColors());
+    setEditor({
+      cardId: card.id,
+      coordinates: { ...card.coordinates },
+      title: card.title,
+      text: card.text,
+      background: card.background,
+      width: card.width,
+      height: card.height,
+    });
   };
   const confirmDelete = () => {
     if (deleteCard && appRef.current) appRef.current.deleteCard(deleteCard.id);
@@ -140,8 +198,14 @@ const BoardCanvas: FC = () => {
   const activeMode = connectMode || disconnectMode;
 
   return (
-    <>
-      <div className="cardboardZoom">Zoom: {zoomPercent}%</div>
+    <div ref={boardAppRef} className="cardboardAppShell">
+      <>
+        <div className="cardboardHeader">
+          <div className="cardboardZoom">Zoom: {zoomPercent}%</div>
+          <button type="button" className="cardboardFullscreenButton" onClick={toggleFullscreen}>
+            {isFullscreen ? "Exit Full" : "Full"}
+          </button>
+        </div>
       <div
         ref={wrapperRef}
         className="cardboardCanvas"
@@ -185,6 +249,7 @@ const BoardCanvas: FC = () => {
       )}
       {tooltip && (
         <div
+          ref={tooltipRef}
           className="cardboardTooltip"
           style={{ left: tooltip.x, top: tooltip.y }}
           onClick={(e) => e.stopPropagation()}>
@@ -242,6 +307,18 @@ const BoardCanvas: FC = () => {
               Background
               <input type="color" value={editor.background} onChange={(e) => setEditor({ ...editor, background: e.target.value })} />
             </label>
+            <div className="cardboardEditorColors">
+              {editorColors.map((color) => (
+                <button
+                  key={color}
+                  type="button"
+                  title={color}
+                  className={editor.background === color ? "selected" : ""}
+                  style={{ backgroundColor: color }}
+                  onClick={() => setEditor({ ...editor, background: color })}
+                />
+              ))}
+            </div>
             <div className="cardboardFields">
               <label>
                 Width
@@ -270,9 +347,21 @@ const BoardCanvas: FC = () => {
               </label>
             </div>
             <div className="cardboardActions">
-              <button onClick={() => setEditor(null)}>Cancel</button>
+              <button onClick={() => setEditor(null)}>Close</button>
               <button onClick={saveEditor}>Save</button>
             </div>
+            {getRelatedCards(editor.cardId).length > 0 && (
+              <div className="cardboardRelatedCards">
+                <div className="cardboardRelatedCardsTitle">Related cards</div>
+                <div className="cardboardRelatedCardsList">
+                  {getRelatedCards(editor.cardId).map((card) => (
+                    <button key={card.id} type="button" style={{ borderColor: card.background }} onClick={() => openRelatedCard(card)}>
+                      {card.title || "Untitled card"}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}
@@ -290,7 +379,8 @@ const BoardCanvas: FC = () => {
           </div>
         </div>
       )}
-    </>
+      </>
+    </div>
   );
 };
 

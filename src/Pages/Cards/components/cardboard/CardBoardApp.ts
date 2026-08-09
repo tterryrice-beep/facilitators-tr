@@ -43,6 +43,7 @@ export class CardBoardApp {
   private connectColor = "#ffffff";
   private hoveredCardId: string | null = null;
   private dirty = true;
+  private cardsDirty = true;
   private destroyed = false;
   private readonly wrapper: HTMLElement;
   private readonly defaultColorHistory = [...DEFAULT_COLORS_LIST];
@@ -101,7 +102,7 @@ export class CardBoardApp {
       ? data.coordinates
       : findNearestFreePosition(this.occupancy, data.coordinates, data.width, data.height, card.id);
     Object.assign(card, data, { background: isValidColor(data.background) ? data.background : DEFAULT_CARD_BACKGROUND, coordinates: position, cells: getCardCells(position, data.width, data.height) });
-    this.rebuildOccupancy(); this.save(); this.markDirty();
+    this.rebuildOccupancy(); this.save(); this.cardsDirty = true; this.markDirty();
     return card;
   }
 
@@ -123,7 +124,7 @@ export class CardBoardApp {
     window.addEventListener("resize", this.onResize);
   }
 
-  private onWheel = (event: WheelEvent): void => { event.preventDefault(); this.controller.zoomAt(this.viewport, this.screenPoint(event), event.deltaY); this.callbacks.onZoomChange?.(Math.round(this.controller.camera.zoom * 100)); this.markDirty(); };
+  private onWheel = (event: WheelEvent): void => { event.preventDefault(); this.controller.zoomAt(this.viewport, this.screenPoint(event), -event.deltaY); this.callbacks.onZoomChange?.(Math.round(this.controller.camera.zoom * 100)); this.markDirty(); };
   private onPointerDown = (event: PointerEvent): void => {
     if (event.button !== 0) return;
     this.wrapper.focus({ preventScroll: true });
@@ -153,7 +154,7 @@ export class CardBoardApp {
   private rebuildOccupancy(): void { this.occupancy.clear(); const next = buildOccupancy(this.cards); for (const [key, value] of next) this.occupancy.set(key, value); }
   private screenPoint(event: { clientX: number; clientY: number }): { x: number; y: number } { const rect = this.wrapper.getBoundingClientRect(); return { x: event.clientX - rect.left, y: event.clientY - rect.top }; }
   private markDirty(): void { this.dirty = true; }
-  private tick = (): void => { if (!this.dirty || this.destroyed) return; this.dirty = false; const camera = this.controller.camera; this.grid.redraw(camera, this.viewport, this.controller.anchorCell ?? undefined); const moving = this.moveCardId ? this.cards[this.moveCardId] : undefined; const preview = moving ? { card: moving, coordinates: this.controller.getCellAt(this.viewport, this.pointer), available: checkPlacement(this.occupancy, this.controller.getCellAt(this.viewport, this.pointer), moving.width, moving.height, moving.id).available } : undefined; this.connectionRenderer.render(Object.values(this.cards), camera, this.viewport, this.connectSourceId ? { fromId: this.connectSourceId, toId: this.hoveredCardId, color: this.connectColor, dashed: true } : undefined); this.cardRenderer.render(Object.values(this.cards), camera, this.viewport, preview); };
+  private tick = (): void => { if (!this.dirty || this.destroyed) return; this.dirty = false; const camera = this.controller.camera; this.grid.redraw(camera, this.viewport, this.controller.anchorCell ?? undefined); const moving = this.moveCardId ? this.cards[this.moveCardId] : undefined; const preview = moving ? { card: moving, coordinates: this.controller.getCellAt(this.viewport, this.pointer), available: checkPlacement(this.occupancy, this.controller.getCellAt(this.viewport, this.pointer), moving.width, moving.height, moving.id).available } : undefined; this.connectionRenderer.render(Object.values(this.cards), camera, this.viewport, this.connectSourceId ? { fromId: this.connectSourceId, toId: this.hoveredCardId, color: this.connectColor, dashed: true } : undefined); this.cardRenderer.render(Object.values(this.cards), camera, this.viewport, preview); this.cardsDirty = false; };
 
   destroy(): void { if (this.destroyed) return; this.destroyed = true; this.app.ticker.remove(this.tick); this.wrapper.removeEventListener("wheel", this.onWheel); this.wrapper.removeEventListener("pointerdown", this.onPointerDown); window.removeEventListener("pointermove", this.onPointerMove); window.removeEventListener("pointerup", this.onPointerUp); this.wrapper.removeEventListener("contextmenu", this.onContextMenu); this.wrapper.removeEventListener("dblclick", this.onDoubleClick); this.wrapper.removeEventListener("keydown", this.onKeyDown); window.removeEventListener("resize", this.onResize); this.grid.destroy(); this.connectionRenderer.destroy(); this.cardRenderer.destroy(); this.app.destroy(true, { children: true, texture: true }); }
 }
