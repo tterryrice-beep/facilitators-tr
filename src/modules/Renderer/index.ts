@@ -1,55 +1,50 @@
-import { Container, Application, type IApplicationOptions } from "pixi.js";
+// Renderer Module - Infinite Canvas Card Board
+// Public API
 
-export abstract class RenderStarter {
-  protected readonly app: Application;
-  protected readonly root = new Container();
+// Core
+export { BoardRenderer } from './core/BoardRenderer';
+export type { BoardRendererOptions } from './core/BoardRenderer';
+export { RenderStarter } from './core/RenderStarter';
 
-  private destroyed = false;
-  protected canvas: HTMLCanvasElement;
+// Types (domain)
+export type {
+  BoardId, CardId, ConnectionId,
+  Board, BoardMetadata,
+  Card, Connection,
+  ConnectionAnchor, ConnectionStyle,
+  CameraState, SelectionState,
+  BoardSettings, GridSettings,
+  InteractionSettings, RenderingSettings, StorageSettings,
+  Point, Size, Rect, Bounds,
+  ClipboardPayload,
+} from './types';
 
-  constructor(
-    protected readonly wrapper: HTMLElement,
-    options?: Partial<IApplicationOptions>,
-  ) {
-    const canvas = document.createElement("canvas");
-    this.canvas = canvas;
-    this.wrapper.appendChild(canvas);
+// Camera
+export { Camera } from './camera/Camera';
+export { CameraManager } from './camera/CameraManager';
 
-    this.app = new Application({
-      width: wrapper.clientWidth,
-      height: wrapper.clientHeight,
-      background: "#000",
-      view: canvas,
-      ...options,
-    });
+// Managers (for advanced usage)
+export { BoardManager } from './managers/BoardManager';
+export { CardManager } from './managers/CardManager';
+export { ConnectionManager } from './managers/ConnectionManager';
+export { SelectionManager } from './managers/SelectionManager';
+export { HistoryManager } from './managers/HistoryManager';
+export { ClipboardManager } from './managers/ClipboardManager';
+export { StorageManager } from './managers/StorageManager';
+export { SpatialIndexManager } from './managers/SpatialIndexManager';
 
-    this.root.sortableChildren = true;
+// Spatial
+export { UniformGridIndex } from './spatial/UniformGridIndex';
+export type { SpatialIndex } from './spatial/SpatialIndex';
 
-    this.app.stage.addChild(this.root);
-    // this.wrapper.appendChild(this.app);
-  }
-
-  resize() {
-    this.app.renderer.resize(
-      this.wrapper.clientWidth,
-      this.wrapper.clientHeight,
-    );
-  }
-
-  destroy() {
-    if (this.destroyed) return;
-    try {
-      this.destroyed = true;
-
-      this.app.destroy(true, {
-        children: true,
-        texture: true,
-      });
-
-      this.wrapper?.removeChild(this.canvas);
-      this.canvas?.remove();
-    } catch (error) {
-      console.error(error);
-    }
-  }
-}
+// Commands
+export {
+  MoveCardsCommand,
+  ResizeCardCommand,
+  CreateCardCommand,
+  DeleteCardsCommand,
+  ConnectCardsCommand,
+  DisconnectCardsCommand,
+  CompositeCommand,
+} from './commands';
+export type { Command, CommandContext } from './commands/Command';
