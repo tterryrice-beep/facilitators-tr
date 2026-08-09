@@ -1,29 +1,8 @@
-/* eslint-disable react-hooks/refs */
-
-import React, {
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-  type FC,
-} from "react";
-import { Application } from "pixi.js";
-import { BoardController } from "./BoardController";
-import { CardRenderer } from "./CardRenderer";
-import { ConnectionRenderer } from "./ConnectionRenderer";
-import {
-  buildOccupancy,
-  checkPlacement,
-  findNearestFreePosition,
-  getCardCells,
-  readCards,
-  writeCards,
-  type CardEntity,
-  type CardMap,
-} from "./cardTypes";
-import { GridRenderer } from "./GridRenderer";
-import { COLOR_BG, DEFAULT_CARD_HEIGHT, DEFAULT_CARD_WIDTH } from "./constants";
-import type { CellCoord, ViewportSize } from "./types";
+import React, { useEffect, useRef, useState, type FC } from "react";
+import { CardBoardApp } from "./CardBoardApp";
+import type { CardEntity } from "./cardTypes";
+import { DEFAULT_CARD_HEIGHT, DEFAULT_CARD_WIDTH } from "./constants";
+import type { CellCoord } from "./types";
 
 type TooltipState = {
   x: number;
@@ -42,200 +21,25 @@ type EditorState = {
 
 const BoardCanvas: FC = () => {
   const wrapperRef = useRef<HTMLDivElement>(null);
-  const controllerRef = useRef(new BoardController());
-  const vpRef = useRef<ViewportSize>({ width: 0, height: 0 });
-  const cardsRef = useRef<CardMap>({});
-  const pointerRef = useRef({ x: 0, y: 0 });
-  const dirtyRef = useRef(true);
+  const appRef = useRef<CardBoardApp | null>(null);
   const [zoomPercent, setZoomPercent] = useState(100);
-  const [isDragging, setIsDragging] = useState(false);
+  const [dragging, setDragging] = useState(false);
   const [tooltip, setTooltip] = useState<TooltipState>(null);
   const [editor, setEditor] = useState<EditorState>(null);
+  const [deleteCard, setDeleteCard] = useState<CardEntity | null>(null);
   const [moveCardId, setMoveCardId] = useState<string | null>(null);
-  const [deleteId, setDeleteId] = useState<string | null>(null);
-  const [connectSourceId, setConnectSourceId] = useState<string | null>(null);
-  const [disconnectSourceId, setDisconnectSourceId] = useState<string | null>(null);
+  const [connectMode, setConnectMode] = useState<string | null>(null);
+  const [disconnectMode, setDisconnectMode] = useState<string | null>(null);
   const [connectColor, setConnectColor] = useState("#ffffff");
-  const [pendingConnectColor, setPendingConnectColor] = useState("#ffffff");
-  const [hoveredCardId, setHoveredCardId] = useState<string | null>(null);
-  const [, refreshCards] = useState(0);
-
-  const markDirty = useCallback(() => {
-    dirtyRef.current = true;
-  }, []);
-  const getScreenPoint = useCallback(
-    (e: { clientX: number; clientY: number }) => {
-      const rect = wrapperRef.current!.getBoundingClientRect();
-      return { x: e.clientX - rect.left, y: e.clientY - rect.top };
-    },
-    [],
-  );
-  const occupancy = useCallback(() => buildOccupancy(cardsRef.current), []);
-  const getCardAt = useCallback(
-    (cell: CellCoord): CardEntity | null => {
-      const id = occupancy().get(`${cell.x}:${cell.y}`)?.cardId;
-      return id ? (cardsRef.current[id] ?? null) : null;
-    },
-    [occupancy],
-  );
-  const saveCards = useCallback(() => writeCards(cardsRef.current), []);
+  const [pendingColor, setPendingColor] = useState("#ffffff");
 
   useEffect(() => {
-    const wrapper = wrapperRef.current!;
-    const canvas = document.createElement("canvas");
-    const app = new Application({
-      width: wrapper.clientWidth,
-      height: wrapper.clientHeight,
-      view: canvas,
-      background: COLOR_BG,
-      antialias: true,
-      resolution: Math.min(window.devicePixelRatio || 1, 2),
-      autoDensity: true,
-    });
-    wrapper.appendChild(canvas);
-    vpRef.current = {
-      width: wrapper.clientWidth,
-      height: wrapper.clientHeight,
-    };
-    cardsRef.current = readCards();
-
-    const grid = new GridRenderer();
-    const cardRenderer = new CardRenderer();
-    const connectionRenderer = new ConnectionRenderer();
-    app.stage.addChild(grid.container, connectionRenderer.container, cardRenderer.container);
-
-    const onWheel = (e: WheelEvent) => {
-      e.preventDefault();
-      controllerRef.current.zoomAt(vpRef.current, getScreenPoint(e), e.deltaY);
-      setZoomPercent(Math.round(controllerRef.current.camera.zoom * 100));
-      markDirty();
-    };
-    const onPointerDown = (e: PointerEvent) => {
-      if (e.button !== 0) return;
-      wrapper.focus({ preventScroll: true });
-      const point = getScreenPoint(e);
-      const cell = controllerRef.current.getCellAt(vpRef.current, point);
-      const clickedCard = getCardAt(cell);
-      if (disconnectSourceId) {
-        if (clickedCard?.id === disconnectSourceId) {
-          setDisconnectSourceId(null);
-          setHoveredCardId(null);
-          markDirty();
-          return;
-        }
-        if (clickedCard && clickedCard.id !== disconnectSourceId) {
-          const source = cardsRef.current[disconnectSourceId];
-          const sourceConnection = source?.connects.find((connection) => connection.id === clickedCard.id);
-          if (source && sourceConnection) {
-            source.connects = source.connects.filter((connection) => connection.id !== clickedCard.id);
-            clickedCard.connects = clickedCard.connects.filter((connection) => connection.id !== source.id);
-            saveCards();
-            refreshCards((v) => v + 1);
-            setDisconnectSourceId(null);
-            setHoveredCardId(null);
-            markDirty();
-          }
-        }
-        return;
-      }
-      if (connectSourceId) {
-        if (clickedCard?.id === connectSourceId) {
-          setConnectSourceId(null);
-          setHoveredCardId(null);
-          markDirty();
-          return;
-        }
-        if (clickedCard && clickedCard.id !== connectSourceId) {
-          const source = cardsRef.current[connectSourceId];
-          if (source && !source.connects.some((connection) => connection.id === clickedCard.id)) {
-            source.connects.push({ id: clickedCard.id, color: connectColor });
-            clickedCard.connects.push({ id: source.id, color: connectColor });
-            saveCards();
-            refreshCards((v) => v + 1);
-          }
-          setConnectSourceId(null);
-          setHoveredCardId(null);
-          markDirty();
-        }
-        return;
-      }
-      if (moveCardId) {
-        const card = cardsRef.current[moveCardId];
-        if (
-          card &&
-          checkPlacement(occupancy(), cell, card.width, card.height, card.id)
-            .available
-        ) {
-          card.coordinates = cell;
-          card.cells = getCardCells(cell, card.width, card.height);
-          cardsRef.current[card.id] = card;
-          saveCards();
-          refreshCards((v) => v + 1);
-          setMoveCardId(null);
-          markDirty();
-        }
-        return;
-      }
-      controllerRef.current.startDrag(vpRef.current, point);
-      setIsDragging(true);
-      setTooltip(null);
-      markDirty();
-    };
-    const onPointerMove = (e: PointerEvent) => {
-      if (controllerRef.current.isDragging) {
-        const p = getScreenPoint(e);
-        controllerRef.current.dragMove(vpRef.current, p.x, p.y);
-        markDirty();
-      }
-    };
-    const onPointerUp = () => {
-      if (controllerRef.current.isDragging) {
-        controllerRef.current.endDrag();
-        setIsDragging(false);
-        markDirty();
-      }
-    };
-    const onPointerMoveAny = (e: PointerEvent) => {
-      pointerRef.current = getScreenPoint(e);
-      onPointerMove(e);
-      if (connectSourceId) {
-        const hovered = getCardAt(
-          controllerRef.current.getCellAt(vpRef.current, pointerRef.current),
-        );
-        const nextHoveredId = hovered?.id ?? null;
-        if (nextHoveredId !== hoveredCardId) {
-          setHoveredCardId(nextHoveredId);
-          markDirty();
-        }
-      }
-      if (disconnectSourceId) {
-        const hovered = getCardAt(
-          controllerRef.current.getCellAt(vpRef.current, pointerRef.current),
-        );
-        const nextHoveredId = hovered?.id ?? null;
-        if (nextHoveredId !== hoveredCardId) {
-          setHoveredCardId(nextHoveredId);
-          markDirty();
-        }
-      }
-      if (moveCardId) markDirty();
-    };
-    const onContextMenu = (e: MouseEvent) => {
-      e.preventDefault();
-      const p = getScreenPoint(e);
-      const cell = controllerRef.current.getCellAt(vpRef.current, p);
-      setTooltip({
-        x: e.clientX,
-        y: e.clientY,
-        cell,
-        cardId: getCardAt(cell)?.id ?? null,
-      });
-    };
-    const onDoubleClick = (e: MouseEvent) => {
-      const card = getCardAt(
-        controllerRef.current.getCellAt(vpRef.current, getScreenPoint(e)),
-      );
-      if (card)
+    if (!wrapperRef.current) return;
+    const app = new CardBoardApp(wrapperRef.current, {
+      onZoomChange: setZoomPercent,
+      onPointerStateChange: setDragging,
+      onContextMenu: setTooltip,
+      onOpenCard: (card) =>
         setEditor({
           cardId: card.id,
           coordinates: { ...card.coordinates },
@@ -243,139 +47,24 @@ const BoardCanvas: FC = () => {
           text: card.text,
           width: card.width,
           height: card.height,
-        });
-    };
-    const onKeyDown = (e: KeyboardEvent) => {
-      if (
-        e.target instanceof HTMLInputElement ||
-        e.target instanceof HTMLTextAreaElement
-      )
-        return;
-      if (e.key === "Escape" && (connectSourceId || disconnectSourceId)) {
-        setConnectSourceId(null);
-        setDisconnectSourceId(null);
-        setHoveredCardId(null);
-        markDirty();
-        return;
-      }
-      if (controllerRef.current.handleArrowKey(e.key)) {
-        e.preventDefault();
-        markDirty();
-      }
-    };
-    const onResize = () => {
-      vpRef.current = {
-        width: wrapper.clientWidth,
-        height: wrapper.clientHeight,
-      };
-      app.renderer.resize(wrapper.clientWidth, wrapper.clientHeight);
-      markDirty();
-    };
-
-    wrapper.addEventListener("wheel", onWheel, { passive: false });
-    wrapper.addEventListener("pointerdown", onPointerDown);
-    window.addEventListener("pointermove", onPointerMoveAny);
-    window.addEventListener("pointerup", onPointerUp);
-    wrapper.addEventListener("contextmenu", onContextMenu);
-    wrapper.addEventListener("dblclick", onDoubleClick);
-    wrapper.addEventListener("keydown", onKeyDown);
-    window.addEventListener("resize", onResize);
-    const tick = () => {
-      if (!dirtyRef.current) return;
-      dirtyRef.current = false;
-      const camera = controllerRef.current.camera;
-      grid.redraw(
-        camera,
-        vpRef.current,
-        controllerRef.current.anchorCell ?? undefined,
-      );
-      connectionRenderer.render(
-        Object.values(cardsRef.current),
-        camera,
-        vpRef.current,
-        undefined,
-      );
-      const moving = moveCardId ? cardsRef.current[moveCardId] : undefined;
-      const preview = moving
-        ? (() => {
-            const cell = controllerRef.current.getCellAt(
-              vpRef.current,
-              pointerRef.current,
-            );
-            return {
-              card: moving,
-              coordinates: cell,
-              available: checkPlacement(
-                occupancy(),
-                cell,
-                moving.width,
-                moving.height,
-                moving.id,
-              ).available,
-            };
-          })()
-        : undefined;
-      cardRenderer.render(
-        Object.values(cardsRef.current),
-        camera,
-        vpRef.current,
-        preview,
-        connectSourceId || disconnectSourceId
-          ? { sourceId: connectSourceId ?? disconnectSourceId!, hoveredId: hoveredCardId }
-          : undefined,
-      );
-    };
-    app.ticker.add(tick);
-    markDirty();
+        }),
+    });
+    appRef.current = app;
     return () => {
-      app.ticker.remove(tick);
-      wrapper.removeEventListener("wheel", onWheel);
-      wrapper.removeEventListener("pointerdown", onPointerDown);
-      window.removeEventListener("pointermove", onPointerMoveAny);
-      window.removeEventListener("pointerup", onPointerUp);
-      wrapper.removeEventListener("contextmenu", onContextMenu);
-      wrapper.removeEventListener("dblclick", onDoubleClick);
-      wrapper.removeEventListener("keydown", onKeyDown);
-      window.removeEventListener("resize", onResize);
-      grid.destroy();
-      connectionRenderer.destroy();
-      cardRenderer.destroy();
-      app.destroy(true, { children: true, texture: true });
+      app.destroy();
+      appRef.current = null;
     };
-  }, [
-    getCardAt,
-    getScreenPoint,
-    markDirty,
-    moveCardId,
-    connectColor,
-    connectSourceId,
-    disconnectSourceId,
-    hoveredCardId,
-    occupancy,
-    refreshCards,
-    saveCards,
-  ]);
+  }, []);
 
   const startCreate = () => {
-    if (!tooltip) return;
-    const id = String(Date.now());
-    const card: CardEntity = {
-      id,
-      title: "",
-      text: "",
-      connects: [],
-      coordinates: tooltip.cell,
-      width: DEFAULT_CARD_WIDTH,
-      height: DEFAULT_CARD_HEIGHT,
-      cells: getCardCells(
-        tooltip.cell,
-        DEFAULT_CARD_WIDTH,
-        DEFAULT_CARD_HEIGHT,
-      ),
-    };
-    cardsRef.current[id] = card;
+    if (!tooltip || !appRef.current) return;
+    const card = appRef.current.createCard(
+      tooltip.cell,
+      DEFAULT_CARD_WIDTH,
+      DEFAULT_CARD_HEIGHT,
+    );
     setEditor({
-      cardId: id,
+      cardId: card.id,
       coordinates: { ...card.coordinates },
       title: "",
       text: "",
@@ -383,80 +72,65 @@ const BoardCanvas: FC = () => {
       height: DEFAULT_CARD_HEIGHT,
     });
     setTooltip(null);
-    markDirty();
+  };
+  const openCard = (card: CardEntity) => {
+    setEditor({
+      cardId: card.id,
+      coordinates: { ...card.coordinates },
+      title: card.title,
+      text: card.text,
+      width: card.width,
+      height: card.height,
+    });
+    setTooltip(null);
   };
   const saveEditor = () => {
-    if (!editor) return;
-    const card = cardsRef.current[editor.cardId];
-    if (!card) return;
-    const width = Math.max(1, editor.width);
-    const height = Math.max(1, editor.height);
-    const free = checkPlacement(
-      occupancy(),
-      editor.coordinates,
-      width,
-      height,
-      card.id,
-    ).available;
-    const coordinates = free
-      ? editor.coordinates
-      : findNearestFreePosition(
-          occupancy(),
-          editor.coordinates,
-          width,
-          height,
-          card.id,
-        );
-    card.title = editor.title;
-    card.text = editor.text;
-    card.width = width;
-    card.height = height;
-    card.coordinates = coordinates;
-    card.cells = getCardCells(coordinates, width, height);
-    cardsRef.current[card.id] = card;
-    saveCards();
-    refreshCards((v) => v + 1);
+    if (!editor || !appRef.current) return;
+    appRef.current.updateCard(editor.cardId, editor);
     setEditor(null);
-    markDirty();
   };
-  const removeCard = () => {
-    if (!deleteId) return;
-    delete cardsRef.current[deleteId];
-    saveCards();
-    refreshCards((v) => v + 1);
-    setDeleteId(null);
+  const confirmDelete = () => {
+    if (deleteCard && appRef.current) appRef.current.deleteCard(deleteCard.id);
+    setDeleteCard(null);
+  };
+  const cancelMode = () => {
+    setConnectMode(null);
+    setDisconnectMode(null);
+    setMoveCardId(null);
+    appRef.current?.setMoveMode(null);
+    appRef.current?.setConnectMode(null);
+    appRef.current?.setDisconnectMode(null);
+  };
+  const startConnect = (id: string) => {
+    setConnectMode(id);
+    setDisconnectMode(null);
+    setPendingColor(connectColor);
     setTooltip(null);
-    markDirty();
+    appRef.current?.setConnectMode(id, connectColor);
   };
   const startDisconnect = (card: CardEntity) => {
+    setTooltip(null);
     if (card.connects.length === 1) {
-      const target = cardsRef.current[card.connects[0].id];
+      const target = appRef.current?.getCard(card.connects[0].id);
       if (target) {
-        card.connects = card.connects.filter((connection) => connection.id !== target.id);
-        target.connects = target.connects.filter((connection) => connection.id !== card.id);
-      } else {
-        card.connects = [];
+        card.connects = card.connects.filter(
+          (connection) => connection.id !== target.id,
+        );
+        target.connects = target.connects.filter(
+          (connection) => connection.id !== card.id,
+        );
+        appRef.current?.save();
       }
-      saveCards();
-      refreshCards((v) => v + 1);
-      markDirty();
       return;
     }
-    setDisconnectSourceId(card.id);
-    setHoveredCardId(null);
-    setTooltip(null);
-    markDirty();
+    setDisconnectMode(card.id);
+    setConnectMode(null);
+    appRef.current?.setDisconnectMode(card.id);
   };
-  const editorCard = editor ? cardsRef.current[editor.cardId] : null;
-  const editorPlacement = editor
-    ? checkPlacement(
-        occupancy(),
-        editor.coordinates,
-        editor.width,
-        editor.height,
-        editor.cardId,
-      )
+  const tooltipCard = tooltip?.cardId
+    ? appRef.current?.getCard(tooltip.cardId)
     : null;
+  const activeMode = connectMode || disconnectMode;
 
   return (
     <>
@@ -466,21 +140,35 @@ const BoardCanvas: FC = () => {
         className="cardboardCanvas"
         tabIndex={0}
         autoFocus
-        style={{ cursor: isDragging ? "grabbing" : "grab" }}
+        style={{ cursor: dragging ? "grabbing" : "grab" }}
       />
       {moveCardId && (
         <div className="cardboardMoveHint">
           Move mode: choose a green position and click
         </div>
       )}
-      {(connectSourceId || disconnectSourceId) && (
+      {activeMode && (
         <div className="cardboardConnectPanel">
-          {connectSourceId && <label>
-            Thread color
-            <input type="color" value={pendingConnectColor} onChange={(e) => setPendingConnectColor(e.target.value)} />
-          </label>}
-          {connectSourceId && <button onClick={() => { setConnectColor(pendingConnectColor); markDirty(); }}>OK</button>}
-          <button onClick={() => { setConnectSourceId(null); setDisconnectSourceId(null); setHoveredCardId(null); markDirty(); }}>Cancel</button>
+          {connectMode && (
+            <>
+              <label>
+                Thread color{" "}
+                <input
+                  type="color"
+                  value={pendingColor}
+                  onChange={(e) => setPendingColor(e.target.value)}
+                />
+              </label>
+              <button
+                onClick={() => {
+                  setConnectColor(pendingColor);
+                  appRef.current?.setConnectColor(pendingColor);
+                }}>
+                OK
+              </button>
+            </>
+          )}
+          <button onClick={cancelMode}>Cancel</button>
         </div>
       )}
       {tooltip && (
@@ -488,54 +176,32 @@ const BoardCanvas: FC = () => {
           className="cardboardTooltip"
           style={{ left: tooltip.x, top: tooltip.y }}
           onClick={(e) => e.stopPropagation()}>
-          {!tooltip.cardId ? (
+          {!tooltipCard ? (
             <button onClick={startCreate}>Add Card</button>
           ) : (
             <>
               <button
                 onClick={() => {
-                  setDeleteId(tooltip.cardId);
+                  setDeleteCard(tooltipCard);
                   setTooltip(null);
                 }}>
                 Remove Card
               </button>
               <button
                 onClick={() => {
-                  setMoveCardId(tooltip.cardId);
+                  setMoveCardId(tooltipCard.id);
+                  appRef.current?.setMoveMode(tooltipCard.id);
                   setTooltip(null);
-                  markDirty();
                 }}>
                 Move Card
               </button>
-              <button
-                onClick={() => {
-                  setConnectSourceId(tooltip.cardId);
-                  setPendingConnectColor(connectColor);
-                  setHoveredCardId(null);
-                  setTooltip(null);
-                  markDirty();
-                }}>
+              <button onClick={() => startConnect(tooltipCard.id)}>
                 Connect
               </button>
-              <button onClick={() => startDisconnect(cardsRef.current[tooltip.cardId!])}>
+              <button onClick={() => startDisconnect(tooltipCard)}>
                 Unconnect
               </button>
-              <button
-                onClick={() => {
-                  const card = cardsRef.current[tooltip.cardId!];
-                  if (card)
-                    setEditor({
-                      cardId: card.id,
-                      coordinates: { ...card.coordinates },
-                      title: card.title,
-                      text: card.text,
-                      width: card.width,
-                      height: card.height,
-                    });
-                  setTooltip(null);
-                }}>
-                Open Card
-              </button>
+              <button onClick={() => openCard(tooltipCard)}>Open Card</button>
             </>
           )}
         </div>
@@ -543,7 +209,7 @@ const BoardCanvas: FC = () => {
       {editor && (
         <div className="cardboardModalOverlay">
           <div className="cardboardModal">
-            <h3>{editorCard?.title ? "Edit Card" : "New Card"}</h3>
+            <h3>{editor.title ? "Edit Card" : "New Card"}</h3>
             <label>
               Title
               <input
@@ -587,11 +253,6 @@ const BoardCanvas: FC = () => {
                 />
               </label>
             </div>
-            {editorPlacement && !editorPlacement.available && (
-              <p className="cardboardWarning">
-                The card will be moved to the nearest free space.
-              </p>
-            )}
             <div className="cardboardActions">
               <button onClick={() => setEditor(null)}>Cancel</button>
               <button onClick={saveEditor}>Save</button>
@@ -599,16 +260,14 @@ const BoardCanvas: FC = () => {
           </div>
         </div>
       )}
-      {deleteId && (
+      {deleteCard && (
         <div className="cardboardModalOverlay">
           <div className="cardboardModal">
             <h3>Remove Card</h3>
-            <p>
-              Remove “{(cardsRef.current || {}) [deleteId]?.title || "Untitled card"}”?
-            </p>
+            <p>Remove “{deleteCard.title || "Untitled card"}”?</p>
             <div className="cardboardActions">
-              <button onClick={() => setDeleteId(null)}>Cancel</button>
-              <button className="danger" onClick={removeCard}>
+              <button onClick={() => setDeleteCard(null)}>Cancel</button>
+              <button className="danger" onClick={confirmDelete}>
                 Remove
               </button>
             </div>
