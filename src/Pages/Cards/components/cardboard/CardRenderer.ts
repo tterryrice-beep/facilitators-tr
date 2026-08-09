@@ -47,6 +47,20 @@ export class CardRenderer {
       }
       view.position.set(x, y);
       view.visible = true;
+      const mask = view.mask as Graphics | null;
+      if (mask) {
+        mask.clear();
+        mask.beginFill(0xffffff);
+        mask.drawRect(0, 0, width, height);
+        mask.endFill();
+      } else {
+        const cardMask = new Graphics();
+        cardMask.beginFill(0xffffff);
+        cardMask.drawRect(0, 0, width, height);
+        cardMask.endFill();
+        view.addChild(cardMask);
+        view.mask = cardMask;
+      }
       const background = view.getChildAt(0) as Graphics;
       background.clear();
       background.beginFill(0x2d5a87, 0.96);

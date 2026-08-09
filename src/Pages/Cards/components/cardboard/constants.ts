@@ -16,6 +16,12 @@ export const ZOOM_FACTOR = 1.08;
 /** Number of cells the camera jumps per arrow-key press */
 export const ARROW_CELL_STEP = 5;
 
+// ── Cards ─────────────────────────────────────────────────────────────
+/** Default card width in grid cells */
+export const DEFAULT_CARD_WIDTH = 2;
+/** Default card height in grid cells */
+export const DEFAULT_CARD_HEIGHT = 2;
+
 // ── Colors (hex numbers for PixiJS) ───────────────────────────────────
 export const COLOR_BG = 0x1a1a2e;
 export const COLOR_GRID_LINE = 0xffffff;
