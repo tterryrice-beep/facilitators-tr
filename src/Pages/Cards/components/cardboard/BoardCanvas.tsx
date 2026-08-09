@@ -54,7 +54,9 @@ const BoardCanvas: FC = () => {
   const [moveCardId, setMoveCardId] = useState<string | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [connectSourceId, setConnectSourceId] = useState<string | null>(null);
+  const [disconnectSourceId, setDisconnectSourceId] = useState<string | null>(null);
   const [connectColor, setConnectColor] = useState("#ffffff");
+  const [pendingConnectColor, setPendingConnectColor] = useState("#ffffff");
   const [hoveredCardId, setHoveredCardId] = useState<string | null>(null);
   const [, refreshCards] = useState(0);
 
@@ -114,7 +116,35 @@ const BoardCanvas: FC = () => {
       const point = getScreenPoint(e);
       const cell = controllerRef.current.getCellAt(vpRef.current, point);
       const clickedCard = getCardAt(cell);
+      if (disconnectSourceId) {
+        if (clickedCard?.id === disconnectSourceId) {
+          setDisconnectSourceId(null);
+          setHoveredCardId(null);
+          markDirty();
+          return;
+        }
+        if (clickedCard && clickedCard.id !== disconnectSourceId) {
+          const source = cardsRef.current[disconnectSourceId];
+          const sourceConnection = source?.connects.find((connection) => connection.id === clickedCard.id);
+          if (source && sourceConnection) {
+            source.connects = source.connects.filter((connection) => connection.id !== clickedCard.id);
+            clickedCard.connects = clickedCard.connects.filter((connection) => connection.id !== source.id);
+            saveCards();
+            refreshCards((v) => v + 1);
+            setDisconnectSourceId(null);
+            setHoveredCardId(null);
+            markDirty();
+          }
+        }
+        return;
+      }
       if (connectSourceId) {
+        if (clickedCard?.id === connectSourceId) {
+          setConnectSourceId(null);
+          setHoveredCardId(null);
+          markDirty();
+          return;
+        }
         if (clickedCard && clickedCard.id !== connectSourceId) {
           const source = cardsRef.current[connectSourceId];
           if (source && !source.connects.some((connection) => connection.id === clickedCard.id)) {
@@ -172,8 +202,21 @@ const BoardCanvas: FC = () => {
         const hovered = getCardAt(
           controllerRef.current.getCellAt(vpRef.current, pointerRef.current),
         );
-        setHoveredCardId(hovered?.id ?? null);
-        markDirty();
+        const nextHoveredId = hovered?.id ?? null;
+        if (nextHoveredId !== hoveredCardId) {
+          setHoveredCardId(nextHoveredId);
+          markDirty();
+        }
+      }
+      if (disconnectSourceId) {
+        const hovered = getCardAt(
+          controllerRef.current.getCellAt(vpRef.current, pointerRef.current),
+        );
+        const nextHoveredId = hovered?.id ?? null;
+        if (nextHoveredId !== hoveredCardId) {
+          setHoveredCardId(nextHoveredId);
+          markDirty();
+        }
       }
       if (moveCardId) markDirty();
     };
@@ -208,6 +251,13 @@ const BoardCanvas: FC = () => {
         e.target instanceof HTMLTextAreaElement
       )
         return;
+      if (e.key === "Escape" && (connectSourceId || disconnectSourceId)) {
+        setConnectSourceId(null);
+        setDisconnectSourceId(null);
+        setHoveredCardId(null);
+        markDirty();
+        return;
+      }
       if (controllerRef.current.handleArrowKey(e.key)) {
         e.preventDefault();
         markDirty();
@@ -243,9 +293,7 @@ const BoardCanvas: FC = () => {
         Object.values(cardsRef.current),
         camera,
         vpRef.current,
-        connectSourceId
-          ? { fromId: connectSourceId, toId: hoveredCardId, color: connectColor }
-          : undefined,
+        undefined,
       );
       const moving = moveCardId ? cardsRef.current[moveCardId] : undefined;
       const preview = moving
@@ -272,8 +320,8 @@ const BoardCanvas: FC = () => {
         camera,
         vpRef.current,
         preview,
-        connectSourceId
-          ? { sourceId: connectSourceId, hoveredId: hoveredCardId }
+        connectSourceId || disconnectSourceId
+          ? { sourceId: connectSourceId ?? disconnectSourceId!, hoveredId: hoveredCardId }
           : undefined,
       );
     };
@@ -301,6 +349,7 @@ const BoardCanvas: FC = () => {
     moveCardId,
     connectColor,
     connectSourceId,
+    disconnectSourceId,
     hoveredCardId,
     occupancy,
     refreshCards,
@@ -379,6 +428,25 @@ const BoardCanvas: FC = () => {
     setTooltip(null);
     markDirty();
   };
+  const startDisconnect = (card: CardEntity) => {
+    if (card.connects.length === 1) {
+      const target = cardsRef.current[card.connects[0].id];
+      if (target) {
+        card.connects = card.connects.filter((connection) => connection.id !== target.id);
+        target.connects = target.connects.filter((connection) => connection.id !== card.id);
+      } else {
+        card.connects = [];
+      }
+      saveCards();
+      refreshCards((v) => v + 1);
+      markDirty();
+      return;
+    }
+    setDisconnectSourceId(card.id);
+    setHoveredCardId(null);
+    setTooltip(null);
+    markDirty();
+  };
   const editorCard = editor ? cardsRef.current[editor.cardId] : null;
   const editorPlacement = editor
     ? checkPlacement(
@@ -405,13 +473,14 @@ const BoardCanvas: FC = () => {
           Move mode: choose a green position and click
         </div>
       )}
-      {connectSourceId && (
+      {(connectSourceId || disconnectSourceId) && (
         <div className="cardboardConnectPanel">
-          <label>
+          {connectSourceId && <label>
             Thread color
-            <input type="color" value={connectColor} onChange={(e) => { setConnectColor(e.target.value); markDirty(); }} />
-          </label>
-          <button onClick={() => { setConnectSourceId(null); setHoveredCardId(null); markDirty(); }}>Cancel</button>
+            <input type="color" value={pendingConnectColor} onChange={(e) => setPendingConnectColor(e.target.value)} />
+          </label>}
+          {connectSourceId && <button onClick={() => { setConnectColor(pendingConnectColor); markDirty(); }}>OK</button>}
+          <button onClick={() => { setConnectSourceId(null); setDisconnectSourceId(null); setHoveredCardId(null); markDirty(); }}>Cancel</button>
         </div>
       )}
       {tooltip && (
@@ -441,11 +510,15 @@ const BoardCanvas: FC = () => {
               <button
                 onClick={() => {
                   setConnectSourceId(tooltip.cardId);
+                  setPendingConnectColor(connectColor);
                   setHoveredCardId(null);
                   setTooltip(null);
                   markDirty();
                 }}>
                 Connect
+              </button>
+              <button onClick={() => startDisconnect(cardsRef.current[tooltip.cardId!])}>
+                Unconnect
               </button>
               <button
                 onClick={() => {
