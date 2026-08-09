@@ -62,6 +62,7 @@ const BoardCanvas: FC = () => {
 
     const onPointerDown = (e: PointerEvent) => {
       if (e.button !== 0) return;
+      wrapper.focus({ preventScroll: true });
       const sp = getScreenPoint(e);
       controllerRef.current.startDrag(vpRef.current, sp);
       setIsDragging(true);
@@ -95,7 +96,7 @@ const BoardCanvas: FC = () => {
         markDirty();
       }
     };
-    window.addEventListener('keydown', onKeyDown);
+    wrapper.addEventListener('keydown', onKeyDown);
 
     const onResize = () => {
       const nw = wrapper.clientWidth;
@@ -122,7 +123,7 @@ const BoardCanvas: FC = () => {
       wrapper.removeEventListener('wheel', onWheel);
       window.removeEventListener('pointermove', onPointerMove);
       window.removeEventListener('pointerup', onPointerUp);
-      window.removeEventListener('keydown', onKeyDown);
+      wrapper.removeEventListener('keydown', onKeyDown);
       window.removeEventListener('resize', onResize);
       grid?.destroy();
       try {
@@ -150,6 +151,7 @@ const BoardCanvas: FC = () => {
         style={{ flex: 1, width: '100%', overflow: 'hidden',
           cursor: isDragging ? 'grabbing' : 'grab' }}
         tabIndex={0}
+        autoFocus
       />
     </>
   );

@@ -1,6 +1,11 @@
-import type { CellCoord, CameraState, ViewportSize, ScreenPoint } from './types';
-import { Camera } from './Camera';
-import { ZOOM_DEFAULT, ARROW_CELL_STEP } from './constants';
+import type {
+  CellCoord,
+  CameraState,
+  ViewportSize,
+  ScreenPoint,
+} from "./types";
+import { Camera } from "./Camera";
+import { ZOOM_DEFAULT, ARROW_CELL_STEP } from "./constants";
 
 /**
  * Holds the mutable board/camera state and exposes methods
@@ -32,16 +37,16 @@ export class BoardController {
   /** Apply arrow key (returns true if handled) */
   handleArrowKey(key: string): boolean {
     switch (key) {
-      case 'ArrowUp':
+      case "ArrowUp":
         this.panByCells(0, -ARROW_CELL_STEP);
         return true;
-      case 'ArrowDown':
+      case "ArrowDown":
         this.panByCells(0, ARROW_CELL_STEP);
         return true;
-      case 'ArrowLeft':
+      case "ArrowLeft":
         this.panByCells(-ARROW_CELL_STEP, 0);
         return true;
-      case 'ArrowRight':
+      case "ArrowRight":
         this.panByCells(ARROW_CELL_STEP, 0);
         return true;
       default:
@@ -53,17 +58,19 @@ export class BoardController {
 
   /** Begin anchor drag at a screen point. Sets the anchor cell. */
   startDrag(vp: ViewportSize, screenPoint: ScreenPoint): void {
-    const { cx, cy } = Camera.screenToCell(screenPoint, this.camera, vp);
-    this.anchorCell = { x: cx, y: cy };
+    this.anchorCell = Camera.screenToCell(screenPoint, this.camera, vp);
   }
 
   /** Continue anchor drag with current mouse position */
   dragMove(vp: ViewportSize, mouseX: number, mouseY: number): void {
     if (!this.anchorCell) return;
     this.camera = Camera.panWithAnchor(
-      this.camera, vp,
-      this.anchorCell.x, this.anchorCell.y,
-      mouseX, mouseY,
+      this.camera,
+      vp,
+      this.anchorCell.x,
+      this.anchorCell.y,
+      mouseX,
+      mouseY,
     );
   }
 

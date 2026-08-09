@@ -1,5 +1,11 @@
-import type { ScreenPoint, WorldPoint, CameraState, ViewportSize } from './types';
-import { CELL_SIZE, ZOOM_MIN, ZOOM_MAX, ZOOM_FACTOR } from './constants';
+import type {
+  ScreenPoint,
+  WorldPoint,
+  CameraState,
+  ViewportSize,
+  CellCoord,
+} from "./types";
+import { CELL_SIZE, ZOOM_MIN, ZOOM_MAX, ZOOM_FACTOR } from "./constants";
 
 /**
  * Pure-math camera: screen ↔ world coordinate conversion, zoom, pan.
@@ -48,10 +54,10 @@ export const Camera = {
   },
 
   /** Given a world point, return the cell coordinate containing it */
-  worldToCell(wx: number, wy: number): { cx: number; cy: number } {
+  worldToCell(wx: number, wy: number): CellCoord {
     return {
-      cx: Math.floor(wx / CELL_SIZE),
-      cy: Math.floor(wy / CELL_SIZE),
+      x: Math.floor(wx / CELL_SIZE),
+      y: Math.floor(wy / CELL_SIZE),
     };
   },
 
@@ -60,7 +66,7 @@ export const Camera = {
     screen: ScreenPoint,
     cam: CameraState,
     vp: ViewportSize,
-  ): { cx: number; cy: number } {
+  ): CellCoord {
     const w = Camera.screenToWorld(screen, cam, vp);
     return Camera.worldToCell(w.x, w.y);
   },
@@ -94,11 +100,7 @@ export const Camera = {
   // ── Pan ─────────────────────────────────────────────────────────────
 
   /** Pan camera by a screen-pixel delta (drag direction) */
-  panByScreen(
-    cam: Readonly<CameraState>,
-    dx: number,
-    dy: number,
-  ): CameraState {
+  panByScreen(cam: Readonly<CameraState>, dx: number, dy: number): CameraState {
     return {
       ...cam,
       x: cam.x - dx / cam.zoom,
@@ -107,11 +109,7 @@ export const Camera = {
   },
 
   /** Pan camera by world units */
-  panByWorld(
-    cam: Readonly<CameraState>,
-    dx: number,
-    dy: number,
-  ): CameraState {
+  panByWorld(cam: Readonly<CameraState>, dx: number, dy: number): CameraState {
     return { ...cam, x: cam.x - dx, y: cam.y - dy };
   },
 
