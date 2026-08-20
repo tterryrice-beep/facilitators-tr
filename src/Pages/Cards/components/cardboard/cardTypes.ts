@@ -3,6 +3,7 @@ import { DEFAULT_CARD_BACKGROUND } from './constants';
 
 export interface CardEntity {
   id: string;
+  updatedAt: number;
   title: string;
   text: string;
   background: string;
@@ -30,6 +31,7 @@ export interface PlacementCheck {
 }
 
 export const CARD_STORAGE_KEY = 'cards.cardboard.entities';
+export const CARD_STORAGE_UPDATED_AT_KEY = 'cards.cardboard.updatedAt';
 
 export function readCards(): CardMap {
   try {
@@ -38,6 +40,7 @@ export function readCards(): CardMap {
     const parsed = JSON.parse(raw) as CardMap;
     if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) return {};
     for (const card of Object.values(parsed)) {
+      card.updatedAt = typeof card.updatedAt === 'number' ? card.updatedAt : 0;
       card.background = isValidColor(card.background)
         ? card.background
         : DEFAULT_CARD_BACKGROUND;
@@ -59,6 +62,23 @@ function isValidColor(value: unknown): value is string {
 
 export function writeCards(cards: CardMap): void {
   localStorage.setItem(CARD_STORAGE_KEY, JSON.stringify(cards));
+  localStorage.setItem(CARD_STORAGE_UPDATED_AT_KEY, String(Date.now()));
+}
+
+export function getCardsUpdatedAt(cards: CardMap): number {
+  const timestamps = Object.values(cards).map((card) => card.updatedAt ?? 0);
+  const storedTimestamp = Number(
+    localStorage.getItem(CARD_STORAGE_UPDATED_AT_KEY) ?? 0,
+  );
+  return Math.max(
+    Number.isFinite(storedTimestamp) ? storedTimestamp : 0,
+    ...timestamps,
+  );
+}
+
+export function writeCardsAt(cards: CardMap, updatedAt: number): void {
+  localStorage.setItem(CARD_STORAGE_KEY, JSON.stringify(cards));
+  localStorage.setItem(CARD_STORAGE_UPDATED_AT_KEY, String(updatedAt));
 }
 
 export function getCardCells(coordinates: CellCoord, width: number, height: number): CellCoord[] {

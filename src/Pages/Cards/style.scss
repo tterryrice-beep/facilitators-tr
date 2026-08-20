@@ -243,9 +243,13 @@
 }
 .cardboardActions {
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
   gap: 8px;
   margin-top: 18px;
+}
+.cardboardActionsLeft {
+  display: flex;
+  gap: 8px;
 }
 .cardboardActions button {
   width: auto;
@@ -254,6 +258,22 @@
 }
 .cardboardActions button:last-child {
   background: #4a9eff;
+}
+.cardboardActions .cardboardAddButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  padding: 8px;
+  background: #32a852;
+}
+.cardboardActions .cardboardAddButton:hover {
+  background: #279044;
+}
+.cardboardAddButton svg {
+  width: 22px;
+  height: 22px;
 }
 
 .cardboardRelatedCards {

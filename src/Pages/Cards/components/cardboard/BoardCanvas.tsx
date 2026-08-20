@@ -4,6 +4,8 @@ import { CardBoardApp } from "./CardBoardApp";
 import type { CardEntity } from "./cardTypes";
 import { DEFAULT_CARD_HEIGHT, DEFAULT_CARD_WIDTH, DEFAULT_COLORS_LIST } from "./constants";
 import type { CellCoord } from "./types";
+import type { CardMap } from "./cardTypes";
+import { Icon } from "@@/Icon";
 
 type TooltipState = {
   x: number;
@@ -21,7 +23,12 @@ type EditorState = {
   height: number;
 } | null;
 
-const BoardCanvas: FC = () => {
+interface BoardCanvasProps {
+  initialCards?: CardMap;
+  onCardsChange?: (cards: CardMap) => void;
+}
+
+const BoardCanvas: FC<BoardCanvasProps> = ({ initialCards, onCardsChange }) => {
   const wrapperRef = useRef<HTMLDivElement>(null);
   const boardAppRef = useRef<HTMLDivElement>(null);
   const appRef = useRef<CardBoardApp | null>(null);
@@ -69,6 +76,8 @@ const BoardCanvas: FC = () => {
   useEffect(() => {
     if (!wrapperRef.current) return;
     const app = new CardBoardApp(wrapperRef.current, {
+      initialCards,
+      onCardsChange,
       onZoomChange: setZoomPercent,
       onPointerStateChange: setDragging,
       onContextMenu: setTooltip,
@@ -130,10 +139,14 @@ const BoardCanvas: FC = () => {
       : [];
     return [...new Set([...DEFAULT_COLORS_LIST, ...existing])];
   };
-  const saveEditor = () => {
-    if (!editor || !appRef.current) return;
+  const saveEditor = (): boolean => {
+    if (!editor || !appRef.current) return false;
     const savedCard = appRef.current.updateCard(editor.cardId, editor);
     if (savedCard) toast.success(`${savedCard.title || "Untitled card"} saved access`);
+    return Boolean(savedCard);
+  };
+  const saveAndCloseEditor = () => {
+    if (saveEditor()) setEditor(null);
   };
   const getRelatedCards = (cardId: string): CardEntity[] => {
     const current = appRef.current?.getCard(cardId);
@@ -286,7 +299,7 @@ const BoardCanvas: FC = () => {
       {editor && (
         <div className="cardboardModalOverlay">
           <div className="cardboardModal">
-            <h3>{editor.title ? "Edit Card" : "New Card"}</h3>
+            <h3>Card Data</h3>
             <label>
               Title
               <input
@@ -347,8 +360,18 @@ const BoardCanvas: FC = () => {
               </label>
             </div>
             <div className="cardboardActions">
-              <button onClick={() => setEditor(null)}>Close</button>
-              <button onClick={saveEditor}>Save</button>
+              <div className="cardboardActionsLeft">
+                <button type="button" onClick={() => setEditor(null)}>Close</button>
+                <button type="button" onClick={saveEditor}>Save</button>
+              </div>
+              <button
+                type="button"
+                className="cardboardAddButton"
+                aria-label="Save and close card"
+                title="Save and close"
+                onClick={saveAndCloseEditor}>
+                <Icon name="main/Add" />
+              </button>
             </div>
             {getRelatedCards(editor.cardId).length > 0 && (
               <div className="cardboardRelatedCards">

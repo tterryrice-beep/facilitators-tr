@@ -21,6 +21,8 @@ import {
 import type { CellCoord, ViewportSize } from "./types";
 
 export interface CardBoardAppCallbacks {
+  initialCards?: CardMap;
+  onCardsChange?: (cards: CardMap) => void;
   onZoomChange?: (zoomPercent: number) => void;
   onPointerStateChange?: (dragging: boolean) => void;
   onContextMenu?: (event: {
@@ -78,7 +80,7 @@ export class CardBoardApp {
       width: wrapper.clientWidth,
       height: wrapper.clientHeight,
     };
-    this.cards = readCards();
+    this.cards = callbacks.initialCards ?? readCards();
     this.rebuildOccupancy();
     this.grid = new GridRenderer();
     this.cardRenderer = new CardRenderer();
@@ -140,6 +142,7 @@ export class CardBoardApp {
     const id = String(Date.now());
     const card: CardEntity = {
       id,
+      updatedAt: Date.now(),
       title: "",
       text: "",
       background: DEFAULT_CARD_BACKGROUND,
@@ -157,6 +160,7 @@ export class CardBoardApp {
 
   save(): void {
     writeCards(this.cards);
+    this.callbacks.onCardsChange?.(this.cards);
   }
 
   updateCard(
@@ -184,6 +188,7 @@ export class CardBoardApp {
           card.id,
         );
     Object.assign(card, data, {
+      updatedAt: Date.now(),
       background: isValidColor(data.background)
         ? data.background
         : DEFAULT_CARD_BACKGROUND,
@@ -205,6 +210,7 @@ export class CardBoardApp {
         (connection) => connection.id !== cardId,
       );
     delete this.cards[cardId];
+    this.touchCards();
     this.rebuildOccupancy();
     this.save();
     this.markDirty();
@@ -390,6 +396,7 @@ export class CardBoardApp {
   private moveCard(card: CardEntity, cell: CellCoord): void {
     card.coordinates = cell;
     card.cells = getCardCells(cell, card.width, card.height);
+    this.touchCards();
     this.rebuildOccupancy();
     this.save();
     this.moveCardId = null;
@@ -401,6 +408,10 @@ export class CardBoardApp {
     this.disconnectSourceId = null;
     this.hoveredCardId = null;
     this.markDirty();
+  }
+  private touchCards(): void {
+    const updatedAt = Date.now();
+    for (const card of Object.values(this.cards)) card.updatedAt = updatedAt;
   }
   private getCardAt(cell: CellCoord): CardEntity | null {
     const id = this.occupancy.get(`${cell.x}:${cell.y}`)?.cardId;

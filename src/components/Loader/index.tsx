@@ -1,6 +1,7 @@
 import React, { type FC } from "react";
 
 import css from "./style.module.scss";
+import { Icon } from "@@/Icon";
 
 interface Props {
   children?: React.ReactNode;
