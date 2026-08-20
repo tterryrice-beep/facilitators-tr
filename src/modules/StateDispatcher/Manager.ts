@@ -4,7 +4,7 @@ export type SetterMap<State, Events> = {
   [K in keyof Events]: (state: State, value: Events[K]) => void;
 };
 
-export abstract class StateDispatcher<
+export class StateDispatcher<
   StateValues,
   Events extends Record<string, any>,
 > {

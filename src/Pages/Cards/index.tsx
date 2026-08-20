@@ -13,6 +13,7 @@ import {
 } from "./components/cardboard/cardTypes";
 import { PrimaryButton } from "@@/PrimaryButton";
 import { Text } from "@@/Text";
+import { instances } from "@/config/instances";
 
 const Page: FC = () => {
   const [simpleMode, setSimpleMode] = useState(() => window.innerWidth <= 600);
@@ -87,7 +88,9 @@ const Page: FC = () => {
           </div>
 
           <div className="">
-            <PrimaryButton className="flex items-center justify-center">
+            <PrimaryButton
+              onClick={() => instances.fb?.().signInWithGoogle()}
+              className="flex items-center justify-center">
               <Text>Log In</Text>
             </PrimaryButton>
           </div>
