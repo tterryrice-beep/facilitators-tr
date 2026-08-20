@@ -91,11 +91,29 @@ const Page: FC = () => {
           </div>
 
           <div className="">
-            <PrimaryButton
-              onClick={() => instances.fb?.().signInWithGoogle()}
-              className="flex items-center justify-center">
-              <Text>Log In</Text>
-            </PrimaryButton>
+            {auth ? (
+              <button
+                type="button"
+                aria-label={`Signed in as ${auth.displayName ?? auth.email ?? "user"}`}
+                className="h-10 w-10 overflow-hidden rounded-full border-2 border-zinc-500 bg-zinc-600 text-sm font-bold text-white"
+                title={auth.displayName ?? auth.email ?? "Signed-in user"}>
+                {auth.photoURL ? (
+                  <img
+                    src={auth.photoURL}
+                    alt={auth.displayName ?? auth.email ?? "User avatar"}
+                    className="h-full w-full object-cover"
+                  />
+                ) : (
+                  getUserInitials(auth.displayName ?? auth.email ?? "User")
+                )}
+              </button>
+            ) : (
+              <PrimaryButton
+                onClick={() => instances.fb?.().signInWithGoogle()}
+                className="flex items-center justify-center">
+                <Text>Log In</Text>
+              </PrimaryButton>
+            )}
           </div>
         </div>
       </div>
@@ -126,6 +144,15 @@ function isValidCardMap(value: unknown): value is CardMap {
       Array.isArray(item.connects)
     );
   });
+}
+
+function getUserInitials(name: string): string {
+  return name
+    .trim()
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase() ?? "")
+    .join("");
 }
 
 export default Page;
