@@ -5,26 +5,31 @@ import { FbAuth } from "./modules/Auth";
 import { StateDispatcher } from "../StateDispatcher";
 import type { FbEvents, FbState } from "./type";
 
-export class FireBaseRunner {
-  private app: FirebaseApp;
-  private auth: FbAuth;
-
-  private dispatcher = new StateDispatcher<FbState, FbEvents>({}, {})
+export class FireBaseRunner extends StateDispatcher<FbState, FbEvents> {
+  private readonly app: FirebaseApp;
+  private readonly auth: FbAuth;
+  private readonly unsubscribeAuthState: () => void;
 
   constructor() {
+    super(
+      { user: null },
+      {
+        user: (state, user) => {
+          state.user = user;
+        },
+      },
+    );
+
     this.app = getApps()[0] ?? initializeApp(firebaseConfig);
     this.auth = new FbAuth(this.app);
-  }
 
-  public listen = this.dispatcher.listen;
-  public getState = this.dispatcher.getState;
+    this.unsubscribeAuthState = this.auth.onAuthStateChanged((user) => {
+      this.setters.user(user);
+    });
+  }
 
   public getCurrentUser(): User | null {
-    return this.auth.getCurrentUser();
-  }
-
-  public onAuthStateChanged(callback: (user: User | null) => void): () => void {
-    return this.auth.onAuthStateChanged(callback);
+    return this.getState().user;
   }
 
   public signInWithGoogle(): Promise<User> {
@@ -33,5 +38,10 @@ export class FireBaseRunner {
 
   public signOut(): Promise<void> {
     return this.auth.signOut();
+  }
+
+  public destroy(): void {
+    this.unsubscribeAuthState();
+    this.destroyDispatcher();
   }
 }
