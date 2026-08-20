@@ -14,10 +14,13 @@ import {
 import { PrimaryButton } from "@@/PrimaryButton";
 import { Text } from "@@/Text";
 import { instances } from "@/config/instances";
+import { useAuth } from "@/modules/FireBase";
 
 const Page: FC = () => {
   const [simpleMode, setSimpleMode] = useState(() => window.innerWidth <= 600);
   const [boardKey, setBoardKey] = useState(0);
+
+  const auth = useAuth()
 
   const exportCards = () => {
     const blob = new Blob([localStorage.getItem(CARD_STORAGE_KEY) ?? "{}"], {
