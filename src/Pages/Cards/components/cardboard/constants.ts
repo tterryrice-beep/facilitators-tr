@@ -1,6 +1,6 @@
 // ── Grid ──────────────────────────────────────────────────────────────
 /** World-unit size of a single grid cell */
-export const CELL_SIZE = 50;
+export const CELL_SIZE = 20;
 
 // ── Zoom ──────────────────────────────────────────────────────────────
 /** Zoom at which 1 cell occupies 50 screen pixels (100 %) */
@@ -18,11 +18,11 @@ export const ARROW_CELL_STEP = 5;
 
 // ── Cards ─────────────────────────────────────────────────────────────
 /** Default card width in grid cells */
-export const DEFAULT_CARD_WIDTH = 4;
+export const DEFAULT_CARD_WIDTH = 8;
 /** Default card background color */
 export const DEFAULT_CARD_BACKGROUND = "#2d5a87";
 /** Default card height in grid cells */
-export const DEFAULT_CARD_HEIGHT = 4;
+export const DEFAULT_CARD_HEIGHT = 10;
 
 // ── Colors (hex numbers for PixiJS) ───────────────────────────────────
 export const COLOR_BG = 0x1a1a2e;

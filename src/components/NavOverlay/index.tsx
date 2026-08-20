@@ -8,7 +8,7 @@ import { Button } from "@@/Button";
 
 export interface NavOverlayItem {
   name?: string;
-  page?: PagePath;
+  page?: PagePath | null;
   modal?: ModalPath;
   breadcrumbs?: string[];
 }
@@ -39,14 +39,24 @@ export const NavOverlay: FC<NavOverlayProps> = ({
       onMouseEnter={open}
       onMouseLeave={close}>
       <Button className="h-full w-full">
-        <NavLink
-          className="px-6 h-full w-full flex items-center justify-center gap-1"
-          to={page}
-          modal={modal}
-          modalBreadCrumbs={breadcrumbs}
-          onClick={close}>
-          <Text>{name}</Text>
-        </NavLink>
+        {page ? (
+          <>
+            <NavLink
+              className="px-6 h-full w-full flex items-center justify-center gap-1"
+              to={page}
+              modal={modal}
+              modalBreadCrumbs={breadcrumbs}
+              onClick={close}>
+              <Text>{name}</Text>
+            </NavLink>
+          </>
+        ) : (
+          <>
+            <div className="px-6 h-full w-full flex items-center justify-center gap-1">
+              <Text>{name}</Text>
+            </div>
+          </>
+        )}
       </Button>
 
       <Overlay isOpen={isOpen} onClose={close} withoutBlind anchor={root}>

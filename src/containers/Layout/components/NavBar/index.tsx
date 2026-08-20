@@ -11,7 +11,7 @@ export const NavBar: FC<Props> = ({}) => {
     <>
       <NavOverlay
         name={getText("main/header/instruments/title")}
-        page="modules"
+        page={null}
         sections={[
           { name: getText("instruments/cards/title"), page: "int/cards" },
         ]}
@@ -23,7 +23,7 @@ export const NavBar: FC<Props> = ({}) => {
       /> */}
       <NavOverlay
         name={getText("main/header/modules/title")}
-        page={path as PagePath}
+        page={null}
         sections={[
           { name: "PathRouter", page: "modules/routing" },
           { name: "StateDispatcher", page: "modules/dispather" },

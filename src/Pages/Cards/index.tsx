@@ -7,14 +7,21 @@ import SimpleLayout, { readSimpleCards } from "./components/SimpleLayout";
 import "./style.scss";
 import { Icon } from "@@/Icon";
 import clsx from "clsx";
-import { CARD_STORAGE_KEY, type CardMap } from "./components/cardboard/cardTypes";
+import {
+  CARD_STORAGE_KEY,
+  type CardMap,
+} from "./components/cardboard/cardTypes";
+import { PrimaryButton } from "@@/PrimaryButton";
+import { Text } from "@@/Text";
 
 const Page: FC = () => {
   const [simpleMode, setSimpleMode] = useState(() => window.innerWidth <= 600);
   const [boardKey, setBoardKey] = useState(0);
 
   const exportCards = () => {
-    const blob = new Blob([localStorage.getItem(CARD_STORAGE_KEY) ?? "{}"], { type: "application/json" });
+    const blob = new Blob([localStorage.getItem(CARD_STORAGE_KEY) ?? "{}"], {
+      type: "application/json",
+    });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
@@ -42,23 +49,55 @@ const Page: FC = () => {
   return (
     <section className="page">
       <div className="cardsModeHeader">
-        <Button
-          type="button"
-          ariaLabel="Toggle simplified card view"
-          className={clsx(
-            `cardsModeButton ${simpleMode ? "enabled" : "disabled"}`,
-            "center",
-          )}
-          onClick={() => setSimpleMode((value) => !value)}>
-            <Icon name="main/List" />
-        </Button>
-        <Button type="button" ariaLabel="Export cards" className="cardsDataButton" onClick={exportCards}>Export</Button>
-        <Button type="button" ariaLabel="Import cards" className="cardsDataButton" onClick={() => document.getElementById("cards-import-input")?.click()}>
-          Import
-          <input id="cards-import-input" className="cardsImportInput" type="file" accept="application/json,.json" onChange={importCards} />
-        </Button>
+        <div className="flex items-center w-full justify-between">
+          <div className="flex items-center justify-start">
+            <Button
+              type="button"
+              ariaLabel="Toggle simplified card view"
+              className={clsx(
+                `cardsModeButton ${simpleMode ? "enabled" : "disabled"}`,
+                "center",
+              )}
+              onClick={() => setSimpleMode((value) => !value)}>
+              <Icon name="main/List" />
+            </Button>
+            <Button
+              type="button"
+              ariaLabel="Export cards"
+              className="cardsDataButton"
+              onClick={exportCards}>
+              Export
+            </Button>
+            <Button
+              type="button"
+              ariaLabel="Import cards"
+              className="cardsDataButton"
+              onClick={() =>
+                document.getElementById("cards-import-input")?.click()
+              }>
+              Import
+              <input
+                id="cards-import-input"
+                className="cardsImportInput"
+                type="file"
+                accept="application/json,.json"
+                onChange={importCards}
+              />
+            </Button>
+          </div>
+
+          <div className="">
+            <PrimaryButton className="flex items-center justify-center">
+              <Text>Log In</Text>
+            </PrimaryButton>
+          </div>
+        </div>
       </div>
-      {simpleMode ? <SimpleLayout key={boardKey} /> : <BoardCanvas key={boardKey} />}
+      {simpleMode ? (
+        <SimpleLayout key={boardKey} />
+      ) : (
+        <BoardCanvas key={boardKey} />
+      )}
     </section>
   );
 };
@@ -68,7 +107,18 @@ function isValidCardMap(value: unknown): value is CardMap {
   return Object.values(value as Record<string, unknown>).every((card) => {
     if (!card || typeof card !== "object") return false;
     const item = card as Record<string, unknown>;
-    return typeof item.id === "string" && typeof item.title === "string" && typeof item.text === "string" && typeof item.background === "string" && typeof item.width === "number" && typeof item.height === "number" && item.coordinates !== null && typeof item.coordinates === "object" && Array.isArray(item.cells) && Array.isArray(item.connects);
+    return (
+      typeof item.id === "string" &&
+      typeof item.title === "string" &&
+      typeof item.text === "string" &&
+      typeof item.background === "string" &&
+      typeof item.width === "number" &&
+      typeof item.height === "number" &&
+      item.coordinates !== null &&
+      typeof item.coordinates === "object" &&
+      Array.isArray(item.cells) &&
+      Array.isArray(item.connects)
+    );
   });
 }
 
