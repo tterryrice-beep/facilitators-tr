@@ -64,14 +64,24 @@ export const NavOverlay: FC<NavOverlayProps> = ({
           {sections?.map(({ name, page, modal, breadcrumbs }) => {
             return (
               <Fragment key={clsx(name, page, modal, breadcrumbs?.join("-"))}>
-                <NavLink
-                  to={page}
-                  modal={modal}
-                  modalBreadCrumbs={breadcrumbs}
-                  onClick={close}
-                  className="rounded-none p-3 hover:bg-cyan-800 transition-colors duration-200">
-                  <Text>{name}</Text>
-                </NavLink>
+                {page ? (
+                  <>
+                    <NavLink
+                      to={page}
+                      modal={modal}
+                      modalBreadCrumbs={breadcrumbs}
+                      onClick={close}
+                      className="rounded-none p-3 hover:bg-cyan-800 transition-colors duration-200">
+                      <Text>{name}</Text>
+                    </NavLink>
+                  </>
+                ) : (
+                  <>
+                    <div className="rounded-none p-3 hover:bg-cyan-800 transition-colors duration-200">
+                      <Text>{name}</Text>
+                    </div>
+                  </>
+                )}
               </Fragment>
             );
           })}
